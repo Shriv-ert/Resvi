@@ -74,11 +74,18 @@ Write-Step "Menunggu database siap..."
 $retries = 30
 $dbReady = $false
 while ($retries -gt 0) {
-    $result = docker compose exec -T db mysqladmin ping -p"root_password" 2>&1
+    $status = (docker inspect --format='{{.State.Health.Status}}' ppk_db 2>$null)
+    if ($status -eq "healthy") {
+        $dbReady = $true
+        break
+    }
+
+    docker compose exec -T db sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysqladmin ping 2>/dev/null' | Out-Null
     if ($LASTEXITCODE -eq 0) {
         $dbReady = $true
         break
     }
+
     $retries--
     Start-Sleep -Seconds 2
 }
