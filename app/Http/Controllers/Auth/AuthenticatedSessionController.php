@@ -33,6 +33,11 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
+        $user = auth()->user();
+        if ($user?->isAdmin()) {
+            return redirect()->intended(route('admin.facilities.index'));
+        }
+
         return redirect()->intended(route('home'));
     }
 
