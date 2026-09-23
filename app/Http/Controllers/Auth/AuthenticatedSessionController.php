@@ -11,6 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
+use App\Enums\UserRole;
+use App\Services\GuestReservationDraftService;
+
 class AuthenticatedSessionController extends Controller
 {
     public function create(): View
@@ -18,8 +21,11 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login');
     }
 
-    public function store(LoginRequest $request, AuthenticationService $authentication): RedirectResponse
-    {
+    public function store(
+        LoginRequest $request,
+        AuthenticationService $authentication,
+        GuestReservationDraftService $draftService
+    ): RedirectResponse {
         $credentials = $request->validated();
         $result = $authentication->authenticate(
             $credentials['email'],
@@ -31,6 +37,15 @@ class AuthenticatedSessionController extends Controller
             throw ValidationException::withMessages([
                 'login' => [$this->loginErrorMessage($result)],
             ]);
+        }
+
+        $user = auth()->user();
+        if ($user && $user->role === UserRole::Pengguna && $draftService->hasDraft()) {
+            return redirect()->route('reservations.create');
+        }
+
+        if ($draftService->hasDraft()) {
+            $draftService->clearDraft();
         }
 
         return redirect()->intended(route('home'));
