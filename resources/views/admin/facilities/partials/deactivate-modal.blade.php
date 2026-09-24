@@ -1,138 +1,126 @@
-<!-- Modal Konfirmasi Nonaktifkan Fasilitas -->
-<div
-    id="deactivateFacilityModal"
-    class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-sm transition-opacity duration-200"
-    aria-labelledby="modal-title-deactivate"
-    role="dialog"
-    aria-modal="true"
->
-    <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
-        <div
-            id="deactivateModalContent"
-            class="relative w-full max-w-lg transform overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-2xl transition-all sm:my-8 sm:p-8"
-        >
-            <!-- Modal Header -->
-            <div class="flex items-start justify-between border-b border-slate-100 pb-4">
-                <div class="flex items-center gap-3">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-100 text-rose-700 text-lg shadow-sm">
-                        ⚠
-                    </span>
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-900" id="modal-title-deactivate">Nonaktifkan Fasilitas</h3>
-                        <p class="text-xs text-slate-500">Konfirmasi penonaktifan data master fasilitas</p>
-                    </div>
+@php
+    $facilityId = is_array($facility) ? $facility['id'] : $facility->id;
+    $facilityName = is_array($facility) ? $facility['name'] : $facility->name;
+    $facilityType = is_array($facility) ? ($facility['type'] ?? '-') : (is_object($facility->type ?? null) && method_exists($facility->type, 'label') ? $facility->type->label() : ($facility->type ?? '-'));
+    $facilityLocation = is_array($facility) ? ($facility['location'] ?? '-') : ($facility->location ?? '-');
+@endphp
+
+<!-- Modal Konfirmasi Nonaktifkan Fasilitas oleh Admin -->
+<div id="deactivateModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title-deactivate">
+    <div class="bg-[#111111] border border-[#333333] rounded-[8px] max-w-lg w-full p-6 shadow-2xl relative text-left">
+        
+        <div class="flex items-start justify-between pb-4 border-b border-[#222222]">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-[6px] bg-[#2b0000] text-[#ff453a] flex items-center justify-center border border-[#550000]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
                 </div>
-                <button
-                    type="button"
-                    class="close-deactivate-modal rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
-                    aria-label="Tutup"
-                >
-                    ✕
+                <div>
+                    <h3 class="text-sm font-semibold text-white tracking-tight" id="modal-title-deactivate">Nonaktifkan Data Master Fasilitas</h3>
+                    <p class="text-xs text-[#888888]">Fasilitas tidak akan tampil pada katalog publik</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeDeactivateModal()" class="close-deactivate-modal text-[#888888] hover:text-white p-1 rounded-[6px] transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ route('admin.facilities.deactivate', is_array($facility) ? $facility['id'] : $facility) }}" class="space-y-4 pt-4">
+            @csrf
+            
+            <!-- Warning Notice (BR-ADM-02) -->
+            <div class="p-3.5 rounded-[6px] bg-[#2b1e00]/50 border border-[#553c00] text-xs text-[#f5a623] space-y-1.5 leading-relaxed">
+                <strong class="font-semibold text-[#f5a623] block font-mono text-[11px] uppercase tracking-wide">Pemberitahuan Sistem (BR-ADM-02):</strong>
+                <p>• Tindakan ini hanya diizinkan jika <strong class="text-white">tidak ada reservasi Disetujui atau Berlangsung</strong> pada fasilitas ini.</p>
+                <p>• Seluruh reservasi yang masih berstatus <em>Menunggu</em> otomatis <strong class="text-white">Ditolak</strong> oleh sistem.</p>
+                <p>• Fasilitas akan disembunyikan dari katalog publik Pengunjung dan Pengguna.</p>
+            </div>
+
+            <div class="rounded-[6px] bg-[#0a0a0a] border border-[#222222] p-3 text-xs text-[#a1a1a1]">
+                <p><strong class="text-white">Fasilitas:</strong> {{ $facilityName }}</p>
+                <p class="text-[#666666] text-[11px] mt-0.5">{{ $facilityType }} — {{ $facilityLocation }}</p>
+            </div>
+
+            <div>
+                <label for="deactivate_reason" class="block text-xs font-medium text-[#a1a1a1] uppercase tracking-wider mb-1.5">
+                    Alasan Penonaktifan <span class="text-rose-500">*</span>
+                </label>
+                <textarea
+                    id="deactivate_reason"
+                    name="reason"
+                    rows="3"
+                    required
+                    minlength="5"
+                    placeholder="Contoh: Renovasi gedung jangka panjang / inventaris dipindahkan permanen..."
+                    class="w-full bg-[#0a0a0a] border border-[#333333] rounded-[6px] px-3.5 py-2 text-xs text-white placeholder-[#555555] outline-none transition focus:border-white focus:ring-1 focus:ring-white"
+                >{{ old('reason') }}</textarea>
+                @error('reason')
+                    <p class="mt-1 text-xs text-rose-400 font-medium">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="pt-3 flex items-center justify-end gap-2 border-t border-[#222222]">
+                <button 
+                    type="button" 
+                    onclick="closeDeactivateModal()" 
+                    class="close-deactivate-modal bg-[#171717] hover:bg-[#222222] text-white border border-[#333333] font-medium text-xs px-3.5 py-1.5 rounded-[6px] transition">
+                    Batal
+                </button>
+                <button 
+                    type="submit" 
+                    class="bg-[#ee0000] hover:bg-[#c50000] text-white font-medium text-xs px-4 py-1.5 rounded-[6px] transition shadow-none">
+                    Konfirmasi Nonaktifkan
                 </button>
             </div>
-
-            <!-- Warning Notice -->
-            <div class="my-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-900 space-y-1.5 leading-relaxed">
-                <p class="font-bold">Konsekuensi Penonaktifan Master Data:</p>
-                <ul class="list-disc pl-4 space-y-1 text-rose-800">
-                    <li>Fasilitas akan disembunyikan dari katalog publik Pengunjung dan Pengguna.</li>
-                    <li>Seluruh pengajuan reservasi berstatus <strong>Menunggu</strong> yang belum dimulai akan <strong>otomatis Ditolak</strong> oleh sistem.</li>
-                    <li>Sistem akan menolak penonaktifan jika masih ada reservasi aktif berstatus <strong>Disetujui</strong> atau <strong>Berlangsung</strong>.</li>
-                </ul>
-            </div>
-
-            <!-- Facility Summary -->
-            <div class="mb-4 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
-                <p><strong>Fasilitas:</strong> {{ $facility->name }}</p>
-                <p class="text-slate-500 mt-0.5">{{ $facility->type->label() }} — {{ $facility->location }}</p>
-            </div>
-
-            <!-- Form Deactivate -->
-            <form method="POST" action="{{ route('admin.facilities.deactivate', $facility) }}" class="space-y-4">
-                @csrf
-
-                <div>
-                    <label for="deactivate_reason" class="block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                        Alasan Penonaktifan <span class="text-red-500">*</span>
-                    </label>
-                    <textarea
-                        id="deactivate_reason"
-                        name="reason"
-                        rows="3"
-                        required
-                        minlength="5"
-                        placeholder="Contoh: Renovasi gedung jangka panjang / inventaris dipindahkan permanen..."
-                        class="mt-1.5 block w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm shadow-sm outline-none transition placeholder:text-slate-400 focus:border-rose-600 focus:ring-4 focus:ring-rose-100"
-                    >{{ old('reason') }}</textarea>
-                    @error('reason')
-                        <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Modal Actions -->
-                <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
-                    <button
-                        type="button"
-                        class="close-deactivate-modal rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-                    >
-                        Batal
-                    </button>
-                    <button
-                        type="submit"
-                        class="rounded-xl bg-rose-600 px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-200"
-                    >
-                        Konfirmasi Nonaktifkan
-                    </button>
-                </div>
-            </form>
-        </div>
+        </form>
     </div>
 </div>
 
 <script>
+    function openDeactivateModal() {
+        const modal = document.getElementById('deactivateModal') || document.getElementById('deactivateFacilityModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+    }
+
+    function closeDeactivateModal() {
+        const modal = document.getElementById('deactivateModal') || document.getElementById('deactivateFacilityModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
-        const modal = document.getElementById('deactivateFacilityModal');
+        const modal = document.getElementById('deactivateModal') || document.getElementById('deactivateFacilityModal');
         const openBtn = document.getElementById('openDeactivateModalBtn');
         const closeBtns = document.querySelectorAll('.close-deactivate-modal');
 
-        function openModal() {
-            if (modal) {
-                modal.classList.remove('hidden');
-                document.body.classList.add('overflow-hidden');
-            }
-        }
-
-        function closeModal() {
-            if (modal) {
-                modal.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-            }
-        }
-
         if (openBtn) {
-            openBtn.addEventListener('click', openModal);
+            openBtn.addEventListener('click', openDeactivateModal);
         }
 
         closeBtns.forEach(btn => {
-            btn.addEventListener('click', closeModal);
+            btn.addEventListener('click', closeDeactivateModal);
         });
 
         if (modal) {
             modal.addEventListener('click', function (e) {
                 if (e.target === modal) {
-                    closeModal();
+                    closeDeactivateModal();
                 }
             });
         }
 
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
-                closeModal();
+                closeDeactivateModal();
             }
         });
 
         @if ($errors->has('reason'))
-            openModal();
+            openDeactivateModal();
         @endif
     });
 </script>

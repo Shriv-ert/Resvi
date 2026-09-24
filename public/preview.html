@@ -1,0 +1,2267 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PPK Room Reservation · Vercel Design System & SRS Interactive Simulator</title>
+
+    <!-- Google Fonts: Geist Sans & Geist Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600;700&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Geist"', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+                        mono: ['"Geist Mono"', 'ui-monospace', 'monospace'],
+                    },
+                    colors: {
+                        canvas: '#0a0a0a',
+                        surface: '#111111',
+                        ink: '#ededed',
+                        hairline: '#333333',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { 
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background-color: #0a0a0a; 
+            color: #ededed;
+            -webkit-font-smoothing: antialiased;
+        }
+        .mesh-gradient-line {
+            background: linear-gradient(90deg, #007cf0, #00dfd8, #7928ca, #ff0080, #f9cb28);
+            height: 2px;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #333333; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555555; }
+
+        /* Hide number input spinners */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        /* Custom Slider Styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: #222222;
+            border-radius: 9999px;
+            height: 6px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            border: 2px solid #000000;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            border: 2px solid #000000;
+        }
+
+        /* Hide number input spinners / steppers (Image 1 fix) */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none !important;
+            margin: 0 !important;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield !important;
+            appearance: textfield !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-[#0a0a0a] text-[#ededed] flex flex-col antialiased">
+
+    <!-- Top Mesh Gradient Accent Line -->
+    <div class="mesh-gradient-line w-full sticky top-0 z-50"></div>
+
+    <!-- Role Simulator Switcher Strip -->
+    <div class="bg-[#111111] text-white py-2 px-4 border-b border-[#333333] text-xs sticky top-[2px] z-50">
+        <div class="max-w-[1200px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="font-mono text-[11px] text-[#888888] uppercase tracking-wider">Simulator Peran SRS:</span>
+                <span id="roleIndicator" class="font-medium text-white text-xs">1. Pengunjung (Publik)</span>
+            </div>
+            
+            <!-- Role Selector Segmented Buttons -->
+            <div class="flex items-center gap-1 bg-[#0a0a0a] p-0.5 rounded-[6px] border border-[#333333]">
+                <button onclick="switchRole('pengunjung')" id="tab-pengunjung" class="role-btn px-3 py-1 rounded-[6px] text-xs font-medium transition bg-white text-black">
+                    1. Pengunjung
+                </button>
+                <button onclick="switchRole('pengguna')" id="tab-pengguna" class="role-btn px-3 py-1 rounded-[6px] text-xs font-medium text-[#888888] hover:text-white transition">
+                    2. Pengguna
+                </button>
+                <button onclick="switchRole('petugas')" id="tab-petugas" class="role-btn px-3 py-1 rounded-[6px] text-xs font-medium text-[#888888] hover:text-white transition">
+                    3. Petugas
+                </button>
+                <button onclick="switchRole('admin')" id="tab-admin" class="role-btn px-3 py-1 rounded-[6px] text-xs font-medium text-[#888888] hover:text-white transition">
+                    4. Admin
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fixed 64px Header Navigation -->
+    <header class="sticky top-[42px] z-40 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-[#333333]">
+        <div class="max-w-[1200px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="javascript:void(0)" onclick="switchRole('pengunjung')" class="flex items-center gap-2.5">
+                    <div class="w-7 h-7 rounded-[6px] bg-white text-black flex items-center justify-center font-semibold text-sm">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                            <polyline points="2 17 12 22 22 17"></polyline>
+                            <polyline points="2 12 12 17 22 12"></polyline>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-sm tracking-tight text-white leading-none">PPK Sarpras</div>
+                        <div class="text-[10px] text-[#888888] font-mono mt-0.5">Sistem Reservasi Kampus</div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="flex items-center gap-3 text-xs">
+                <span class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[6px] text-[11px] font-mono text-[#0070f3] bg-[#001733] border border-[#003b80]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#0070f3]"></span>
+                    07:00 – 20:00 WIB
+                </span>
+                <div id="headerAuthAction">
+                    <button onclick="showScreen('auth-login')" class="bg-white hover:bg-[#e6e6e6] text-black text-xs font-medium px-3.5 py-1.5 rounded-[6px] transition active:scale-95">
+                        Masuk Akun
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sub-navigation for Views in Selected Role -->
+    <div class="bg-[#111111] border-b border-[#333333] py-2 px-4 sm:px-6">
+        <div class="max-w-[1200px] mx-auto flex items-center justify-between flex-wrap gap-2 text-xs">
+            <div class="flex items-center gap-1.5 overflow-x-auto py-1" id="viewNavLinks">
+                <!-- Dynamically populated sub links -->
+            </div>
+            <div class="text-[11px] text-[#888888] font-mono hidden md:flex items-center gap-2">
+                <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span>SRS Verified · KEPUTUSAN-GLOBAL.md Compliant</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Container (max-w-[1200px]) -->
+    <main class="max-w-[1200px] mx-auto px-4 sm:px-6 py-8 flex-grow w-full">
+
+        <!-- ========================================== -->
+        <!-- SCREEN 1: PENGUNJUNG - HOMEPAGE (KATALOG & FILTER) -->
+        <!-- ========================================== -->
+        <div id="screen-pengunjung-home" class="screen-view space-y-6">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-semibold text-white tracking-[-0.03em]">Katalog fasilitas kampus.</h1>
+                <p class="text-xs sm:text-sm text-[#a1a1a1] mt-1">Gunakan penyaringan berikut untuk mencari ruangan atau sarana yang siap dipinjam.</p>
+            </div>
+
+            <!-- Search & Filter Controls (SRS FR-PG-02) -->
+            <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="space-y-1.5">
+                    <label class="block font-mono text-[11px] uppercase tracking-wider text-[#888888] font-medium">Pencarian nama</label>
+                    <input type="text" id="demoSearch" oninput="filterDemoCards()" placeholder="Contoh: Lab Komputer..." class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] px-3 py-2 focus:outline-none focus:border-white transition">
+                </div>
+                <!-- Custom Dropdown: Tipe Fasilitas -->
+                <div class="space-y-1.5 relative custom-dropdown" id="dropdown-demoType">
+                    <label class="block font-mono text-[11px] uppercase tracking-wider text-[#888888] font-medium">Tipe fasilitas</label>
+                    <input type="hidden" id="demoType" value="">
+                    <button type="button" onclick="toggleCustomDropdown('demoType')" id="demoTypeTrigger"
+                            class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                        <span id="demoTypeLabel">Semua tipe</span>
+                        <svg id="demoTypeChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <!-- Dropdown List Menu -->
+                    <div id="demoTypeMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                        <!-- Dropdown Search Box -->
+                        <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                            <div class="relative">
+                                <input type="text" placeholder="Cari tipe fasilitas..." 
+                                       id="search-demoType"
+                                       oninput="filterDropdownOptions(this, 'demoTypeMenu')"
+                                       onclick="event.stopPropagation()"
+                                       class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                                <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div onclick="selectCustomDropdown('demoType', '', 'Semua tipe')" data-value="" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between bg-[#1f1f1f]">
+                            <span>Semua tipe</span>
+                            <span class="check-icon text-[#50e3c2] text-xs">✓</span>
+                        </div>
+                        <div onclick="selectCustomDropdown('demoType', 'kelas', 'Ruang kelas')" data-value="kelas" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                            <span>Ruang kelas</span>
+                            <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                        </div>
+                        <div onclick="selectCustomDropdown('demoType', 'laboratorium', 'Laboratorium')" data-value="laboratorium" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                            <span>Laboratorium</span>
+                            <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                        </div>
+                        <div onclick="selectCustomDropdown('demoType', 'aula', 'Aula')" data-value="aula" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                            <span>Aula</span>
+                            <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                        </div>
+                        <div onclick="selectCustomDropdown('demoType', 'alat', 'Alat khusus')" data-value="alat" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                            <span>Alat khusus</span>
+                            <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                        </div>
+                        <div onclick="selectCustomDropdown('demoType', 'lapangan', 'Lapangan')" data-value="lapangan" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                            <span>Lapangan</span>
+                            <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom Dropdown: Lokasi Gedung -->
+                <div class="space-y-1.5 relative custom-dropdown" id="dropdown-demoLoc">
+                    <label class="block font-mono text-[11px] uppercase tracking-wider text-[#888888] font-medium">Lokasi gedung</label>
+                    <input type="hidden" id="demoLoc" value="">
+                    <button type="button" onclick="toggleCustomDropdown('demoLoc')" id="demoLocTrigger"
+                            class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                        <span id="demoLocLabel">Semua lokasi</span>
+                        <svg id="demoLocChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <!-- Dropdown List Menu -->
+                    <div id="demoLocMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                        <!-- Dropdown Search Box -->
+                        <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                            <div class="relative">
+                                <input type="text" placeholder="Cari lokasi gedung..." 
+                                       id="search-demoLoc"
+                                       oninput="filterDropdownOptions(this, 'demoLocMenu')"
+                                       onclick="event.stopPropagation()"
+                                       class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                                <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div onclick="selectCustomDropdown('demoLoc', '', 'Semua lokasi')" data-value="" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between bg-[#1f1f1f]">
+                            <span>Semua lokasi</span>
+                            <span class="check-icon text-[#50e3c2] text-xs">✓</span>
+                        </div>
+                        <div onclick="selectCustomDropdown('demoLoc', 'Gedung A', 'Gedung A (Utama)')" data-value="Gedung A" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                            <span>Gedung A (Utama)</span>
+                            <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                        </div>
+                        <div onclick="selectCustomDropdown('demoLoc', 'Gedung B', 'Gedung B (Laboratorium)')" data-value="Gedung B" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                            <span>Gedung B (Laboratorium)</span>
+                            <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                        </div>
+                        <div onclick="selectCustomDropdown('demoLoc', 'Area Terbuka', 'Area terbuka kampus')" data-value="Area Terbuka" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                            <span>Area terbuka kampus</span>
+                            <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom Capacity Input + Interactive Popup Range Slider -->
+                <div class="space-y-1.5 relative" id="capacityFilterContainer">
+                    <div class="flex items-center justify-between">
+                        <label class="block font-mono text-[11px] uppercase tracking-wider text-[#888888] font-medium">Kapasitas</label>
+                        <span id="capacityValueBadge" class="font-mono text-[10px] text-[#50e3c2] hidden">≥ <span id="capacityValueBadgeNum">0</span> Orang</span>
+                    </div>
+                    <div class="relative flex items-center">
+                        <!-- Manual editable input (bisa diisi sendiri / diketik) -->
+                        <input type="number" id="demoCapInput" min="0" max="250" placeholder="Semua (0)" 
+                               oninput="onManualCapacityInput(this.value)"
+                               onfocus="openCapacityPopup()"
+                               class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] focus:border-white text-white text-xs rounded-[6px] pl-3 pr-9 py-2 focus:outline-none transition font-mono">
+                        <button type="button" onclick="toggleCapacityPopup()" title="Buka slider range kapasitas" class="absolute right-1 px-1.5 py-1 text-[#888888] hover:text-white transition rounded-[4px] hover:bg-[#1f1f1f]">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="4" y1="21" x2="4" y2="14"></line>
+                                <line x1="4" y1="10" x2="4" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12" y2="3"></line>
+                                <line x1="20" y1="21" x2="20" y2="16"></line>
+                                <line x1="20" y1="12" x2="20" y2="3"></line>
+                                <line x1="1" y1="14" x2="7" y2="14"></line>
+                                <line x1="9" y1="8" x2="15" y2="8"></line>
+                                <line x1="17" y1="16" x2="23" y2="16"></line>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Hidden input to preserve data compatibility -->
+                    <input type="hidden" id="demoCap" value="0">
+
+                    <!-- Popup Slide Range Kapasitas (Interactive Slider) -->
+                    <div id="capacityPopup" class="hidden absolute top-full left-0 right-0 sm:right-auto sm:w-80 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[8px] p-4 shadow-2xl backdrop-blur-md space-y-4">
+                        <div class="flex items-center justify-between border-b border-[#222222] pb-2.5">
+                            <span class="text-xs font-semibold text-white">Range Kapasitas</span>
+                            <span class="font-mono text-xs px-2 py-0.5 rounded-[4px] bg-[#1a1a1a] text-[#50e3c2] border border-[#333333]" id="sliderCapDisplay">Semua (0 Orang)</span>
+                        </div>
+
+                        <!-- Slider Range -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-[10px] font-mono text-[#888888]">
+                                <span>0</span>
+                                <span>50</span>
+                                <span>100</span>
+                                <span>150+</span>
+                            </div>
+                            <input type="range" id="demoCapSlider" min="0" max="150" step="5" value="0"
+                                   oninput="onSliderCapacityChange(this.value)"
+                                   class="w-full">
+                        </div>
+
+                        <!-- Preset Chips -->
+                        <div class="space-y-1.5">
+                            <span class="text-[10px] font-mono uppercase text-[#888888] tracking-wider block">Pilihan Cepat</span>
+                            <div class="grid grid-cols-4 gap-1.5 text-[11px] font-mono">
+                                <button type="button" onclick="setCapacityPreset(0)" class="px-2 py-1 rounded-[4px] bg-[#1a1a1a] hover:bg-[#262626] border border-[#333333] text-[#ededed] text-center transition">Semua</button>
+                                <button type="button" onclick="setCapacityPreset(20)" class="px-2 py-1 rounded-[4px] bg-[#1a1a1a] hover:bg-[#262626] border border-[#333333] text-[#ededed] text-center transition">≥ 20</button>
+                                <button type="button" onclick="setCapacityPreset(40)" class="px-2 py-1 rounded-[4px] bg-[#1a1a1a] hover:bg-[#262626] border border-[#333333] text-[#ededed] text-center transition">≥ 40</button>
+                                <button type="button" onclick="setCapacityPreset(80)" class="px-2 py-1 rounded-[4px] bg-[#1a1a1a] hover:bg-[#262626] border border-[#333333] text-[#ededed] text-center transition">≥ 80</button>
+                            </div>
+                        </div>
+
+                        <div class="text-[10px] text-[#777777] leading-relaxed border-t border-[#222222] pt-2">
+                            *Alat tanpa kapasitas (null) dikecualikan jika kapasitas > 0.
+                        </div>
+
+                        <div class="pt-1 flex items-center justify-between text-xs">
+                            <button type="button" onclick="setCapacityPreset(0)" class="text-[#888888] hover:text-white underline text-[11px]">Reset</button>
+                            <button type="button" onclick="closeCapacityPopup()" class="px-3.5 py-1 bg-white hover:bg-[#e6e6e6] text-black font-medium rounded-[4px] text-xs transition">Tutup</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-[#333333] flex flex-wrap items-center justify-between gap-3 text-xs text-[#888888]">
+                    <div class="flex items-center gap-2">
+                        <span>Menampilkan <strong class="text-white font-mono" id="demoCountDisplay">3</strong> fasilitas aktif</span>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <div class="hidden sm:flex items-center gap-4 text-[11px] font-mono border-r border-[#333333] pr-4">
+                            <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span> Dapat digunakan</span>
+                            <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-[#ff453a]"></span> Dalam perbaikan</span>
+                        </div>
+
+                        <!-- View Switcher -->
+                        <div class="inline-flex p-0.5 bg-[#0a0a0a] border border-[#333333] rounded-[6px] text-xs">
+                            <button type="button" id="demoBtnViewGrid" onclick="setDemoViewMode('grid')" title="Tampilan Grid / Card" class="px-2.5 py-1 rounded-[4px] font-mono text-[11px] flex items-center gap-1.5 transition text-white bg-[#222222] border border-[#444444]">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                                </svg>
+                                <span>Grid</span>
+                            </button>
+                            <button type="button" id="demoBtnViewList" onclick="setDemoViewMode('list')" title="Tampilan List" class="px-2.5 py-1 rounded-[4px] font-mono text-[11px] flex items-center gap-1.5 transition text-[#888888] hover:text-white">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                                </svg>
+                                <span>List</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Facilities Cards Container -->
+            <style>
+                #demoCardsContainer.is-list-view {
+                    display: flex;
+                    flex-direction: column;
+                }
+                #demoCardsContainer.is-list-view .demo-empty-cell {
+                    display: none !important;
+                }
+                @media (min-width: 640px) {
+                    #demoCardsContainer.is-list-view .demo-card {
+                        flex-direction: row;
+                        align-items: center;
+                        padding: 1.25rem 1.5rem;
+                    }
+                    #demoCardsContainer.is-list-view .demo-card > div:first-child {
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        flex: 1;
+                        min-width: 0;
+                        gap: 1.25rem;
+                    }
+                    #demoCardsContainer.is-list-view .demo-card > div:first-child > div:first-child {
+                        width: 14rem;
+                        height: 7.5rem;
+                        margin-bottom: 0;
+                        flex-shrink: 0;
+                    }
+                    #demoCardsContainer.is-list-view .demo-card > div:first-child p {
+                        margin-bottom: 0;
+                    }
+                    #demoCardsContainer.is-list-view .demo-card > div:last-child {
+                        border-top: none;
+                        padding-top: 0;
+                        margin-top: 0;
+                        flex-direction: column;
+                        align-items: flex-end;
+                        justify-content: center;
+                        gap: 0.75rem;
+                        flex-shrink: 0;
+                        padding-left: 1.5rem;
+                        border-left: 1px solid #222222;
+                        min-width: 150px;
+                    }
+                }
+            </style>
+
+            <div id="demoCardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 bg-[#333333] gap-[1px] border border-[#333333] rounded-[6px] overflow-hidden">
+                
+                <!-- Cell 1: Ruang Kelas -->
+                <div onclick="openDetailFacility('fac-01')" class="demo-card bg-[#111111] p-5 hover:bg-[#171717] transition-colors flex flex-col justify-between cursor-pointer group"
+                     data-id="fac-01" data-name="ruang kuliah teori a-101" data-type="kelas" data-loc="Gedung A" data-cap="45">
+                    <div>
+                        <div class="relative h-44 w-full overflow-hidden bg-[#1a1a1a] rounded-[6px] border border-[#333333] mb-4">
+                            <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute top-2.5 left-2.5 bg-black/80 text-white text-[10px] font-mono font-medium px-2 py-0.5 rounded-[4px] border border-[#333333] uppercase">Kelas</div>
+                            <div class="absolute top-2.5 right-2.5 bg-black/80 text-[#a1a1a1] text-[11px] font-mono px-2 py-0.5 rounded-[4px] border border-[#333333]">Kapasitas 45</div>
+                        </div>
+                        <span class="text-[11px] font-mono text-[#888888] block mb-0.5">Gedung A (Utama)</span>
+                        <h3 class="text-base font-semibold text-white tracking-tight mb-1.5 group-hover:text-[#50e3c2] transition-colors">Ruang Kuliah Teori A-101</h3>
+                        <p class="text-xs text-[#a1a1a1] leading-relaxed mb-4">Dilengkapi 45 kursi kuliah, AC sentral, proyektor laser 4K, dan koneksi internet kampus.</p>
+                    </div>
+                    <div class="pt-3 border-t border-[#333333] flex items-center justify-between">
+                        <span class="text-xs text-[#50e3c2] flex items-center gap-1.5 font-medium font-mono text-[11px]">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span> Dapat digunakan
+                        </span>
+                        <span class="text-xs text-[#888888] group-hover:text-white font-medium transition-colors flex items-center gap-1">
+                            Detail <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Cell 2: Laboratorium -->
+                <div onclick="openDetailFacility('fac-02')" class="demo-card bg-[#111111] p-5 hover:bg-[#171717] transition-colors flex flex-col justify-between cursor-pointer group"
+                     data-id="fac-02" data-name="laboratorium komputer 301" data-type="laboratorium" data-loc="Gedung B" data-cap="40">
+                    <div>
+                        <div class="relative h-44 w-full overflow-hidden bg-[#1a1a1a] rounded-[6px] border border-[#333333] mb-4">
+                            <img src="https://images.unsplash.com/photo-1562774053-701939374585?w=800&auto=format&fit=crop&q=80" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute top-2.5 left-2.5 bg-black/80 text-white text-[10px] font-mono font-medium px-2 py-0.5 rounded-[4px] border border-[#333333] uppercase">Laboratorium</div>
+                            <div class="absolute top-2.5 right-2.5 bg-black/80 text-[#a1a1a1] text-[11px] font-mono px-2 py-0.5 rounded-[4px] border border-[#333333]">Kapasitas 40</div>
+                        </div>
+                        <span class="text-[11px] font-mono text-[#888888] block mb-0.5">Gedung B (Laboratorium)</span>
+                        <h3 class="text-base font-semibold text-white tracking-tight mb-1.5 group-hover:text-[#50e3c2] transition-colors">Laboratorium Komputer 301</h3>
+                        <p class="text-xs text-[#a1a1a1] leading-relaxed mb-4">40 Workstation spesifikasi tinggi dengan GPU NVIDIA RTX, LAN Gigabit, dan sound system.</p>
+                    </div>
+                    <div class="pt-3 border-t border-[#333333] flex items-center justify-between">
+                        <span class="text-xs text-[#50e3c2] flex items-center gap-1.5 font-medium font-mono text-[11px]">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span> Dapat digunakan
+                        </span>
+                        <span class="text-xs text-[#888888] group-hover:text-white font-medium transition-colors flex items-center gap-1">
+                            Detail <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Cell 3: Alat (Dalam Perbaikan, Kapasitas Null) -->
+                <div onclick="openDetailFacility('fac-04')" class="demo-card bg-[#111111] p-5 hover:bg-[#171717] transition-colors flex flex-col justify-between cursor-pointer group opacity-85"
+                     data-id="fac-04" data-name="proyektor cinema & sound portabel" data-type="alat" data-loc="Gedung B" data-cap="0">
+                    <div>
+                        <div class="relative h-44 w-full overflow-hidden bg-[#1a1a1a] rounded-[6px] border border-[#333333] mb-4">
+                            <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=800&auto=format&fit=crop&q=80" class="w-full h-full object-cover filter grayscale group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute top-2.5 left-2.5 bg-black/80 text-white text-[10px] font-mono font-medium px-2 py-0.5 rounded-[4px] border border-[#333333] uppercase">Alat</div>
+                            <div class="absolute top-2.5 right-2.5 bg-black/80 text-[#888888] text-[11px] font-mono px-2 py-0.5 rounded-[4px] border border-[#333333]">Unit Alat</div>
+                        </div>
+                        <span class="text-[11px] font-mono text-[#888888] block mb-0.5">Gedung B (Laboratorium)</span>
+                        <h3 class="text-base font-semibold text-white tracking-tight mb-1.5 group-hover:text-[#50e3c2] transition-colors">Proyektor Cinema & Sound</h3>
+                        <p class="text-xs text-[#a1a1a1] leading-relaxed mb-4">Paket proyektor 5.000 lumens yang menetap di ruang multimedia.</p>
+                    </div>
+                    <div class="pt-3 border-t border-[#333333] flex items-center justify-between">
+                        <span class="text-xs text-[#ff453a] flex items-center gap-1.5 font-medium font-mono text-[11px]">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#ff453a] animate-pulse"></span> Dalam perbaikan
+                        </span>
+                        <span class="text-xs text-[#888888] group-hover:text-white font-medium transition-colors flex items-center gap-1">
+                            Detail <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Aesthetic Empty Slot Placeholders (Modified Gray Space) -->
+                <div id="demoEmptyCell1" class="demo-empty-cell hidden bg-[#0c0c0c] p-5 flex flex-col justify-center items-center text-center relative overflow-hidden min-h-[380px] group transition-colors"
+                     style="background-image: repeating-linear-gradient(-45deg, #0d0d0d, #0d0d0d 12px, #121212 12px, #121212 24px);">
+                    <div class="w-full h-full border border-dashed border-[#222222] rounded-[6px] p-6 flex flex-col items-center justify-center text-center relative z-10 transition-colors group-hover:border-[#333333]">
+                        <div class="w-11 h-11 rounded-full bg-[#141414] border border-[#262626] flex items-center justify-center mb-3 text-[#555555]">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        </div>
+                        <span class="text-xs font-mono font-medium text-[#777777] uppercase tracking-wider mb-1">Slot Fasilitas Kosong</span>
+                        <p class="text-[11px] text-[#555555] max-w-[200px] leading-relaxed">Ruang fasilitas lain belum terisi pada kriteria penyaringan ini.</p>
+                    </div>
+                </div>
+
+                <div id="demoEmptyCell2" class="demo-empty-cell hidden bg-[#0c0c0c] p-5 flex flex-col justify-center items-center text-center relative overflow-hidden min-h-[380px] group transition-colors"
+                     style="background-image: repeating-linear-gradient(-45deg, #0d0d0d, #0d0d0d 12px, #121212 12px, #121212 24px);">
+                    <div class="w-full h-full border border-dashed border-[#222222] rounded-[6px] p-6 flex flex-col items-center justify-center text-center relative z-10 transition-colors group-hover:border-[#333333]">
+                        <div class="w-11 h-11 rounded-full bg-[#141414] border border-[#262626] flex items-center justify-center mb-3 text-[#555555]">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        </div>
+                        <span class="text-xs font-mono font-medium text-[#777777] uppercase tracking-wider mb-1">Slot Fasilitas Kosong</span>
+                        <p class="text-[11px] text-[#555555] max-w-[200px] leading-relaxed">Ruang fasilitas lain belum terisi pada kriteria penyaringan ini.</p>
+                    </div>
+                </div>
+
+                <!-- No Results State -->
+                <div id="demoNoResult" class="hidden col-span-1 md:col-span-2 lg:col-span-3 bg-[#111111] p-12 text-center text-[#888888] font-mono text-xs">
+                    Tidak ada fasilitas kampus yang sesuai dengan filter pencarian.
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 2: DETAIL FASILITAS (SRS FR-PG-03 & FR-PGN-05) -->
+        <!-- ========================================== -->
+        <div id="screen-pengunjung-detail" class="screen-view hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <button onclick="showScreen('pengunjung-home')" class="text-xs font-medium text-[#a1a1a1] hover:text-white flex items-center gap-1.5 transition">
+                    ← Kembali ke Katalog Fasilitas
+                </button>
+                <div id="detailStatusBadge">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] text-xs font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>
+                        Status: Dapat Digunakan
+                    </span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Left 8 Cols: Visuals and Specs -->
+                <div class="lg:col-span-8 space-y-6">
+                    <div class="relative h-64 sm:h-80 w-full rounded-[6px] overflow-hidden border border-[#333333] bg-[#111111]">
+                        <img id="detailPhoto" src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-5 left-5 right-5">
+                            <span id="detailTypeBadge" class="inline-block bg-black/80 text-white font-mono text-[10px] uppercase font-medium px-2 py-0.5 rounded-[4px] tracking-wider mb-2 border border-[#333333]">Kelas</span>
+                            <h2 id="detailTitle" class="text-2xl sm:text-3xl font-semibold text-white tracking-[-0.03em]">Ruang Kuliah Teori A-101.</h2>
+                        </div>
+                    </div>
+
+                    <!-- Quick Specs Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 bg-[#333333] gap-[1px] border border-[#333333] rounded-[6px] overflow-hidden text-xs">
+                        <div class="bg-[#111111] p-4">
+                            <span class="font-mono text-[10px] uppercase tracking-wider text-[#888888] block mb-1">Tipe</span>
+                            <strong id="detailType" class="text-white capitalize font-medium">Kelas</strong>
+                        </div>
+                        <div class="bg-[#111111] p-4">
+                            <span class="font-mono text-[10px] uppercase tracking-wider text-[#888888] block mb-1">Lokasi Gedung</span>
+                            <strong id="detailLoc" class="text-white font-medium">Gedung A (Utama)</strong>
+                        </div>
+                        <div class="bg-[#111111] p-4">
+                            <span class="font-mono text-[10px] uppercase tracking-wider text-[#888888] block mb-1">Kapasitas Maks</span>
+                            <strong id="detailCap" class="text-white font-medium">45 Orang</strong>
+                        </div>
+                        <div class="bg-[#111111] p-4">
+                            <span class="font-mono text-[10px] uppercase tracking-wider text-[#888888] block mb-1">Jam Operasional</span>
+                            <strong class="font-mono text-[#0070f3] font-medium">07.00 – 20.00 WIB</strong>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-6 space-y-3">
+                        <h3 class="text-sm font-semibold text-white tracking-tight">Deskripsi & Spesifikasi</h3>
+                        <p id="detailDesc" class="text-xs text-[#a1a1a1] leading-relaxed">Dilengkapi 45 kursi kuliah, AC sentral, proyektor laser 4K, whiteboard magnetik, serta koneksi internet kampus.</p>
+                    </div>
+                </div>
+
+                <!-- Right 4 Cols: Action Box -->
+                <div class="lg:col-span-4 space-y-5">
+                    <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-6 space-y-4">
+                        <div class="border-b border-[#333333] pb-3">
+                            <span class="font-mono text-[10px] text-[#888888] uppercase tracking-wider block mb-1">Aksi Permohonan</span>
+                            <h3 class="text-base font-semibold text-white tracking-tight">Reservasi Fasilitas</h3>
+                        </div>
+
+                        <div id="detailNoticeBox">
+                            <div class="p-3.5 rounded-[6px] bg-[#002b11] border border-[#005522] text-xs text-[#50e3c2] space-y-1">
+                                <strong class="font-medium text-white block">Siap Digunakan:</strong>
+                                <p class="leading-relaxed">Fasilitas beroperasi normal dan siap menerima permohonan reservasi baru.</p>
+                            </div>
+                        </div>
+
+                        <div id="detailActionBtnContainer">
+                            <button onclick="startReservationFromDetail()" class="w-full bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs py-2.5 rounded-[6px] transition active:scale-95 shadow-none">
+                                Pilih Jadwal & Reservasi →
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="border border-[#333333] rounded-[6px] bg-[#111111] p-4 font-mono text-[11px] text-[#888888] space-y-1.5">
+                        <span class="text-white block font-medium">Ketentuan Sistem:</span>
+                        <p>• Jam: 07.00 - 20.00 WIB</p>
+                        <p>• Interval: Slot 30 menit</p>
+                        <p>• Persetujuan: Petugas Sarpras</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 3: FORM RESERVASI BERTAHAP (SRS FR-PG-04..06 & FR-PGN-06) -->
+        <!-- ========================================== -->
+        <div id="screen-pengunjung-form" class="screen-view hidden space-y-6 max-w-3xl mx-auto">
+            <div class="flex items-center justify-between">
+                <button onclick="showScreen('pengunjung-home')" class="text-xs font-medium text-[#a1a1a1] hover:text-white flex items-center gap-1.5 transition">
+                    ← Kembali ke katalog
+                </button>
+                <span class="px-2.5 py-0.5 rounded-[6px] text-[11px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
+                    Formulir Reservasi Bersama
+                </span>
+            </div>
+
+            <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-6 sm:p-8 space-y-6">
+                <div class="border-b border-[#333333] pb-4 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-mono uppercase text-[#888888] tracking-wider">Tahap 1: Pemilihan Jadwal</span>
+                        <h2 id="formFacilityTitle" class="text-2xl font-semibold text-white tracking-[-0.03em]">Ruang Kuliah Teori A-101.</h2>
+                        <p class="text-xs text-[#a1a1a1] mt-0.5">Jam operasional: 07.00 – 20.00 WIB (Interval slot 30 menit)</p>
+                    </div>
+                </div>
+
+                <!-- Schedule Checker Inputs (Custom Dark Controls) -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <!-- Custom Date Picker -->
+                    <div class="space-y-1.5 relative custom-datepicker" id="datepicker-simDate">
+                        <label class="block font-mono text-[11px] uppercase tracking-wider text-[#888888] font-medium">Tanggal penggunaan</label>
+                        <input type="hidden" id="simDate" value="2026-09-24">
+                        <button type="button" onclick="toggleDatePicker()" id="datePickerTrigger"
+                                class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                            <span id="datePickerDisplay" class="flex items-center gap-2">
+                                <svg class="w-3.5 h-3.5 text-[#888888]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                <span id="datePickerSelectedText">24 Sep 2026</span>
+                            </span>
+                            <svg class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+
+                        <!-- Dark Vercel Calendar Popup -->
+                        <div id="calendarPopup" class="hidden absolute top-full left-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[8px] p-4 shadow-2xl backdrop-blur-md w-72 space-y-3 font-sans">
+                            <div class="flex items-center justify-between border-b border-[#222222] pb-2">
+                                <span id="calMonthYear" class="font-semibold text-xs text-white">September 2026</span>
+                                <div class="flex items-center gap-1">
+                                    <button type="button" onclick="changeCalMonth(-1)" class="w-6 h-6 rounded flex items-center justify-center text-[#888888] hover:text-white hover:bg-[#222222] transition">‹</button>
+                                    <button type="button" onclick="changeCalMonth(1)" class="w-6 h-6 rounded flex items-center justify-center text-[#888888] hover:text-white hover:bg-[#222222] transition">›</button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-7 gap-1 text-center font-mono text-[10px] text-[#888888]">
+                                <div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div><div>Su</div>
+                            </div>
+                            <div id="calDaysGrid" class="grid grid-cols-7 gap-1 text-center text-xs">
+                                <!-- Generated by JS -->
+                            </div>
+                            <div class="border-t border-[#222222] pt-2 flex items-center justify-between text-[11px]">
+                                <button type="button" onclick="clearDateSelection()" class="text-[#888888] hover:text-white underline">Hapus</button>
+                                <button type="button" onclick="selectTodayDate()" class="text-[#50e3c2] hover:underline font-medium">Hari Ini</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Dropdown: Waktu Mulai -->
+                    <div class="space-y-1.5 relative custom-dropdown" id="dropdown-simStart">
+                        <label class="block font-mono text-[11px] uppercase tracking-wider text-[#888888] font-medium">Waktu mulai</label>
+                        <input type="hidden" id="simStart" value="08:30">
+                        <button type="button" onclick="toggleCustomDropdown('simStart')" id="simStartTrigger"
+                                class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                            <span id="simStartLabel">08:30 WIB</span>
+                            <svg id="simStartChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <!-- Dropdown List -->
+                        <div id="simStartMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                            <!-- Dropdown Search Box -->
+                            <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                                <div class="relative">
+                                    <input type="text" placeholder="Cari waktu mulai..." 
+                                           id="search-simStart"
+                                           oninput="filterDropdownOptions(this, 'simStartMenu')"
+                                           onclick="event.stopPropagation()"
+                                           class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                                    <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div onclick="selectCustomDropdown('simStart', '08:00', '08:00 WIB')" data-value="08:00" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                                <span>08:00 WIB</span>
+                                <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                            </div>
+                            <div onclick="selectCustomDropdown('simStart', '08:30', '08:30 WIB')" data-value="08:30" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between bg-[#1f1f1f]">
+                                <span>08:30 WIB</span>
+                                <span class="check-icon text-[#50e3c2] text-xs">✓</span>
+                            </div>
+                            <div onclick="selectCustomDropdown('simStart', '11:00', '11:00 WIB (Simulasi bentrok)', true)" data-value="11:00" class="dropdown-item px-3 py-2 text-xs font-mono text-[#ff8080] hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between">
+                                <span>11:00 WIB (Simulasi bentrok)</span>
+                                <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                            </div>
+                            <div onclick="selectCustomDropdown('simStart', '14:00', '14:00 WIB')" data-value="14:00" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                                <span>14:00 WIB</span>
+                                <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Dropdown: Waktu Selesai -->
+                    <div class="space-y-1.5 relative custom-dropdown" id="dropdown-simEnd">
+                        <label class="block font-mono text-[11px] uppercase tracking-wider text-[#888888] font-medium">Waktu selesai</label>
+                        <input type="hidden" id="simEnd" value="10:30">
+                        <button type="button" onclick="toggleCustomDropdown('simEnd')" id="simEndTrigger"
+                                class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                            <span id="simEndLabel">10:30 WIB</span>
+                            <svg id="simEndChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <!-- Dropdown List -->
+                        <div id="simEndMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                            <!-- Dropdown Search Box -->
+                            <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                                <div class="relative">
+                                    <input type="text" placeholder="Cari waktu selesai..." 
+                                           id="search-simEnd"
+                                           oninput="filterDropdownOptions(this, 'simEndMenu')"
+                                           onclick="event.stopPropagation()"
+                                           class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                                    <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div onclick="selectCustomDropdown('simEnd', '09:30', '09:30 WIB')" data-value="09:30" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                                <span>09:30 WIB</span>
+                                <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                            </div>
+                            <div onclick="selectCustomDropdown('simEnd', '10:30', '10:30 WIB')" data-value="10:30" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between bg-[#1f1f1f]">
+                                <span>10:30 WIB</span>
+                                <span class="check-icon text-[#50e3c2] text-xs">✓</span>
+                            </div>
+                            <div onclick="selectCustomDropdown('simEnd', '12:00', '12:00 WIB (Simulasi bentrok)', true)" data-value="12:00" class="dropdown-item px-3 py-2 text-xs font-mono text-[#ff8080] hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between">
+                                <span>12:00 WIB (Simulasi bentrok)</span>
+                                <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                            </div>
+                            <div onclick="selectCustomDropdown('simEnd', '16:00', '16:00 WIB')" data-value="16:00" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                                <span>16:00 WIB</span>
+                                <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="runSimSlotCheck()" class="bg-[#171717] hover:bg-[#222222] text-white border border-[#333333] hover:border-[#555555] font-medium text-xs px-4 py-2 rounded-[6px] transition active:scale-95">
+                        Cek Ketersediaan Jadwal
+                    </button>
+                    <span class="text-xs text-[#888888]">Klik untuk memeriksa bentrokan jadwal server.</span>
+                </div>
+
+                <!-- Result Alert Box -->
+                <div id="simResultBox" class="hidden p-3.5 rounded-[6px] text-xs">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <!-- STAGE 2: PENGGUNA PURPOSE FIELD (Only shown if Pengguna logged in) -->
+                <div id="simPurposeContainer" class="hidden pt-4 border-t border-[#333333] space-y-3">
+                    <span class="text-[10px] font-mono uppercase text-[#888888] tracking-wider block">Tahap 2: Tujuan Penggunaan (Pengguna Terotentikasi)</span>
+                    <div class="space-y-1.5">
+                        <label class="block font-mono text-[11px] uppercase tracking-wider text-[#888888] font-medium">Tujuan penggunaan <span class="text-[#ff453a]">*</span></label>
+                        <textarea id="simPurposeText" rows="3" placeholder="Tuliskan tujuan peminjaman fasilitas..." class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] p-2.5 focus:outline-none focus:border-white"></textarea>
+                    </div>
+                    <button onclick="submitSimReservation()" class="bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs px-5 py-2.5 rounded-[6px] transition active:scale-95">
+                        Ajukan Reservasi Sekarang (Status: Menunggu)
+                    </button>
+                </div>
+
+                <!-- GUEST CALL TO ACTION (Only shown for Visitor when slot is Available) -->
+                <div id="simGuestLoginCTA" class="hidden pt-4 border-t border-[#333333]">
+                    <div class="p-4 rounded-[6px] bg-[#161616] border border-[#333333] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <strong class="text-white text-xs block">Jadwal Tersedia! Masuk untuk Melanjutkan Reservasi.</strong>
+                            <p class="text-[11px] text-[#a1a1a1]">Sistem akan menyimpan tanggal dan slot waktu ini sebagai draft sementara.</p>
+                        </div>
+                        <button onclick="saveSimDraftAndLogin()" class="bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs px-4 py-2 rounded-[6px] transition active:scale-95 whitespace-nowrap">
+                            Login untuk Melanjutkan →
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 4: AUTH LOGIN (SRS FR-PG-07) -->
+        <!-- ========================================== -->
+        <div id="screen-auth-login" class="screen-view hidden max-w-md mx-auto space-y-6">
+            <button onclick="showScreen('pengunjung-home')" class="text-xs font-medium text-[#a1a1a1] hover:text-white flex items-center gap-1.5 transition">
+                ← Kembali ke beranda
+            </button>
+            <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-8 space-y-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-[6px] bg-white text-black flex items-center justify-center font-semibold text-sm">
+                        ▲
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-white tracking-[-0.03em]">Masuk ke sistem.</h2>
+                        <p class="text-xs text-[#888888]">Akun dibuat langsung oleh administrator.</p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="space-y-1.5">
+                        <label class="block font-mono text-[11px] uppercase tracking-wider text-[#888888] font-medium">Email</label>
+                        <input type="email" id="loginEmail" value="mahasiswa@ppk.test" class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] px-3 py-2 focus:outline-none focus:border-white font-mono">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block font-mono text-[11px] uppercase tracking-wider text-[#888888] font-medium">Kata sandi</label>
+                        <input type="password" value="password123" class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] px-3 py-2 focus:outline-none focus:border-white font-mono">
+                    </div>
+                    <button onclick="doSimLogin()" class="w-full bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs py-2.5 rounded-[6px] transition active:scale-95">
+                        Masuk
+                    </button>
+                </div>
+                <div class="pt-4 border-t border-[#333333] text-center text-[11px] text-[#888888] font-mono">
+                    Tidak ada registrasi mandiri. Akun didaftarkan oleh admin kampus.
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 5: PENGGUNA - RIWAYAT RESERVASI (SRS FR-PGN-08..10) -->
+        <!-- ========================================== -->
+        <div id="screen-pengguna-reservations" class="screen-view hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-semibold text-white tracking-[-0.03em]">Riwayat reservasi saya.</h1>
+                    <p class="text-xs text-[#a1a1a1] mt-0.5">Daftar seluruh pengajuan peminjaman fasilitas civitas akademika.</p>
+                </div>
+                <button onclick="showScreen('pengunjung-form')" class="bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs px-3.5 py-1.5 rounded-[6px] transition active:scale-95">
+                    + Ajukan Reservasi Baru
+                </button>
+            </div>
+
+            <!-- Table Riwayat Reservasi -->
+            <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
+                <table class="w-full text-left text-xs text-[#a1a1a1]" id="userReservationsTable">
+                    <thead class="bg-[#161616] text-[#888888] uppercase text-[10px] font-mono tracking-wider border-b border-[#333333]">
+                        <tr>
+                            <th class="p-4">No. Reservasi</th>
+                            <th class="p-4">Fasilitas</th>
+                            <th class="p-4">Jadwal Pinjam</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#333333]" id="userReservationsBody">
+                        <tr class="hover:bg-[#171717]">
+                            <td class="p-4 font-mono font-medium text-white">RSV-2026-0901</td>
+                            <td class="p-4 font-medium text-white">Ruang Kuliah Teori A-101</td>
+                            <td class="p-4 font-mono text-[#a1a1a1]">2026-09-24 (08:30 - 10:30 WIB)</td>
+                            <td class="p-4">
+                                <span class="px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono font-medium bg-[#2b1e00] text-[#f5a623] border border-[#553c00]">Menunggu</span>
+                            </td>
+                            <td class="p-4 text-right">
+                                <button onclick="openCancelModal('RSV-2026-0901')" class="text-[#ff453a] hover:underline font-medium text-xs">
+                                    Batalkan Reservasi
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-[#171717]">
+                            <td class="p-4 font-mono font-medium text-white">RSV-2026-0890</td>
+                            <td class="p-4 font-medium text-white">Laboratorium Komputer 301</td>
+                            <td class="p-4 font-mono text-[#a1a1a1]">2026-09-22 (13:00 - 15:00 WIB)</td>
+                            <td class="p-4">
+                                <span class="px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono font-medium bg-[#002b11] text-[#50e3c2] border border-[#005522]">Disetujui</span>
+                            </td>
+                            <td class="p-4 text-right text-[#888888]">
+                                Selesai Diverifikasi
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 6: PENGGUNA - RIWAYAT & LAPORAN (SRS FR-PGN-12..14) -->
+        <!-- ========================================== -->
+        <div id="screen-pengguna-reports" class="screen-view hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-semibold text-white tracking-[-0.03em]">Laporan kendala fasilitas.</h1>
+                    <p class="text-xs text-[#a1a1a1] mt-0.5">Sampaikan laporan kerusakan fisik atau elektronik untuk ditangani petugas sarpras.</p>
+                </div>
+                <button onclick="openCreateReportModal()" class="bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs px-3.5 py-1.5 rounded-[6px] transition active:scale-95 flex items-center gap-1.5">
+                    + Buat Laporan Kerusakan
+                </button>
+            </div>
+
+            <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
+                <table class="w-full text-left text-xs text-[#a1a1a1]">
+                    <thead class="bg-[#161616] text-[#888888] uppercase text-[10px] font-mono tracking-wider border-b border-[#333333]">
+                        <tr>
+                            <th class="p-4">No. Laporan</th>
+                            <th class="p-4">Fasilitas</th>
+                            <th class="p-4">Kategori</th>
+                            <th class="p-4">Tanggal</th>
+                            <th class="p-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#333333]">
+                        <tr class="hover:bg-[#171717]">
+                            <td class="p-4 font-mono font-medium text-white">LAP-2026-0301</td>
+                            <td class="p-4 font-medium text-white">Ruang Kuliah Teori A-101</td>
+                            <td class="p-4 capitalize">Kerusakan Elektronik (AC Berisik)</td>
+                            <td class="p-4 font-mono">2026-09-23 08:30</td>
+                            <td class="p-4">
+                                <span class="px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono font-medium bg-[#2b1e00] text-[#f5a623] border border-[#553c00]">Baru</span>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-[#171717]">
+                            <td class="p-4 font-mono font-medium text-white">LAP-2026-0280</td>
+                            <td class="p-4 font-medium text-white">Laboratorium Komputer 301</td>
+                            <td class="p-4 capitalize">Kerusakan Fisik (Stopkontak Longgar)</td>
+                            <td class="p-4 font-mono">2026-09-17 14:20</td>
+                            <td class="p-4">
+                                <span class="px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono font-medium bg-[#002b11] text-[#50e3c2] border border-[#005522]">Selesai</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 7: PETUGAS - ANTRIAN RESERVASI (SRS FR-PTG-02..05) -->
+        <!-- ========================================== -->
+        <div id="screen-petugas-queue" class="screen-view hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-semibold text-white tracking-[-0.03em]">Antrian reservasi aktif.</h1>
+                    <p class="text-xs text-[#a1a1a1] mt-0.5">Prioritas verifikasi pengajuan permohonan baru sebelum waktu mulai (Status: Menunggu di atas).</p>
+                </div>
+            </div>
+
+            <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
+                <table class="w-full text-left text-xs text-[#a1a1a1]" id="petugasQueueTable">
+                    <thead class="bg-[#161616] text-[#888888] uppercase text-[10px] font-mono tracking-wider border-b border-[#333333]">
+                        <tr>
+                            <th class="p-4">No. Reservasi</th>
+                            <th class="p-4">Pemohon</th>
+                            <th class="p-4">Fasilitas</th>
+                            <th class="p-4">Jadwal Penggunaan</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 text-right">Aksi Petugas</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#333333]" id="petugasQueueBody">
+                        <tr class="bg-[#171717]/60 hover:bg-[#171717]">
+                            <td class="p-4 font-mono font-medium text-white">RSV-2026-0901</td>
+                            <td class="p-4">
+                                <span class="font-medium text-white block">Ahmad Fauzi</span>
+                                <span class="text-[#888888] font-mono text-[10px]">Mahasiswa · TI-22</span>
+                            </td>
+                            <td class="p-4 text-white">Ruang Kuliah Teori A-101</td>
+                            <td class="p-4 font-mono text-white">2026-09-24, 08:30–10:30 WIB</td>
+                            <td class="p-4">
+                                <span class="px-2 py-0.5 rounded-[4px] text-[10px] font-mono font-medium bg-[#2b1e00] text-[#f5a623] border border-[#553c00]">Menunggu</span>
+                            </td>
+                            <td class="p-4 text-right space-x-2">
+                                <button onclick="openRejectModal('RSV-2026-0901')" class="px-3 py-1 rounded-[6px] border border-[#550000] text-[#ff453a] bg-[#2b0000] hover:bg-[#3b0000] text-xs font-medium transition">
+                                    Tolak Manual
+                                </button>
+                                <button onclick="approveReservation('RSV-2026-0901')" class="px-3 py-1 rounded-[6px] bg-white hover:bg-[#e6e6e6] text-black text-xs font-medium transition active:scale-95">
+                                    Setujui
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 8: PETUGAS - LAPORAN KERJA (SRS FR-PTG-06..09) -->
+        <!-- ========================================== -->
+        <div id="screen-petugas-reports" class="screen-view hidden space-y-6">
+            <div>
+                <h1 class="text-2xl font-semibold text-white tracking-[-0.03em]">Penanganan laporan fasilitas.</h1>
+                <p class="text-xs text-[#a1a1a1] mt-0.5">Daftar laporan aktif (Baru & Diproses) untuk ditindaklanjuti.</p>
+            </div>
+
+            <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
+                <table class="w-full text-left text-xs text-[#a1a1a1]">
+                    <thead class="bg-[#161616] text-[#888888] uppercase text-[10px] font-mono tracking-wider border-b border-[#333333]">
+                        <tr>
+                            <th class="p-4">No. Laporan</th>
+                            <th class="p-4">Pelapor</th>
+                            <th class="p-4">Fasilitas</th>
+                            <th class="p-4">Kategori & Deskripsi</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 text-right">Tindakan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#333333]">
+                        <tr class="hover:bg-[#171717]">
+                            <td class="p-4 font-mono font-medium text-white">LAP-2026-0301</td>
+                            <td class="p-4 text-white">Ahmad Fauzi</td>
+                            <td class="p-4 text-white">Ruang Kuliah Teori A-101</td>
+                            <td class="p-4">
+                                <span class="block text-white font-medium">Pendingin Ruangan (AC) Berisik</span>
+                                <span class="text-[#888888] text-[11px]">Hembusan angin kurang dingin dan ada getaran.</span>
+                            </td>
+                            <td class="p-4">
+                                <span class="px-2 py-0.5 rounded-[4px] text-[10px] font-mono font-medium bg-[#2b1e00] text-[#f5a623] border border-[#553c00]">Baru</span>
+                            </td>
+                            <td class="p-4 text-right space-x-1.5">
+                                <button onclick="processReport('LAP-2026-0301')" class="px-3 py-1 rounded-[6px] bg-white text-black text-xs font-medium hover:bg-[#e6e6e6]">
+                                    Mulai Proses
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 9: PETUGAS - STATUS FASILITAS & PERBAIKAN (SRS FR-PTG-10..13) -->
+        <!-- ========================================== -->
+        <div id="screen-petugas-maintenance" class="screen-view hidden space-y-6">
+            <div>
+                <h1 class="text-2xl font-semibold text-white tracking-[-0.03em]">Fasilitas dalam perbaikan.</h1>
+                <p class="text-xs text-[#a1a1a1] mt-0.5">Daftar fasilitas yang sedang berstatus operasional Dalam Perbaikan (reservasi otomatis dinonaktifkan).</p>
+            </div>
+
+            <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
+                <table class="w-full text-left text-xs text-[#a1a1a1]">
+                    <thead class="bg-[#161616] text-[#888888] uppercase text-[10px] font-mono tracking-wider border-b border-[#333333]">
+                        <tr>
+                            <th class="p-4">Fasilitas</th>
+                            <th class="p-4">Tipe</th>
+                            <th class="p-4">Lokasi</th>
+                            <th class="p-4">Alasan Terakhir</th>
+                            <th class="p-4 text-right">Aksi Pemulihan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#333333]">
+                        <tr class="hover:bg-[#171717]">
+                            <td class="p-4 font-medium text-white">Proyektor Cinema & Sound Portabel</td>
+                            <td class="p-4 font-mono text-[11px] uppercase">Alat</td>
+                            <td class="p-4">Gedung B (Laboratorium)</td>
+                            <td class="p-4 text-[#ff453a]">Penggantian lampu optik dan kalibrasi lensa 4K.</td>
+                            <td class="p-4 text-right">
+                                <button onclick="restoreFacilityStatus('Proyektor Cinema & Sound Portabel')" class="px-3 py-1.5 rounded-[6px] bg-[#002b11] border border-[#005522] text-[#50e3c2] hover:bg-[#003b17] font-medium text-xs transition">
+                                    ✓ Selesai Perbaikan (Kembalikan Siap Pakai)
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 10: ADMIN - KELOLA AKUN CIVITAS (SRS FR-ADM-02..04) -->
+        <!-- ========================================== -->
+        <div id="screen-admin-accounts" class="screen-view hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-semibold text-white tracking-[-0.03em]">Kelola akun pengguna & petugas.</h1>
+                    <p class="text-xs text-[#a1a1a1] mt-0.5">Pembuatan akun langsung oleh Admin tanpa alur registrasi mandiri.</p>
+                </div>
+                <button onclick="openCreateAccountModal()" class="bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs px-3.5 py-1.5 rounded-[6px] transition active:scale-95 flex items-center gap-1.5">
+                    + Buat Akun Baru
+                </button>
+            </div>
+
+            <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
+                <table class="w-full text-left text-xs text-[#a1a1a1]">
+                    <thead class="bg-[#161616] text-[#888888] uppercase text-[10px] font-mono tracking-wider border-b border-[#333333]">
+                        <tr>
+                            <th class="p-4">Nama Civitas</th>
+                            <th class="p-4">Email</th>
+                            <th class="p-4">Peran Sistem</th>
+                            <th class="p-4">Kategori Pengguna</th>
+                            <th class="p-4 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#333333]">
+                        <tr class="hover:bg-[#171717]">
+                            <td class="p-4 font-medium text-white">Ahmad Fauzi</td>
+                            <td class="p-4 font-mono text-white">mahasiswa@ppk.test</td>
+                            <td class="p-4"><span class="px-2 py-0.5 rounded-[4px] text-[10px] font-mono bg-[#161616] text-white border border-[#333333]">Pengguna</span></td>
+                            <td class="p-4 text-white">Mahasiswa</td>
+                            <td class="p-4 text-right">
+                                <button onclick="resetPasswordModal('Ahmad Fauzi')" class="text-[#0070f3] hover:underline font-mono text-xs">Reset Kata Sandi</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-[#171717]">
+                            <td class="p-4 font-medium text-white">Budi Santoso</td>
+                            <td class="p-4 font-mono text-white">petugas@ppk.test</td>
+                            <td class="p-4"><span class="px-2 py-0.5 rounded-[4px] text-[10px] font-mono bg-[#002b11] text-[#50e3c2] border border-[#005522]">Petugas</span></td>
+                            <td class="p-4 text-[#888888]">—</td>
+                            <td class="p-4 text-right">
+                                <button onclick="resetPasswordModal('Budi Santoso')" class="text-[#0070f3] hover:underline font-mono text-xs">Reset Kata Sandi</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 11: ADMIN - MASTER FASILITAS (SRS FR-ADM-05..09) -->
+        <!-- ========================================== -->
+        <div id="screen-admin-facilities" class="screen-view hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-semibold text-white tracking-[-0.03em]">Master data fasilitas kampus.</h1>
+                    <p class="text-xs text-[#a1a1a1] mt-0.5">Kelola penambahan, pengeditan, dan penonaktifan data master fasilitas.</p>
+                </div>
+                <button onclick="alert('Modal Tambah Fasilitas Baru dibuka (Nama, Tipe: Kelas/Lab/Aula/Alat/Lapangan, Lokasi, Kapasitas opsional, Deskripsi).')" class="bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs px-3.5 py-1.5 rounded-[6px] transition active:scale-95">
+                    + Tambah Fasilitas
+                </button>
+            </div>
+
+            <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
+                <table class="w-full text-left text-xs text-[#a1a1a1]">
+                    <thead class="bg-[#161616] text-[#888888] uppercase text-[10px] font-mono tracking-wider border-b border-[#333333]">
+                        <tr>
+                            <th class="p-4">Nama Fasilitas</th>
+                            <th class="p-4">Tipe</th>
+                            <th class="p-4">Lokasi</th>
+                            <th class="p-4">Data Master</th>
+                            <th class="p-4">Status Operasional</th>
+                            <th class="p-4 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#333333]">
+                        <tr class="hover:bg-[#171717]">
+                            <td class="p-4 font-medium text-white">Ruang Kuliah Teori A-101</td>
+                            <td class="p-4 font-mono capitalize">Kelas</td>
+                            <td class="p-4">Gedung A</td>
+                            <td class="p-4"><span class="px-2 py-0.5 rounded-[4px] text-[10px] font-mono bg-[#002b11] text-[#50e3c2] border border-[#005522]">Aktif</span></td>
+                            <td class="p-4 text-[#50e3c2]">Dapat Digunakan</td>
+                            <td class="p-4 text-right space-x-2">
+                                <button onclick="alert('Pemeriksaan reservasi aktif berhasil: Fasilitas dapat dinonaktifkan.')" class="text-[#ff453a] hover:underline font-mono text-xs">Nonaktifkan</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-[#171717]">
+                            <td class="p-4 font-medium text-white">Ruang Seminar Eksekutif C-204</td>
+                            <td class="p-4 font-mono capitalize">Kelas</td>
+                            <td class="p-4">Gedung C</td>
+                            <td class="p-4"><span class="px-2 py-0.5 rounded-[4px] text-[10px] font-mono bg-[#161616] text-[#888888] border border-[#333333]">Nonaktif</span></td>
+                            <td class="p-4 text-[#888888]">Nonaktif</td>
+                            <td class="p-4 text-right space-x-2">
+                                <button onclick="alert('Data master fasilitas berhasil diaktifkan kembali.')" class="text-[#50e3c2] hover:underline font-mono text-xs">Aktifkan Kembali</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 12: ADMIN - REKAPITULASI (SRS FR-ADM-10..11) -->
+        <!-- ========================================== -->
+        <div id="screen-admin-recaps" class="screen-view hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-semibold text-white tracking-[-0.03em]">Rekapitulasi okupansi & frekuensi kerusakan.</h1>
+                    <p class="text-xs text-[#a1a1a1] mt-0.5">Perhitungan periode bulanan jam operasional 07.00 - 20.00 WIB.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="alert('Mengekspor file CSV...')" class="px-3 py-1.5 rounded-[6px] bg-[#171717] text-xs font-medium text-white border border-[#333333] hover:border-white transition font-mono">Ekspor CSV</button>
+                    <button onclick="alert('Mengekspor file Excel (.xlsx)...')" class="px-3 py-1.5 rounded-[6px] bg-[#171717] text-xs font-medium text-white border border-[#333333] hover:border-white transition font-mono">Ekspor Excel</button>
+                    <button onclick="alert('Mengekspor berkas cetak PDF...')" class="px-3 py-1.5 rounded-[6px] bg-[#2b0000] text-xs font-medium text-[#ff453a] border border-[#550000] hover:bg-[#3b0000] transition font-mono">Ekspor PDF</button>
+                </div>
+            </div>
+
+            <!-- Filters for recap (Custom UI Dropdowns) -->
+            <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                
+                <!-- Custom Dropdown: Jenis Rekap -->
+                <div class="space-y-1.5 relative custom-dropdown" id="dropdown-recapMetric">
+                    <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Jenis Rekap</label>
+                    <input type="hidden" id="recapMetric" value="okupansi">
+                    <button type="button" onclick="toggleCustomDropdown('recapMetric')" id="recapMetricTrigger"
+                            class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                        <span id="recapMetricLabel" class="truncate pr-2">Tingkat Okupansi Pemakaian (%)</span>
+                        <svg id="recapMetricChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div id="recapMetricMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                        <div onclick="selectCustomDropdown('recapMetric', 'okupansi', 'Tingkat Okupansi Pemakaian (%)')" data-value="okupansi" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between bg-[#1f1f1f]">
+                            <span>Tingkat Okupansi Pemakaian (%)</span>
+                            <span class="check-icon text-[#50e3c2] text-xs">✓</span>
+                        </div>
+                        <div onclick="selectCustomDropdown('recapMetric', 'kerusakan', 'Frekuensi Kerusakan Fisik')" data-value="kerusakan" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                            <span>Frekuensi Kerusakan Fisik</span>
+                            <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom Dropdown: Pengelompokan -->
+                <div class="space-y-1.5 relative custom-dropdown" id="dropdown-recapGroup">
+                    <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Pengelompokan</label>
+                    <input type="hidden" id="recapGroup" value="fasilitas">
+                    <button type="button" onclick="toggleCustomDropdown('recapGroup')" id="recapGroupTrigger"
+                            class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                        <span id="recapGroupLabel" class="truncate pr-2">Per Fasilitas Individual</span>
+                        <svg id="recapGroupChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div id="recapGroupMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                        <div onclick="selectCustomDropdown('recapGroup', 'fasilitas', 'Per Fasilitas Individual')" data-value="fasilitas" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between bg-[#1f1f1f]">
+                            <span>Per Fasilitas Individual</span>
+                            <span class="check-icon text-[#50e3c2] text-xs">✓</span>
+                        </div>
+                        <div onclick="selectCustomDropdown('recapGroup', 'lokasi', 'Per Lokasi Gedung')" data-value="lokasi" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                            <span>Per Lokasi Gedung</span>
+                            <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom Dropdown: Bulan Periode -->
+                <div class="space-y-1.5 relative custom-dropdown" id="dropdown-recapMonth">
+                    <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Bulan Periode</label>
+                    <input type="hidden" id="recapMonth" value="September">
+                    <button type="button" onclick="toggleCustomDropdown('recapMonth')" id="recapMonthTrigger"
+                            class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                        <span id="recapMonthLabel" class="truncate pr-2">September</span>
+                        <svg id="recapMonthChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div id="recapMonthMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                        <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                            <div class="relative">
+                                <input type="text" placeholder="Cari bulan..." 
+                                       id="search-recapMonth"
+                                       oninput="filterDropdownOptions(this, 'recapMonthMenu')"
+                                       onclick="event.stopPropagation()"
+                                       class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                                <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div onclick="selectCustomDropdown('recapMonth', 'Januari', 'Januari')" data-value="Januari" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between"><span>Januari</span><span class="check-icon text-[#50e3c2] text-xs hidden">✓</span></div>
+                        <div onclick="selectCustomDropdown('recapMonth', 'Februari', 'Februari')" data-value="Februari" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between"><span>Februari</span><span class="check-icon text-[#50e3c2] text-xs hidden">✓</span></div>
+                        <div onclick="selectCustomDropdown('recapMonth', 'Maret', 'Maret')" data-value="Maret" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between"><span>Maret</span><span class="check-icon text-[#50e3c2] text-xs hidden">✓</span></div>
+                        <div onclick="selectCustomDropdown('recapMonth', 'April', 'April')" data-value="April" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between"><span>April</span><span class="check-icon text-[#50e3c2] text-xs hidden">✓</span></div>
+                        <div onclick="selectCustomDropdown('recapMonth', 'Mei', 'Mei')" data-value="Mei" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between"><span>Mei</span><span class="check-icon text-[#50e3c2] text-xs hidden">✓</span></div>
+                        <div onclick="selectCustomDropdown('recapMonth', 'Juni', 'Juni')" data-value="Juni" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between"><span>Juni</span><span class="check-icon text-[#50e3c2] text-xs hidden">✓</span></div>
+                        <div onclick="selectCustomDropdown('recapMonth', 'Juli', 'Juli')" data-value="Juli" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between"><span>Juli</span><span class="check-icon text-[#50e3c2] text-xs hidden">✓</span></div>
+                        <div onclick="selectCustomDropdown('recapMonth', 'Agustus', 'Agustus')" data-value="Agustus" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between"><span>Agustus</span><span class="check-icon text-[#50e3c2] text-xs hidden">✓</span></div>
+                        <div onclick="selectCustomDropdown('recapMonth', 'September', 'September')" data-value="September" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between bg-[#1f1f1f]"><span>September</span><span class="check-icon text-[#50e3c2] text-xs">✓</span></div>
+                        <div onclick="selectCustomDropdown('recapMonth', 'Oktober', 'Oktober')" data-value="Oktober" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between"><span>Oktober</span><span class="check-icon text-[#50e3c2] text-xs hidden">✓</span></div>
+                        <div onclick="selectCustomDropdown('recapMonth', 'November', 'November')" data-value="November" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between"><span>November</span><span class="check-icon text-[#50e3c2] text-xs hidden">✓</span></div>
+                        <div onclick="selectCustomDropdown('recapMonth', 'Desember', 'Desember')" data-value="Desember" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between"><span>Desember</span><span class="check-icon text-[#50e3c2] text-xs hidden">✓</span></div>
+                    </div>
+                </div>
+
+                <!-- Custom Dropdown: Tahun Periode -->
+                <div class="space-y-1.5 relative custom-dropdown" id="dropdown-recapYear">
+                    <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Tahun Periode</label>
+                    <input type="hidden" id="recapYear" value="2026">
+                    <button type="button" onclick="toggleCustomDropdown('recapYear')" id="recapYearTrigger"
+                            class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                        <span id="recapYearLabel" class="truncate pr-2">2026</span>
+                        <svg id="recapYearChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div id="recapYearMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                        <div onclick="selectCustomDropdown('recapYear', '2026', '2026')" data-value="2026" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between bg-[#1f1f1f]">
+                            <span>2026</span>
+                            <span class="check-icon text-[#50e3c2] text-xs">✓</span>
+                        </div>
+                        <div onclick="selectCustomDropdown('recapYear', '2025', '2025')" data-value="2025" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                            <span>2025</span>
+                            <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Admin Recap Table -->
+            <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden" id="recapTableContainer">
+                <table class="w-full text-left text-xs text-[#a1a1a1]">
+                    <thead class="bg-[#161616] text-[#888888] uppercase text-[10px] font-mono tracking-wider border-b border-[#333333]">
+                        <tr>
+                            <th class="p-4" id="recapHeaderEntity">Fasilitas</th>
+                            <th class="p-4" id="recapHeaderCol1">Durasi Selesai</th>
+                            <th class="p-4" id="recapHeaderCol2">Slot Jam Operasional</th>
+                            <th class="p-4" id="recapHeaderResult">Tingkat Okupansi (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#333333] font-mono" id="recapTableBody">
+                        <tr class="hover:bg-[#171717]">
+                            <td class="p-4 font-sans font-medium text-white">Laboratorium Komputer 301</td>
+                            <td class="p-4 text-white">208 Jam</td>
+                            <td class="p-4 text-[#888888]">390 Jam</td>
+                            <td class="p-4 text-[#50e3c2] font-semibold">53.3%</td>
+                        </tr>
+                        <tr class="hover:bg-[#171717]">
+                            <td class="p-4 font-sans font-medium text-white">Ruang Kuliah Teori A-101</td>
+                            <td class="p-4 text-white">124 Jam</td>
+                            <td class="p-4 text-[#888888]">390 Jam</td>
+                            <td class="p-4 text-[#50e3c2] font-semibold">31.8%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Global Modals (Floating Windows) -->
+    <!-- 1. Modal Pembatalan Reservasi -->
+    <div id="modalCancelReservation" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#111111] border border-[#333333] rounded-[6px] max-w-md w-full p-6 space-y-4">
+            <h3 class="text-base font-semibold text-white">Konfirmasi Pembatalan Reservasi</h3>
+            <p class="text-xs text-[#a1a1a1]">Sesuai aturan bisnis, pembatalan mandiri sebelum jam mulai wajib mencantumkan alasan.</p>
+            <div class="space-y-1.5">
+                <label class="block font-mono text-[11px] text-[#888888]">Alasan Pembatalan <span class="text-[#ff453a]">*</span></label>
+                <textarea id="cancelReasonInput" rows="3" placeholder="Tuliskan alasan pembatalan..." class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] p-2.5 focus:outline-none focus:border-white"></textarea>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button onclick="closeModal('modalCancelReservation')" class="px-4 py-2 rounded-[6px] bg-[#1a1a1a] text-xs font-medium text-[#a1a1a1] hover:text-white">Tutup</button>
+                <button onclick="submitCancelReservation()" class="px-4 py-2 rounded-[6px] bg-[#2b0000] border border-[#550000] text-[#ff453a] hover:bg-[#3b0000] text-xs font-medium">Konfirmasi Pembatalan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Modal Penolakan Manual Petugas -->
+    <div id="modalRejectReservation" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#111111] border border-[#333333] rounded-[6px] max-w-md w-full p-6 space-y-4">
+            <h3 class="text-base font-semibold text-white">Tolak Permohonan Reservasi</h3>
+            <p class="text-xs text-[#a1a1a1]">Penolakan bersifat final dan wajib mencantumkan alasan yang jelas untuk pemohon.</p>
+            <div class="space-y-1.5">
+                <label class="block font-mono text-[11px] text-[#888888]">Alasan Penolakan <span class="text-[#ff453a]">*</span></label>
+                <textarea id="rejectReasonInput" rows="3" placeholder="Contoh: Jadwal bentrok dengan ujian skripsi terjadwal..." class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] p-2.5 focus:outline-none focus:border-white"></textarea>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button onclick="closeModal('modalRejectReservation')" class="px-4 py-2 rounded-[6px] bg-[#1a1a1a] text-xs font-medium text-[#a1a1a1] hover:text-white">Batal</button>
+                <button onclick="submitRejectReservation()" class="px-4 py-2 rounded-[6px] bg-[#2b0000] border border-[#550000] text-[#ff453a] hover:bg-[#3b0000] text-xs font-medium">Konfirmasi Tolak</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Modal Buat Akun & Kata Sandi Tampil 1x (Admin) -->
+    <div id="modalCreateAccount" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#111111] border border-[#333333] rounded-[6px] max-w-md w-full p-6 space-y-4">
+            <h3 class="text-base font-semibold text-white">Buat Akun Civitas Baru</h3>
+            <div class="space-y-3 text-xs">
+                <div class="space-y-1">
+                    <label class="font-mono text-[11px] text-[#888888]">Nama Lengkap</label>
+                    <input type="text" id="newAccName" placeholder="Nama..." class="w-full bg-[#0a0a0a] border border-[#333333] text-white rounded-[6px] p-2">
+                </div>
+                <div class="space-y-1">
+                    <label class="font-mono text-[11px] text-[#888888]">Email</label>
+                    <input type="email" id="newAccEmail" placeholder="email@kampus.ac.id" class="w-full bg-[#0a0a0a] border border-[#333333] text-white rounded-[6px] p-2 font-mono">
+                </div>
+                <div class="space-y-1.5 relative custom-dropdown" id="dropdown-newAccRole">
+                    <label class="block font-mono text-[11px] text-[#888888]">Peran</label>
+                    <input type="hidden" id="newAccRole" value="pengguna">
+                    <button type="button" onclick="toggleCustomDropdown('newAccRole')" id="newAccRoleTrigger"
+                            class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                        <span id="newAccRoleLabel" class="truncate pr-2">Pengguna (Mahasiswa/Dosen/Staf)</span>
+                        <svg id="newAccRoleChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div id="newAccRoleMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                        <div onclick="selectCustomDropdown('newAccRole', 'pengguna', 'Pengguna (Mahasiswa/Dosen/Staf)')" data-value="pengguna" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between bg-[#1f1f1f]">
+                            <span>Pengguna (Mahasiswa/Dosen/Staf)</span>
+                            <span class="check-icon text-[#50e3c2] text-xs">✓</span>
+                        </div>
+                        <div onclick="selectCustomDropdown('newAccRole', 'petugas', 'Petugas Sarpras')" data-value="petugas" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                            <span>Petugas Sarpras</span>
+                            <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button onclick="closeModal('modalCreateAccount')" class="px-4 py-2 rounded-[6px] bg-[#1a1a1a] text-xs text-[#a1a1a1]">Batal</button>
+                <button onclick="submitCreateAccount()" class="px-4 py-2 rounded-[6px] bg-white text-black text-xs font-medium">Buat & Generate Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Modal Password Sekali Tampil (SRS FR-ADM-03) -->
+    <div id="modalPasswordCreated" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-[#111111] border border-emerald-500/50 rounded-[6px] max-w-md w-full p-6 space-y-4 text-center">
+            <span class="inline-block w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-lg leading-8 mx-auto">✓</span>
+            <h3 class="text-base font-semibold text-white">Akun Berhasil Dibuat!</h3>
+            <p class="text-xs text-[#a1a1a1]">Catat kata sandi awal berikut sekarang. Sesuai aturan keamanan <strong>(SRS BR-ADM-01)</strong>, kata sandi ini hanya ditampilkan satu kali dan tidak dapat dibuka kembali.</p>
+            <div class="p-3 bg-[#0a0a0a] border border-[#333333] rounded-[6px] font-mono text-sm text-emerald-400 font-semibold select-all" id="generatedPasswordBox">
+                PPK-SecPass#2026!
+            </div>
+            <button onclick="closeModal('modalPasswordCreated')" class="w-full bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs py-2.5 rounded-[6px]">
+                Saya Telah Mencatat Kata Sandi Ini
+            </button>
+        </div>
+    </div>
+
+    <!-- 5. Modal Buat Laporan Kerusakan (Pengguna) -->
+    <div id="modalCreateReport" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#111111] border border-[#333333] rounded-[6px] max-w-md w-full p-6 space-y-4">
+            <h3 class="text-base font-semibold text-white">Laporkan Masalah / Kerusakan</h3>
+            <p class="text-xs text-[#a1a1a1]">Laporan akan diteruskan ke Petugas Sarpras untuk ditindaklanjuti (SRS FR-PGN-12).</p>
+            <div class="space-y-3 text-xs">
+                <div class="space-y-1">
+                    <label class="font-mono text-[11px] text-[#888888]">Fasilitas</label>
+                    <input type="text" id="reportFacilityName" readonly class="w-full bg-[#161616] border border-[#333333] text-white rounded-[6px] p-2 text-xs">
+                </div>
+                <div class="space-y-1.5 relative custom-dropdown" id="dropdown-reportCategory">
+                    <label class="block font-mono text-[11px] text-[#888888]">Kategori Masalah <span class="text-[#ff453a]">*</span></label>
+                    <input type="hidden" id="reportCategory" value="Kerusakan Fisik / Sarana">
+                    <button type="button" onclick="toggleCustomDropdown('reportCategory')" id="reportCategoryTrigger"
+                            class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                        <span id="reportCategoryLabel" class="truncate pr-2">Kerusakan Fasilitas / Sarana</span>
+                        <svg id="reportCategoryChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div id="reportCategoryMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                        <div onclick="selectCustomDropdown('reportCategory', 'Kerusakan Fisik / Sarana', 'Kerusakan Fasilitas / Sarana')" data-value="Kerusakan Fisik / Sarana" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between bg-[#1f1f1f]">
+                            <span>Kerusakan Fasilitas / Sarana</span>
+                            <span class="check-icon text-[#50e3c2] text-xs">✓</span>
+                        </div>
+                        <div onclick="selectCustomDropdown('reportCategory', 'Perangkat Elektronik / Kelistrikan', 'Perangkat Elektronik / Kelistrikan')" data-value="Perangkat Elektronik / Kelistrikan" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                            <span>Perangkat Elektronik / Kelistrikan</span>
+                            <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                        </div>
+                        <div onclick="selectCustomDropdown('reportCategory', 'Kebersihan & Sanitasi', 'Kebersihan & Sanitasi')" data-value="Kebersihan & Sanitasi" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                            <span>Kebersihan & Sanitasi</span>
+                            <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                        </div>
+                        <div onclick="selectCustomDropdown('reportCategory', 'Lainnya', 'Lainnya')" data-value="Lainnya" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                            <span>Lainnya</span>
+                            <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <label class="font-mono text-[11px] text-[#888888]">Deskripsi Masalah <span class="text-[#ff453a]">*</span></label>
+                    <textarea id="reportDescInput" rows="3" placeholder="Jelaskan detail kendala atau kerusakan yang ditemukan..." class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] p-2.5 focus:outline-none focus:border-white"></textarea>
+                </div>
+                <div class="space-y-1">
+                    <label class="font-mono text-[11px] text-[#888888]">Foto Bukti (Opsional)</label>
+                    <input type="file" disabled class="w-full bg-[#0a0a0a] border border-[#333333] text-[#888888] rounded-[6px] p-1.5 text-[11px]">
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button onclick="closeModal('modalCreateReport')" class="px-4 py-2 rounded-[6px] bg-[#1a1a1a] text-xs font-medium text-[#a1a1a1] hover:text-white">Batal</button>
+                <button onclick="submitCreateReport()" class="px-4 py-2 rounded-[6px] bg-white text-black text-xs font-medium hover:bg-[#e6e6e6]">Kirim Laporan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-[#333333] bg-[#0a0a0a] py-6">
+        <div class="max-w-[1200px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#888888]">
+            <div>
+                © 2026 PPK Sarpras Kampus · Vercel Design Language Layout
+            </div>
+            <div class="flex items-center gap-4 font-mono text-[11px]">
+                <span>Slot: 30 Menit</span>
+                <span>•</span>
+                <span>Waktu: 07:00–20:00</span>
+                <span>•</span>
+                <span>Prioritas: FIFO Menunggu</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Role & Screen Switching Script -->
+    <script>
+        const facilitiesData = {
+            'fac-01': {
+                id: 'fac-01',
+                name: 'Ruang Kuliah Teori A-101',
+                type: 'kelas',
+                loc: 'Gedung A (Utama)',
+                cap: '45 Orang',
+                status: 'dapat_digunakan',
+                desc: 'Ruang kuliah ber-AC dilengkapi proyektor laser resolusi tinggi, whiteboard magnetik, 45 kursi kuliah ergonomis, serta koneksi internet kampus.',
+                photo: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80'
+            },
+            'fac-02': {
+                id: 'fac-02',
+                name: 'Laboratorium Komputer 301',
+                type: 'laboratorium',
+                loc: 'Gedung B (Laboratorium)',
+                cap: '40 Orang',
+                status: 'dapat_digunakan',
+                desc: 'Laboratorium komputasi tingkat lanjut dengan 40 PC workstation berspesifikasi GPU tinggi, LAN Gigabit, AC sentral, dan sistem audio terpadu.',
+                photo: 'https://images.unsplash.com/photo-1562774053-701939374585?w=800&auto=format&fit=crop&q=80'
+            },
+            'fac-04': {
+                id: 'fac-04',
+                name: 'Proyektor Cinema & Sound Portabel',
+                type: 'alat',
+                loc: 'Gedung B (Laboratorium)',
+                cap: '— (Unit Alat)',
+                status: 'dalam_perbaikan',
+                desc: 'Paket proyektor 5.000 lumens dan sistem pengeras suara wireless yang menetap di ruang audiovisual untuk kegiatan presentasi khusus.',
+                photo: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=800&auto=format&fit=crop&q=80'
+            }
+        };
+
+        let currentActiveFacilityId = 'fac-01';
+        let currentRole = 'pengunjung';
+
+        const views = {
+            'pengunjung': [
+                { id: 'pengunjung-home', label: '1. Katalog Fasilitas & Filter' },
+                { id: 'pengunjung-detail', label: '2. Detail Fasilitas' },
+                { id: 'pengunjung-form', label: '3. Form Reservasi (Cek Slot)' },
+                { id: 'auth-login', label: '4. Login Civitas' }
+            ],
+            'pengguna': [
+                { id: 'pengunjung-home', label: '1. Katalog Fasilitas & Filter' },
+                { id: 'pengunjung-detail', label: '2. Detail Fasilitas' },
+                { id: 'pengunjung-form', label: '3. Form Reservasi' },
+                { id: 'pengguna-reservations', label: '4. Riwayat Reservasi & Pembatalan' },
+                { id: 'pengguna-reports', label: '5. Riwayat & Buat Laporan' }
+            ],
+            'petugas': [
+                { id: 'petugas-queue', label: '1. Antrian Reservasi Aktif' },
+                { id: 'petugas-reports', label: '2. Laporan Kerusakan Aktif' },
+                { id: 'petugas-maintenance', label: '3. Dalam Perbaikan' }
+            ],
+            'admin': [
+                { id: 'admin-facilities', label: '1. Kelola Master Fasilitas' },
+                { id: 'admin-accounts', label: '2. Kelola Akun Civitas' },
+                { id: 'admin-recaps', label: '3. Rekapitulasi & Ekspor' }
+            ]
+        };
+
+        function switchRole(role) {
+            currentRole = role;
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.className = 'role-btn px-3 py-1 rounded-[6px] text-xs font-medium text-[#888888] hover:text-white transition';
+            });
+            const activeBtn = document.getElementById('tab-' + role);
+            if (activeBtn) {
+                activeBtn.className = 'role-btn px-3 py-1 rounded-[6px] text-xs font-medium transition bg-white text-black';
+            }
+
+            // Role indicator in helper bar
+            const roleLabels = {
+                'pengunjung': '1. Pengunjung (Publik Tanpa Login)',
+                'pengguna': '2. Pengguna (Mahasiswa/Dosen)',
+                'petugas': '3. Petugas Operasional (Sarpras)',
+                'admin': '4. Administrator Sistem'
+            };
+            document.getElementById('roleIndicator').innerText = roleLabels[role];
+
+            // Header auth button adjustment
+            const authAction = document.getElementById('headerAuthAction');
+            if (role === 'pengunjung') {
+                authAction.innerHTML = '<button onclick="showScreen(\'auth-login\')" class="bg-white hover:bg-[#e6e6e6] text-black text-xs font-medium px-3.5 py-1.5 rounded-[6px] transition active:scale-95">Masuk Akun</button>';
+            } else {
+                authAction.innerHTML = '<div class="flex items-center gap-2 text-xs font-mono"><span class="text-[#50e3c2]">• Sesi Aktif</span><button onclick="switchRole(\'pengunjung\')" class="text-[#888888] hover:text-white underline">Keluar</button></div>';
+            }
+
+            // Sub-nav buttons
+            const nav = document.getElementById('viewNavLinks');
+            nav.innerHTML = '';
+            views[role].forEach((v, idx) => {
+                const b = document.createElement('button');
+                b.className = 'px-3 py-1 rounded-[6px] text-xs font-medium transition border ' + (idx === 0 ? 'bg-white text-black border-white' : 'bg-[#1a1a1a] text-[#a1a1a1] border-[#333333] hover:border-[#555555] hover:text-white');
+                b.innerText = v.label;
+                b.onclick = () => {
+                    document.querySelectorAll('#viewNavLinks button').forEach(el => {
+                        el.className = 'px-3 py-1 rounded-[6px] text-xs font-medium text-[#a1a1a1] bg-[#1a1a1a] border border-[#333333] hover:border-[#555555] hover:text-white transition';
+                    });
+                    b.className = 'px-3 py-1 rounded-[6px] text-xs font-medium bg-white text-black border border-white transition';
+                    showScreen(v.id);
+                };
+                nav.appendChild(b);
+            });
+
+            // Adjust form behavior depending on role
+            adjustFormForRole();
+
+            showScreen(views[role][0].id);
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen-view').forEach(s => s.classList.add('hidden'));
+            const target = document.getElementById('screen-' + screenId);
+            if (target) target.classList.remove('hidden');
+
+            adjustFormForRole();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function adjustFormForRole() {
+            const purposeContainer = document.getElementById('simPurposeContainer');
+            const guestCTA = document.getElementById('simGuestLoginCTA');
+            
+            if (currentRole === 'pengunjung') {
+                if (purposeContainer) purposeContainer.classList.add('hidden');
+            } else if (currentRole === 'pengguna') {
+                if (guestCTA) guestCTA.classList.add('hidden');
+            }
+        }
+
+        function openDetailFacility(facId) {
+            const fac = facilitiesData[facId] || facilitiesData['fac-01'];
+            currentActiveFacilityId = facId;
+
+            document.getElementById('detailPhoto').src = fac.photo;
+            document.getElementById('detailTypeBadge').innerText = fac.type;
+            document.getElementById('detailTitle').innerText = fac.name + '.';
+            document.getElementById('detailType').innerText = fac.type;
+            document.getElementById('detailLoc').innerText = fac.loc;
+            document.getElementById('detailCap').innerText = fac.cap;
+            document.getElementById('detailDesc').innerText = fac.desc;
+
+            const badge = document.getElementById('detailStatusBadge');
+            const notice = document.getElementById('detailNoticeBox');
+            const actionBtn = document.getElementById('detailActionBtnContainer');
+
+            if (fac.status === 'dapat_digunakan') {
+                badge.innerHTML = '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] text-xs font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]"><span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>Status: Dapat Digunakan</span>';
+                notice.innerHTML = '<div class="p-3.5 rounded-[6px] bg-[#002b11] border border-[#005522] text-xs text-[#50e3c2] space-y-1"><strong class="font-medium text-white block">Siap Digunakan:</strong><p class="leading-relaxed">Fasilitas beroperasi normal dan siap menerima permohonan reservasi baru.</p></div>';
+                actionBtn.innerHTML = '<button onclick="startReservationFromDetail()" class="w-full bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs py-2.5 rounded-[6px] transition active:scale-95 shadow-none">Pilih Jadwal & Reservasi →</button>';
+            } else {
+                badge.innerHTML = '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] text-xs font-mono text-[#ff453a] bg-[#2b0000] border border-[#550000]"><span class="w-1.5 h-1.5 rounded-full bg-[#ff453a] animate-pulse"></span>Status: Dalam Perbaikan</span>';
+                notice.innerHTML = '<div class="p-3.5 rounded-[6px] bg-[#2b0000] border border-[#550000] text-xs text-[#ff453a] space-y-1"><strong class="font-medium text-white block">Dalam Perbaikan Fisik:</strong><p class="leading-relaxed">Fasilitas sedang ditangani oleh Petugas Sarpras sehingga reservasi dinonaktifkan sementara.</p></div>';
+                actionBtn.innerHTML = '<button disabled class="w-full bg-[#1a1a1a] text-[#666666] border border-[#333333] font-medium text-xs py-2.5 rounded-[6px] cursor-not-allowed">Reservasi Tidak Tersedia</button>';
+            }
+
+            if (currentRole === 'pengguna') {
+                actionBtn.innerHTML += '<button onclick="openCreateReportModal(\'' + fac.name.replace(/'/g, "\\'") + '\')" class="w-full mt-2 bg-[#171717] hover:bg-[#222222] text-[#ededed] border border-[#333333] hover:border-[#555555] font-medium text-xs py-2 rounded-[6px] transition active:scale-95 flex items-center justify-center gap-1.5"><span>⚠</span> Laporkan Masalah / Kerusakan</button>';
+            }
+
+            showScreen('pengunjung-detail');
+        }
+
+        function startReservationFromDetail() {
+            const fac = facilitiesData[currentActiveFacilityId] || facilitiesData['fac-01'];
+            document.getElementById('formFacilityTitle').innerText = fac.name + '.';
+            resetSimVerification();
+            showScreen('pengunjung-form');
+        }
+
+        function resetSimVerification() {
+            const box = document.getElementById('simResultBox');
+            if (box) {
+                box.classList.add('hidden');
+                box.innerHTML = '';
+            }
+            const guestCTA = document.getElementById('simGuestLoginCTA');
+            if (guestCTA) guestCTA.classList.add('hidden');
+
+            const purposeCont = document.getElementById('simPurposeContainer');
+            if (purposeCont) purposeCont.classList.add('hidden');
+        }
+
+        function runSimSlotCheck() {
+            const start = document.getElementById('simStart').value;
+            const end = document.getElementById('simEnd').value;
+            const box = document.getElementById('simResultBox');
+            box.classList.remove('hidden');
+
+            if (start >= end) {
+                box.className = 'p-3.5 rounded-[6px] bg-[#2b0000] border border-[#550000] text-xs text-[#ff453a] block';
+                box.innerHTML = '<strong class="font-semibold text-white block mb-0.5">✗ Format Waktu Tidak Valid</strong> Waktu selesai harus lebih besar daripada waktu mulai (minimal 1 slot 30 menit).';
+                return;
+            }
+
+            if (start === '11:00') {
+                box.className = 'p-3.5 rounded-[6px] bg-[#2b0000] border border-[#550000] text-xs text-[#ff453a] block';
+                box.innerHTML = '<strong class="font-semibold text-white block mb-0.5">✗ Jadwal Tidak Tersedia (Bentrok)!</strong> Bentrok dengan jadwal perkuliahan terkonfirmasi. Silakan pilih slot jam lain.';
+                resetSimVerification();
+                box.classList.remove('hidden');
+            } else {
+                box.className = 'p-3.5 rounded-[6px] bg-[#002b11] border border-[#005522] text-xs text-[#50e3c2] block';
+                box.innerHTML = '<strong class="font-semibold text-white block mb-0.5">✓ Jadwal Tersedia!</strong> Rentang waktu ' + start + ' - ' + end + ' WIB bebas dari bentrokan jadwal lain.';
+
+                if (currentRole === 'pengunjung') {
+                    const guestCTA = document.getElementById('simGuestLoginCTA');
+                    if (guestCTA) guestCTA.classList.remove('hidden');
+                } else if (currentRole === 'pengguna') {
+                    const purposeCont = document.getElementById('simPurposeContainer');
+                    if (purposeCont) purposeCont.classList.remove('hidden');
+                }
+            }
+        }
+
+        function saveSimDraftAndLogin() {
+            showScreen('auth-login');
+        }
+
+        function doSimLogin() {
+            switchRole('pengguna');
+            showScreen('pengunjung-form');
+            runSimSlotCheck();
+        }
+
+        function submitSimReservation() {
+            const purpose = document.getElementById('simPurposeText').value.trim();
+            if (!purpose) {
+                alert('Tujuan penggunaan wajib diisi!');
+                return;
+            }
+            alert('Reservasi berhasil diajukan dengan status: Menunggu! Anda dialihkan ke Riwayat Reservasi.');
+            switchRole('pengguna');
+            showScreen('pengguna-reservations');
+        }
+
+        function filterDemoCards() {
+            const q = document.getElementById('demoSearch').value.toLowerCase();
+            const t = document.getElementById('demoType').value;
+            const l = document.getElementById('demoLoc').value;
+            const c = parseInt(document.getElementById('demoCap').value) || 0;
+
+            let visibleCount = 0;
+            document.querySelectorAll('.demo-card').forEach(card => {
+                const name = card.dataset.name;
+                const type = card.dataset.type;
+                const loc = card.dataset.loc;
+                const cap = parseInt(card.dataset.cap) || 0;
+
+                const matchQ = !q || name.includes(q);
+                const matchT = !t || type === t;
+                const matchL = !l || loc.includes(l);
+                // null capacity excluded if capacity filter chosen (KEPUTUSAN-GLOBAL.md §3.5)
+                const matchC = c === 0 ? true : (cap > 0 && cap >= c);
+
+                const show = (matchQ && matchT && matchL && matchC);
+                card.style.display = show ? 'flex' : 'none';
+                if (show) visibleCount++;
+            });
+
+            // Aesthetic Empty Slots Handling
+            const empty1 = document.getElementById('demoEmptyCell1');
+            const empty2 = document.getElementById('demoEmptyCell2');
+            const noRes = document.getElementById('demoNoResult');
+
+            if (empty1) empty1.classList.add('hidden');
+            if (empty2) empty2.classList.add('hidden');
+            if (noRes) noRes.classList.add('hidden');
+
+            if (visibleCount === 0) {
+                if (noRes) noRes.classList.remove('hidden');
+            } else if (window.innerWidth >= 1024) {
+                if (visibleCount % 3 === 2) {
+                    if (empty1) empty1.classList.remove('hidden');
+                } else if (visibleCount % 3 === 1) {
+                    if (empty1) empty1.classList.remove('hidden');
+                    if (empty2) empty2.classList.remove('hidden');
+                }
+            } else if (window.innerWidth >= 768) {
+                if (visibleCount % 2 === 1) {
+                    if (empty1) empty1.classList.remove('hidden');
+                }
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            if (typeof filterDemoCards === 'function') filterDemoCards();
+        });
+
+        // Modal Handlers
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function openCancelModal(resNum) {
+            document.getElementById('modalCancelReservation').classList.remove('hidden');
+        }
+
+        function submitCancelReservation() {
+            const reason = document.getElementById('cancelReasonInput').value.trim();
+            if (!reason) {
+                alert('Alasan pembatalan wajib diisi!');
+                return;
+            }
+            closeModal('modalCancelReservation');
+            alert('Reservasi berhasil dibatalkan mandiri dengan status: Dibatalkan oleh pengguna.');
+        }
+
+        function openRejectModal(resNum) {
+            document.getElementById('modalRejectReservation').classList.remove('hidden');
+        }
+
+        function submitRejectReservation() {
+            const reason = document.getElementById('rejectReasonInput').value.trim();
+            if (!reason) {
+                alert('Alasan penolakan wajib diisi!');
+                return;
+            }
+            closeModal('modalRejectReservation');
+            alert('Reservasi ditolak oleh Petugas. Status menjadi Ditolak dan bersifat final.');
+        }
+
+        function approveReservation(resNum) {
+            alert('Reservasi disetujui! Pengajuan lain yang bertabrakan pada rentang waktu yang sama otomatis ditolak oleh sistem.');
+        }
+
+        function processReport(repNum) {
+            alert('Laporan diubah menjadi: Diproses. Anda dapat melakukan perbaikan sarana.');
+        }
+
+        function restoreFacilityStatus(facName) {
+            alert('Status operasional ' + facName + ' berhasil dikembalikan menjadi: Dapat Digunakan.');
+        }
+
+        function openCreateAccountModal() {
+            document.getElementById('modalCreateAccount').classList.remove('hidden');
+        }
+
+        function submitCreateAccount() {
+            const name = document.getElementById('newAccName').value.trim();
+            const email = document.getElementById('newAccEmail').value.trim();
+            if (!name || !email) {
+                alert('Nama dan Email wajib diisi!');
+                return;
+            }
+            closeModal('modalCreateAccount');
+            document.getElementById('modalPasswordCreated').classList.remove('hidden');
+        }
+
+        function resetPasswordModal(userName) {
+            alert('Kata sandi baru berhasil digenerate dan direset untuk akun: ' + userName);
+        }
+
+        function openCreateReportModal(facName) {
+            document.getElementById('reportFacilityName').value = facName || 'Ruang Kuliah Teori A-101';
+            document.getElementById('reportDescInput').value = '';
+            document.getElementById('modalCreateReport').classList.remove('hidden');
+        }
+
+        function submitCreateReport() {
+            const desc = document.getElementById('reportDescInput').value.trim();
+            if (!desc) {
+                alert('Deskripsi masalah wajib diisi!');
+                return;
+            }
+            closeModal('modalCreateReport');
+            alert('Laporan berhasil dikirim dengan status: Baru (SRS FR-PGN-12/13). Petugas Sarpras akan segera memproses laporan Anda.');
+            switchRole('pengguna');
+            showScreen('pengguna-reports');
+        }
+
+        function renderRecapTable() {
+            const metric = document.getElementById('recapMetric').value;
+            const group = document.getElementById('recapGroup').value;
+
+            document.getElementById('recapHeaderEntity').innerText = group === 'fasilitas' ? 'Fasilitas' : 'Lokasi Gedung';
+            if (metric === 'okupansi') {
+                document.getElementById('recapHeaderCol1').innerText = 'Durasi Selesai';
+                document.getElementById('recapHeaderCol2').innerText = 'Slot Jam Operasional';
+                document.getElementById('recapHeaderResult').innerText = 'Tingkat Okupansi (%)';
+                document.getElementById('recapTableBody').innerHTML = `
+                    <tr class="hover:bg-[#171717]">
+                        <td class="p-4 font-sans font-medium text-white">${group === 'fasilitas' ? 'Laboratorium Komputer 301' : 'Gedung A (Utama)'}</td>
+                        <td class="p-4 text-white">208 Jam</td>
+                        <td class="p-4 text-[#888888]">390 Jam</td>
+                        <td class="p-4 text-[#50e3c2] font-semibold">53.3%</td>
+                    </tr>
+                `;
+            } else {
+                document.getElementById('recapHeaderCol1').innerText = 'Kejadian Perbaikan';
+                document.getElementById('recapHeaderCol2').innerText = 'Laporan Sumber';
+                document.getElementById('recapHeaderResult').innerText = 'Frekuensi Kerusakan';
+                document.getElementById('recapTableBody').innerHTML = `
+                    <tr class="hover:bg-[#171717]">
+                        <td class="p-4 font-sans font-medium text-white">${group === 'fasilitas' ? 'Proyektor Cinema & Sound' : 'Gedung B (Laboratorium)'}</td>
+                        <td class="p-4 text-white">1 Kejadian</td>
+                        <td class="p-4 text-[#888888]">1 Laporan</td>
+                        <td class="p-4 text-[#f5a623] font-semibold">1 Kali / Bulan</td>
+                    </tr>
+                `;
+            }
+        }
+
+        // ==========================================
+        // CUSTOM UI HANDLERS (CALENDAR, DROPDOWN, CAPACITY SLIDER)
+        // ==========================================
+
+        // 1. Calendar State & Logic
+        let calCurrentYear = 2026;
+        let calCurrentMonth = 8; // September (0-indexed)
+        let calSelectedDate = '2026-09-24';
+
+        const MONTH_NAMES = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+
+        function initCalendar() {
+            renderCalendarGrid();
+            updateDateDisplay();
+        }
+
+        function updateDateDisplay() {
+            const input = document.getElementById('simDate');
+            const display = document.getElementById('datePickerSelectedText');
+            if (!calSelectedDate) {
+                if (display) display.innerText = 'Pilih tanggal penggunaan...';
+                if (input) input.value = '';
+            } else {
+                const parts = calSelectedDate.split('-');
+                const y = parts[0];
+                const m = parseInt(parts[1], 10) - 1;
+                const d = parseInt(parts[2], 10);
+                if (display) display.innerText = d + ' ' + MONTH_NAMES[m].substr(0, 3) + ' ' + y;
+                if (input) input.value = calSelectedDate;
+            }
+        }
+
+        function toggleDatePicker() {
+            const popup = document.getElementById('calendarPopup');
+            const isOpen = !popup.classList.contains('hidden');
+            closeAllPopups();
+            if (!isOpen) {
+                popup.classList.remove('hidden');
+                renderCalendarGrid();
+            }
+        }
+
+        function closeDatePicker() {
+            const popup = document.getElementById('calendarPopup');
+            if (popup) popup.classList.add('hidden');
+        }
+
+        function changeCalMonth(step) {
+            calCurrentMonth += step;
+            if (calCurrentMonth < 0) {
+                calCurrentMonth = 11;
+                calCurrentYear--;
+            } else if (calCurrentMonth > 11) {
+                calCurrentMonth = 0;
+                calCurrentYear++;
+            }
+            renderCalendarGrid();
+        }
+
+        function renderCalendarGrid() {
+            const monthYearEl = document.getElementById('calMonthYear');
+            if (!monthYearEl) return;
+            monthYearEl.innerText = MONTH_NAMES[calCurrentMonth] + ' ' + calCurrentYear;
+
+            const grid = document.getElementById('calDaysGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const firstDay = new Date(calCurrentYear, calCurrentMonth, 1).getDay();
+            const offset = firstDay === 0 ? 6 : firstDay - 1; // Mo=0 ... Su=6
+
+            const prevMonthDays = new Date(calCurrentYear, calCurrentMonth, 0).getDate();
+            for (let i = offset - 1; i >= 0; i--) {
+                const cell = document.createElement('div');
+                cell.className = 'py-1.5 text-center text-[#444444] font-mono text-[11px] cursor-not-allowed select-none';
+                cell.innerText = prevMonthDays - i;
+                grid.appendChild(cell);
+            }
+
+            const totalDays = new Date(calCurrentYear, calCurrentMonth + 1, 0).getDate();
+            const today = new Date();
+            const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
+            for (let d = 1; d <= totalDays; d++) {
+                const dStr = String(d).padStart(2, '0');
+                const mStr = String(calCurrentMonth + 1).padStart(2, '0');
+                const dateKey = calCurrentYear + '-' + mStr + '-' + dStr;
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.innerText = d;
+                btn.className = 'py-1.5 rounded-[4px] font-mono text-[11px] transition text-center flex items-center justify-center';
+
+                const isSelected = dateKey === calSelectedDate;
+                const isToday = dateKey === todayStr;
+
+                if (isSelected) {
+                    btn.className += ' bg-white text-black font-semibold shadow-sm';
+                } else if (isToday) {
+                    btn.className += ' text-white border border-[#555555] bg-[#1a1a1a] hover:bg-[#262626]';
+                } else {
+                    btn.className += ' text-[#cccccc] hover:bg-[#222222] hover:text-white';
+                }
+
+                btn.onclick = () => {
+                    selectDate(dateKey);
+                };
+                grid.appendChild(btn);
+            }
+        }
+
+        function selectDate(dateStr) {
+            calSelectedDate = dateStr;
+            updateDateDisplay();
+            closeDatePicker();
+            resetSimVerification();
+        }
+
+        function clearDateSelection() {
+            calSelectedDate = '';
+            updateDateDisplay();
+            closeDatePicker();
+            resetSimVerification();
+        }
+
+        function selectTodayDate() {
+            const today = new Date();
+            const dStr = String(today.getDate()).padStart(2, '0');
+            const mStr = String(today.getMonth() + 1).padStart(2, '0');
+            calSelectedDate = today.getFullYear() + '-' + mStr + '-' + dStr;
+            calCurrentMonth = today.getMonth();
+            calCurrentYear = today.getFullYear();
+            updateDateDisplay();
+            closeDatePicker();
+            resetSimVerification();
+        }
+
+        // 2. Custom Dropdown Select Logic
+        function toggleCustomDropdown(id) {
+            const menu = document.getElementById(id + 'Menu');
+            const chevron = document.getElementById(id + 'Chevron');
+            const isOpen = menu && !menu.classList.contains('hidden');
+
+            closeAllPopups();
+
+            if (!isOpen && menu) {
+                menu.classList.remove('hidden');
+                if (chevron) chevron.classList.add('rotate-180');
+
+                // Reset search and auto-focus
+                const searchInput = menu.querySelector('input[type="text"]');
+                if (searchInput) {
+                    searchInput.value = '';
+                    filterDropdownOptions(searchInput, id + 'Menu');
+                    setTimeout(() => searchInput.focus(), 50);
+                }
+            }
+        }
+
+        function filterDropdownOptions(inputEl, menuId) {
+            const q = inputEl.value.toLowerCase().trim();
+            const menu = document.getElementById(menuId);
+            if (!menu) return;
+            menu.querySelectorAll('.dropdown-item').forEach(item => {
+                const text = item.innerText.toLowerCase();
+                item.style.display = text.includes(q) ? 'flex' : 'none';
+            });
+        }
+
+        function selectCustomDropdown(id, val, label, isSimulatedError) {
+            const input = document.getElementById(id);
+            const labelEl = document.getElementById(id + 'Label');
+            const menu = document.getElementById(id + 'Menu');
+            const chevron = document.getElementById(id + 'Chevron');
+
+            if (input) input.value = val;
+            if (labelEl) {
+                labelEl.innerText = label;
+                if (isSimulatedError) {
+                    labelEl.classList.add('text-[#ff453a]');
+                } else {
+                    labelEl.classList.remove('text-[#ff453a]');
+                }
+            }
+
+            if (menu) {
+                menu.querySelectorAll('.dropdown-item').forEach(item => {
+                    if (item.dataset.value === val) {
+                        item.classList.add('bg-[#1f1f1f]', 'text-white', 'font-medium');
+                        const check = item.querySelector('.check-icon');
+                        if (check) check.classList.remove('hidden');
+                    } else {
+                        item.classList.remove('bg-[#1f1f1f]', 'text-white', 'font-medium');
+                        const check = item.querySelector('.check-icon');
+                        if (check) check.classList.add('hidden');
+                    }
+                });
+                menu.classList.add('hidden');
+            }
+            if (chevron) chevron.classList.remove('rotate-180');
+
+            if (id === 'demoType' || id === 'demoLoc') {
+                filterDemoCards();
+            } else if (id === 'simStart' || id === 'simEnd') {
+                resetSimVerification();
+            } else if (id === 'recapMetric' || id === 'recapGroup' || id === 'recapMonth' || id === 'recapYear') {
+                renderRecapTable();
+            }
+        }
+
+        // 3. Custom Capacity Form + Popup Slider Logic
+        function toggleCapacityPopup() {
+            const popup = document.getElementById('capacityPopup');
+            const isOpen = popup && !popup.classList.contains('hidden');
+            closeAllPopups();
+            if (!isOpen && popup) {
+                popup.classList.remove('hidden');
+            }
+        }
+
+        function openCapacityPopup() {
+            closeAllPopups();
+            const popup = document.getElementById('capacityPopup');
+            if (popup) popup.classList.remove('hidden');
+        }
+
+        function closeCapacityPopup() {
+            const popup = document.getElementById('capacityPopup');
+            if (popup) popup.classList.add('hidden');
+        }
+
+        function onManualCapacityInput(val) {
+            let num = parseInt(val, 10);
+            if (isNaN(num) || num < 0) num = 0;
+
+            document.getElementById('demoCap').value = num;
+            const slider = document.getElementById('demoCapSlider');
+            if (slider) slider.value = Math.min(num, 150);
+            updateCapacityUI(num);
+            filterDemoCards();
+        }
+
+        function onSliderCapacityChange(val) {
+            const num = parseInt(val, 10) || 0;
+            document.getElementById('demoCap').value = num;
+            const input = document.getElementById('demoCapInput');
+            if (input) input.value = num === 0 ? '' : num;
+            updateCapacityUI(num);
+            filterDemoCards();
+        }
+
+        function setCapacityPreset(num) {
+            document.getElementById('demoCap').value = num;
+            const slider = document.getElementById('demoCapSlider');
+            if (slider) slider.value = Math.min(num, 150);
+            const input = document.getElementById('demoCapInput');
+            if (input) input.value = num === 0 ? '' : num;
+            updateCapacityUI(num);
+            filterDemoCards();
+        }
+
+        function updateCapacityUI(num) {
+            const display = document.getElementById('sliderCapDisplay');
+            const badge = document.getElementById('capacityValueBadge');
+            const badgeNum = document.getElementById('capacityValueBadgeNum');
+
+            if (display) {
+                display.innerText = num === 0 ? 'Semua (0 Orang)' : '≥ ' + num + ' Orang';
+            }
+            if (badge && badgeNum) {
+                if (num > 0) {
+                    badge.classList.remove('hidden');
+                    badgeNum.innerText = num;
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+        }
+
+        function closeAllPopups() {
+            const cal = document.getElementById('calendarPopup');
+            if (cal) cal.classList.add('hidden');
+
+            const cap = document.getElementById('capacityPopup');
+            if (cap) cap.classList.add('hidden');
+
+            document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+            document.querySelectorAll('.custom-dropdown-chevron').forEach(c => c.classList.remove('rotate-180'));
+        }
+
+        // Global Click Outside Listener
+        document.addEventListener('click', function(e) {
+            const inDropdown = e.target.closest('.custom-dropdown');
+            const inDatePicker = e.target.closest('.custom-datepicker');
+            const inCapacity = e.target.closest('#capacityFilterContainer');
+
+            if (!inDropdown && !inDatePicker && !inCapacity) {
+                closeAllPopups();
+            }
+        });
+
+        function setDemoViewMode(mode) {
+            const grid = document.getElementById('demoCardsContainer');
+            const btnGrid = document.getElementById('demoBtnViewGrid');
+            const btnList = document.getElementById('demoBtnViewList');
+            if (!grid) return;
+
+            if (mode === 'list') {
+                grid.classList.add('is-list-view');
+                grid.classList.remove('md:grid-cols-2', 'lg:grid-cols-3');
+                grid.classList.add('grid-cols-1');
+                
+                if (btnList) btnList.className = 'px-2.5 py-1 rounded-[4px] font-mono text-[11px] flex items-center gap-1.5 transition text-white bg-[#222222] border border-[#444444]';
+                if (btnGrid) btnGrid.className = 'px-2.5 py-1 rounded-[4px] font-mono text-[11px] flex items-center gap-1.5 transition text-[#888888] hover:text-white';
+            } else {
+                grid.classList.remove('is-list-view');
+                grid.classList.add('md:grid-cols-2', 'lg:grid-cols-3');
+                
+                if (btnGrid) btnGrid.className = 'px-2.5 py-1 rounded-[4px] font-mono text-[11px] flex items-center gap-1.5 transition text-white bg-[#222222] border border-[#444444]';
+                if (btnList) btnList.className = 'px-2.5 py-1 rounded-[4px] font-mono text-[11px] flex items-center gap-1.5 transition text-[#888888] hover:text-white';
+            }
+        }
+
+        // Initialize simulator with Pengunjung and Calendar
+        initCalendar();
+        switchRole('pengunjung');
+    </script>
+</body>
+</html>

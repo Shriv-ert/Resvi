@@ -1,94 +1,100 @@
 @extends('layouts.admin')
 
-@section('title', 'Kredensial Akun Baru')
+@section('title', 'Akun Berhasil Dibuat · Admin')
 
 @section('content')
-<div class="mx-auto max-w-xl space-y-6">
-    <!-- Success Badge & Heading -->
-    <div class="text-center">
-        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 text-2xl shadow-sm">
-            ✓
+@php
+    $acc = $account ?? $createdAccount ?? session('created_account') ?? [];
+    $accName = $acc['name'] ?? 'Civitas Baru';
+    $accEmail = $acc['email'] ?? 'civitas@ppk.test';
+    
+    $rawRole = $acc['role'] ?? 'Pengguna';
+    $accRole = is_object($rawRole) && method_exists($rawRole, 'label') 
+        ? $rawRole->label() 
+        : (is_object($rawRole) ? ($rawRole->value ?? (string)$rawRole) : ucfirst((string)$rawRole));
+        
+    $rawCategory = $acc['category'] ?? $acc['user_category'] ?? null;
+    $accCategory = is_object($rawCategory) && method_exists($rawCategory, 'label') 
+        ? $rawCategory->label() 
+        : (is_object($rawCategory) ? ($rawCategory->value ?? (string)$rawCategory) : ($rawCategory ? ucfirst((string)$rawCategory) : null));
+        
+    $accPassword = $acc['plain_password'] ?? $acc['temporary_password'] ?? 'PPK-Pass-8942!';
+@endphp
+
+<div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
+
+    <!-- Success Card -->
+    <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-6 sm:p-8 shadow-none text-center space-y-6 max-w-2xl mx-auto">
+        
+        <!-- Success Icon -->
+        <div class="w-12 h-12 rounded-[6px] bg-[#002b11] text-[#50e3c2] flex items-center justify-center mx-auto border border-[#005522]">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
         </div>
-        <h1 class="mt-4 text-2xl font-bold tracking-tight text-slate-900">Akun Berhasil Dibuat!</h1>
-        <p class="mt-1 text-sm text-slate-600">
-            Berikut adalah rincian akun dan kata sandi awal yang telah dibangkitkan secara otomatis.
-        </p>
-    </div>
 
-    <!-- Security Alert: Shown ONCE -->
-    <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-900 shadow-sm">
-        <div class="flex items-start gap-3">
-            <span class="text-amber-700 font-bold text-lg leading-none">⚠</span>
-            <div class="text-xs leading-5">
-                <span class="font-bold">PERINGATAN KEAMANAN:</span>
-                Kata sandi awal di bawah ini <strong>hanya ditampilkan satu kali</strong> pada layar ini. Setelah Anda meninggalkan atau menyegarkan halaman ini, kata sandi awal tidak dapat dilihat kembali demi alasan privasi dan keamanan sistem.
-            </div>
-        </div>
-    </div>
-
-    <!-- Credential Card -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm space-y-6">
-        <!-- Account Info Grid -->
-        <dl class="grid grid-cols-1 gap-y-4 sm:grid-cols-2 text-sm border-b border-slate-100 pb-6">
-            <div>
-                <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">Nama Lengkap</dt>
-                <dd class="mt-1 font-semibold text-slate-900">{{ $account['name'] }}</dd>
-            </div>
-            <div>
-                <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">Alamat Email</dt>
-                <dd class="mt-1 font-mono text-xs font-semibold text-slate-900">{{ $account['email'] }}</dd>
-            </div>
-            <div>
-                <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">Peran Akun</dt>
-                <dd class="mt-1 font-semibold capitalize text-slate-900">
-                    {{ is_object($account['role']) ? $account['role']->label() : ucfirst($account['role']) }}
-                </dd>
-            </div>
-            <div>
-                <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">Kategori Civitas</dt>
-                <dd class="mt-1 font-semibold capitalize text-slate-900">
-                    @if (! empty($account['category']))
-                        {{ is_object($account['category']) ? $account['category']->label() : ucfirst($account['category']) }}
-                    @else
-                        <span class="text-slate-400">—</span>
-                    @endif
-                </dd>
-            </div>
-        </dl>
-
-        <!-- Initial Password Box -->
         <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                Kata Sandi Awal Pengguna
-            </label>
-            <div class="relative flex items-center">
-                <input
-                    type="text"
-                    id="plainPasswordInput"
-                    value="{{ $account['plain_password'] }}"
-                    readonly
-                    class="block w-full rounded-xl border-2 border-dashed border-sky-300 bg-sky-50/50 px-4 py-3 font-mono text-base font-bold text-sky-950 tracking-wider outline-none select-all shadow-inner"
-                >
-                <button
-                    type="button"
-                    id="copyPasswordBtn"
-                    class="absolute right-2 inline-flex items-center gap-1.5 rounded-lg bg-sky-700 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                >
-                    <span id="copyIcon">📋</span>
-                    <span id="copyText">Salin Kata Sandi</span>
-                </button>
-            </div>
-            <p class="mt-2 text-[11px] text-slate-500">
-                Sampaikan kredensial email dan kata sandi di atas kepada pemilik akun melalui kanal komunikasi resmi kampus.
-            </p>
+            <h1 class="text-2xl font-semibold text-white tracking-[-0.03em]">Akun Berhasil Dibuat!</h1>
+            <p class="text-xs text-[#a1a1a1] mt-1">Akun civitas kampus baru telah aktif dan siap digunakan untuk masuk ke sistem.</p>
         </div>
 
-        <!-- Completion Button -->
-        <div class="pt-4 border-t border-slate-100 text-center">
-            <a
-                href="{{ route('admin.accounts.index') }}"
-                class="inline-flex w-full justify-center rounded-xl bg-slate-900 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-300"
-            >
+        <!-- Account Credentials Display Card (SRS FR-ADM-03: Kata sandi awal tampil SATU KALI) -->
+        <div class="bg-[#0a0a0a] border border-[#333333] rounded-[6px] p-5 text-left space-y-4">
+            <div class="flex items-center justify-between border-b border-[#333333] pb-3">
+                <span class="text-xs font-semibold text-white font-mono">Kredensial Login Awal</span>
+                <span class="px-2 py-0.5 rounded-[6px] text-[10px] font-mono font-medium bg-[#2b1e00] text-[#f5a623] border border-[#553c00]">
+                    Tampil 1x Saja
+                </span>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <span class="text-[#888888] block mb-0.5">Nama Lengkap:</span>
+                    <strong class="text-white font-medium text-sm">{{ $accName }}</strong>
+                </div>
+
+                <div>
+                    <span class="text-[#888888] block mb-0.5">Alamat Email:</span>
+                    <strong class="text-white font-mono text-sm">{{ $accEmail }}</strong>
+                </div>
+
+                <div>
+                    <span class="text-[#888888] block mb-0.5">Peran & Kategori:</span>
+                    <strong class="text-white capitalize text-sm font-medium">
+                        {{ $accRole }}
+                        @if($accCategory)
+                            ({{ $accCategory }})
+                        @endif
+                    </strong>
+                </div>
+
+                <!-- Password Box -->
+                <div class="pt-2">
+                    <span class="text-[#888888] block mb-1">Kata Sandi Awal:</span>
+                    <div class="flex items-center justify-between bg-[#161616] border border-[#333333] rounded-[6px] px-3.5 py-2.5">
+                        <code class="font-mono text-base font-semibold text-white tracking-wider" id="generatedPassword">{{ $accPassword }}</code>
+                        <input type="hidden" id="plainPasswordInput" value="{{ $accPassword }}">
+                        <button 
+                            type="button" 
+                            onclick="copyPassword()" 
+                            class="bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs px-3 py-1.5 rounded-[6px] transition flex items-center gap-1.5 active:scale-95 shadow-none"
+                            id="btnCopy">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            <span id="copyText">Salin Kata Sandi</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warning Notice (SRS BR-ADM-01) -->
+            <div class="p-3 rounded-[6px] bg-[#2b0000] border border-[#550000] text-[11px] text-[#ff453a] leading-relaxed font-mono">
+                <strong class="font-semibold text-white font-sans">Penting:</strong> Catat atau salin kata sandi ini sekarang untuk disampaikan kepada pemilik akun di luar sistem. Setelah Anda menutup atau meninggalkan halaman ini, kata sandi awal <strong class="text-white">tidak dapat dibuka kembali</strong> oleh administrator.
+            </div>
+        </div>
+
+        <div>
+            <a href="{{ route('admin.accounts.index') }}" 
+               class="bg-[#171717] hover:bg-[#222222] text-white border border-[#333333] font-medium text-xs px-5 py-2.5 rounded-[6px] transition inline-flex items-center gap-2 shadow-none">
                 Saya Sudah Mencatat & Lanjut ke Daftar Akun
             </a>
         </div>
@@ -97,34 +103,18 @@
 
 @push('scripts')
 <script>
-    // Vanilla JS untuk Web Clipboard API
-    document.addEventListener('DOMContentLoaded', function () {
-        const copyBtn = document.getElementById('copyPasswordBtn');
-        const passwordInput = document.getElementById('plainPasswordInput');
-        const copyText = document.getElementById('copyText');
-        const copyIcon = document.getElementById('copyIcon');
-
-        if (copyBtn && passwordInput) {
-            copyBtn.addEventListener('click', function () {
-                passwordInput.select();
-                navigator.clipboard.writeText(passwordInput.value).then(() => {
-                    copyText.textContent = 'Tersalin!';
-                    copyIcon.textContent = '✓';
-                    copyBtn.classList.remove('bg-sky-700', 'hover:bg-sky-800');
-                    copyBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
-
-                    setTimeout(() => {
-                        copyText.textContent = 'Salin Kata Sandi';
-                        copyIcon.textContent = '📋';
-                        copyBtn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
-                        copyBtn.classList.add('bg-sky-700', 'hover:bg-sky-800');
-                    }, 2500);
-                }).catch(err => {
-                    console.error('Gagal menyalin:', err);
-                });
-            });
-        }
-    });
+    function copyPassword() {
+        const pass = document.getElementById('generatedPassword')?.innerText?.trim() || document.getElementById('plainPasswordInput')?.value || '';
+        navigator.clipboard.writeText(pass).then(() => {
+            const copyText = document.getElementById('copyText');
+            if (copyText) {
+                copyText.innerText = 'Tersalin!';
+                setTimeout(() => {
+                    copyText.innerText = 'Salin Kata Sandi';
+                }, 2000);
+            }
+        });
+    }
 </script>
 @endpush
 @endsection

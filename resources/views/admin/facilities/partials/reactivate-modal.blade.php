@@ -1,122 +1,109 @@
-<!-- Modal Konfirmasi Reaktivasi Fasilitas -->
-<div
-    id="reactivateFacilityModal"
-    class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-sm transition-opacity duration-200"
-    aria-labelledby="modal-title-reactivate"
-    role="dialog"
-    aria-modal="true"
->
-    <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
-        <div
-            id="reactivateModalContent"
-            class="relative w-full max-w-lg transform overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-2xl transition-all sm:my-8 sm:p-8"
-        >
-            <!-- Modal Header -->
-            <div class="flex items-start justify-between border-b border-slate-100 pb-4">
-                <div class="flex items-center gap-3">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 text-lg shadow-sm">
-                        ↺
-                    </span>
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-900" id="modal-title-reactivate">Aktifkan Kembali Fasilitas</h3>
-                        <p class="text-xs text-slate-500">Kembalikan master data fasilitas ke katalog publik</p>
-                    </div>
+@php
+    $facilityId = is_array($facility) ? $facility['id'] : $facility->id;
+    $facilityName = is_array($facility) ? $facility['name'] : $facility->name;
+    $facilityType = is_array($facility) ? ($facility['type'] ?? '-') : (is_object($facility->type ?? null) && method_exists($facility->type, 'label') ? $facility->type->label() : ($facility->type ?? '-'));
+    $facilityLocation = is_array($facility) ? ($facility['location'] ?? '-') : ($facility->location ?? '-');
+    $opStatus = is_array($facility) 
+        ? ($facility['operational_status'] ?? '') 
+        : ($facility->operational_status?->value ?? ($facility->operational_status ?? ''));
+@endphp
+
+<!-- Modal Konfirmasi Aktifkan Kembali Fasilitas oleh Admin -->
+<div id="reactivateModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title-reactivate">
+    <div class="bg-[#111111] border border-[#333333] rounded-[8px] max-w-lg w-full p-6 shadow-2xl relative text-left">
+        
+        <div class="flex items-start justify-between pb-4 border-b border-[#222222]">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-[6px] bg-[#002b11] text-[#50e3c2] flex items-center justify-center border border-[#005522]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
-                <button
-                    type="button"
-                    class="close-reactivate-modal rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
-                    aria-label="Tutup"
-                >
-                    ✕
+                <div>
+                    <h3 class="text-sm font-semibold text-white tracking-tight" id="modal-title-reactivate">Aktifkan Kembali Data Master</h3>
+                    <p class="text-xs text-[#a1a1a1]">Fasilitas akan kembali tampil pada katalog publik</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeReactivateModal()" class="close-reactivate-modal text-[#888888] hover:text-white p-1 rounded-[6px] transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ route('admin.facilities.reactivate', is_array($facility) ? $facility['id'] : $facility) }}" class="space-y-4 pt-4">
+            @csrf
+            
+            <div class="p-3.5 rounded-[6px] bg-[#0a0a0a] border border-[#333333] text-xs text-[#a1a1a1] space-y-2">
+                <p><strong class="text-white">Fasilitas:</strong> {{ $facilityName }}</p>
+                <p class="text-[#666666] text-[11px]">{{ $facilityType }} — {{ $facilityLocation }}</p>
+                <div class="pt-2 border-t border-[#222222] text-[11px] leading-relaxed">
+                    @if ($opStatus === 'dalam_perbaikan')
+                        <p class="text-amber-400 font-medium">
+                            ⚠ Fasilitas ini saat ini berstatus operasional <strong>Dalam Perbaikan</strong>. Setelah diaktifkan kembali, fasilitas tetap belum dapat direservasi hingga Petugas mengubah status operasionalnya menjadi "Dapat Digunakan".
+                        </p>
+                    @else
+                        <p class="text-[#888888]">
+                            Pengaktifan kembali data master ini tidak mengubah status operasional fisik fasilitas. Fasilitas berstatus operasional <strong class="text-white">Dapat digunakan</strong> dan akan langsung siap menerima reservasi baru.
+                        </p>
+                    @endif
+                </div>
+            </div>
+
+            <div class="pt-3 flex items-center justify-end gap-2 border-t border-[#222222]">
+                <button 
+                    type="button" 
+                    onclick="closeReactivateModal()" 
+                    class="close-reactivate-modal bg-[#171717] hover:bg-[#222222] text-white border border-[#333333] font-medium text-xs px-3.5 py-1.5 rounded-[6px] transition">
+                    Batal
+                </button>
+                <button 
+                    type="submit" 
+                    class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs px-4 py-1.5 rounded-[6px] transition shadow-none">
+                    Konfirmasi Aktifkan Kembali
                 </button>
             </div>
-
-            <!-- Clarification Notice -->
-            <div class="my-4 rounded-xl border border-sky-200 bg-sky-50 p-4 text-xs text-sky-900 space-y-2 leading-relaxed">
-                <p class="font-bold">Preservasi Status Fisik Operasional:</p>
-                <p>
-                    Pengaktifan kembali data master ini <strong>tidak mengubah</strong> status operasional fasilitas.
-                </p>
-                @if ($facility->operational_status->value === 'dalam_perbaikan')
-                    <div class="rounded-lg bg-amber-100/70 p-2.5 text-amber-900 font-medium">
-                        ⚠ Fasilitas ini saat ini berstatus <strong>Dalam Perbaikan</strong>. Setelah diaktifkan kembali, fasilitas tetap belum dapat direservasi hingga Petugas mengubah status operasionalnya menjadi "Dapat Digunakan".
-                    </div>
-                @else
-                    <p class="text-sky-800">
-                        Fasilitas berstatus operasional <strong>Dapat digunakan</strong> dan akan langsung siap menerima reservasi baru.
-                    </p>
-                @endif
-            </div>
-
-            <!-- Facility Summary -->
-            <div class="mb-4 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
-                <p><strong>Fasilitas:</strong> {{ $facility->name }}</p>
-                <p class="text-slate-500 mt-0.5">{{ $facility->type->label() }} — {{ $facility->location }}</p>
-            </div>
-
-            <!-- Form Reactivate -->
-            <form method="POST" action="{{ route('admin.facilities.reactivate', $facility) }}">
-                @csrf
-
-                <!-- Modal Actions -->
-                <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
-                    <button
-                        type="button"
-                        class="close-reactivate-modal rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-                    >
-                        Batal
-                    </button>
-                    <button
-                        type="submit"
-                        class="rounded-xl bg-sky-700 px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-200"
-                    >
-                        Konfirmasi Aktifkan Kembali
-                    </button>
-                </div>
-            </form>
-        </div>
+        </form>
     </div>
 </div>
 
 <script>
+    function openReactivateModal() {
+        const modal = document.getElementById('reactivateModal') || document.getElementById('reactivateFacilityModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+    }
+
+    function closeReactivateModal() {
+        const modal = document.getElementById('reactivateModal') || document.getElementById('reactivateFacilityModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
-        const modal = document.getElementById('reactivateFacilityModal');
+        const modal = document.getElementById('reactivateModal') || document.getElementById('reactivateFacilityModal');
         const openBtn = document.getElementById('openReactivateModalBtn');
         const closeBtns = document.querySelectorAll('.close-reactivate-modal');
 
-        function openModal() {
-            if (modal) {
-                modal.classList.remove('hidden');
-                document.body.classList.add('overflow-hidden');
-            }
-        }
-
-        function closeModal() {
-            if (modal) {
-                modal.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-            }
-        }
-
         if (openBtn) {
-            openBtn.addEventListener('click', openModal);
+            openBtn.addEventListener('click', openReactivateModal);
         }
 
         closeBtns.forEach(btn => {
-            btn.addEventListener('click', closeModal);
+            btn.addEventListener('click', closeReactivateModal);
         });
 
         if (modal) {
             modal.addEventListener('click', function (e) {
                 if (e.target === modal) {
-                    closeModal();
+                    closeReactivateModal();
                 }
             });
         }
 
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
-                closeModal();
+                closeReactivateModal();
             }
         });
     });

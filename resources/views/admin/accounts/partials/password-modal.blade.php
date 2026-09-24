@@ -1,151 +1,137 @@
-<!-- Modal Reset Kata Sandi (Floating Window) -->
-<div
-    id="passwordResetModal"
-    class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-sm transition-opacity duration-200"
-    aria-labelledby="modal-title"
-    role="dialog"
-    aria-modal="true"
->
-    <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
-        <div
-            id="passwordModalContent"
-            class="relative w-full max-w-md transform overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-2xl transition-all sm:my-8 sm:p-8"
-        >
-            <!-- Modal Header -->
-            <div class="flex items-start justify-between border-b border-slate-100 pb-4">
-                <div class="flex items-center gap-3">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700 text-lg shadow-sm">
-                        🔑
-                    </span>
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-900" id="modal-title">Ganti Kata Sandi</h3>
-                        <p class="text-xs text-slate-500">Tetapkan kata sandi baru untuk akun ini</p>
-                    </div>
+@php
+    $uId = is_array($user) ? $user['id'] : $user->id;
+    $uName = is_array($user) ? $user['name'] : $user->name;
+    $uEmail = is_array($user) ? $user['email'] : $user->email;
+@endphp
+
+<!-- Modal Penetapan Kata Sandi Baru oleh Admin -->
+<div id="passwordModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title-password">
+    <div class="bg-[#111111] border border-[#333333] rounded-[8px] max-w-lg w-full p-6 shadow-2xl relative text-left">
+        
+        <div class="flex items-start justify-between pb-4 border-b border-[#222222]">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-[6px] bg-[#001733] text-[#0070f3] flex items-center justify-center border border-[#003b80]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
                 </div>
-                <button
-                    type="button"
-                    class="close-password-modal rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
-                    aria-label="Tutup"
-                >
-                    ✕
+                <div>
+                    <h3 class="text-sm font-semibold text-white tracking-tight" id="modal-title-password">Tetapkan Kata Sandi Baru</h3>
+                    <p class="text-xs text-[#a1a1a1]">Gunakan jika pemilik akun lupa kata sandi</p>
+                </div>
+            </div>
+            <button type="button" onclick="closePasswordModal()" class="close-password-modal text-[#888888] hover:text-white p-1 rounded-[6px] transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ route('admin.accounts.reset-password', is_array($user) ? $user['id'] : $user) }}" class="space-y-4 pt-4">
+            @csrf
+            
+            <div class="p-3 rounded-[6px] bg-[#0a0a0a] border border-[#222222] text-xs text-[#a1a1a1] font-mono">
+                <p>Nama Akun: <strong class="text-white font-sans font-medium">{{ $uName }}</strong></p>
+                <p class="mt-0.5">Email: <strong class="text-white">{{ $uEmail }}</strong></p>
+            </div>
+
+            <!-- New Password Input -->
+            <div class="space-y-1.5">
+                <label for="modal_password" class="block text-xs font-medium text-[#a1a1a1] uppercase tracking-wider">
+                    Kata Sandi Baru <span class="text-rose-500">*</span>
+                </label>
+                <input 
+                    type="password" 
+                    id="modal_password" 
+                    name="password" 
+                    required 
+                    minlength="8"
+                    placeholder="Minimal 8 karakter..."
+                    class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] px-3.5 py-2 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition placeholder-[#666666] font-mono"
+                />
+                @error('password')
+                    <p class="mt-1 text-xs text-rose-400 font-mono">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Confirm Password Input -->
+            <div class="space-y-1.5">
+                <label for="modal_password_confirmation" class="block text-xs font-medium text-[#a1a1a1] uppercase tracking-wider">
+                    Konfirmasi Kata Sandi Baru <span class="text-rose-500">*</span>
+                </label>
+                <input 
+                    type="password" 
+                    id="modal_password_confirmation" 
+                    name="password_confirmation" 
+                    required 
+                    minlength="8"
+                    placeholder="Ulangi kata sandi baru..."
+                    class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] px-3.5 py-2 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition placeholder-[#666666] font-mono"
+                />
+                <span class="text-[11px] text-[#888888] block pt-1">
+                    Kata sandi lama tersimpan dalam hash satu arah dan tidak dapat dilihat oleh administrator.
+                </span>
+            </div>
+
+            <div class="pt-3 flex items-center justify-end gap-2 border-t border-[#222222]">
+                <button 
+                    type="button" 
+                    onclick="closePasswordModal()" 
+                    class="close-password-modal bg-[#171717] hover:bg-[#222222] text-white border border-[#333333] font-medium text-xs px-3.5 py-1.5 rounded-[6px] transition">
+                    Batal
+                </button>
+                <button 
+                    type="submit" 
+                    class="bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs px-4 py-1.5 rounded-[6px] transition shadow-none active:scale-95">
+                    Simpan Kata Sandi Baru
                 </button>
             </div>
-
-            <!-- Target User Info -->
-            <div class="my-4 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
-                <p><strong>Pengguna:</strong> {{ $user->name }}</p>
-                <p class="mt-0.5 font-mono text-[11px] text-slate-500">{{ $user->email }}</p>
-            </div>
-
-            <!-- Reset Password Form -->
-            <form method="POST" action="{{ route('admin.accounts.reset-password', $user) }}" class="space-y-4">
-                @csrf
-
-                <div>
-                    <label for="modal_password" class="block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                        Kata Sandi Baru <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="password"
-                        id="modal_password"
-                        name="password"
-                        required
-                        minlength="8"
-                        placeholder="Minimal 8 karakter"
-                        class="mt-1.5 block w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-600 focus:ring-4 focus:ring-sky-100"
-                    >
-                    @error('password')
-                        <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div>
-                    <label for="modal_password_confirmation" class="block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                        Konfirmasi Kata Sandi Baru <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="password"
-                        id="modal_password_confirmation"
-                        name="password_confirmation"
-                        required
-                        minlength="8"
-                        placeholder="Ulangi kata sandi baru"
-                        class="mt-1.5 block w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-600 focus:ring-4 focus:ring-sky-100"
-                    >
-                </div>
-
-                <div class="rounded-xl border border-slate-100 bg-slate-50 p-3 text-[11px] leading-4 text-slate-500">
-                    ℹ Kata sandi lama tidak diperlukan. Menetapkan kata sandi baru akan langsung meng-hash dan menimpa kata sandi lama akun bersangkutan.
-                </div>
-
-                <!-- Modal Actions -->
-                <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
-                    <button
-                        type="button"
-                        class="close-password-modal rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-                    >
-                        Batal
-                    </button>
-                    <button
-                        type="submit"
-                        class="rounded-xl bg-sky-700 px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-200"
-                    >
-                        Simpan Kata Sandi Baru
-                    </button>
-                </div>
-            </form>
-        </div>
+        </form>
     </div>
 </div>
 
 <script>
-    // Vanilla JS untuk modal dialog handler
+    function openPasswordModal() {
+        const modal = document.getElementById('passwordModal') || document.getElementById('passwordResetModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+    }
+
+    function closePasswordModal() {
+        const modal = document.getElementById('passwordModal') || document.getElementById('passwordResetModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
-        const modal = document.getElementById('passwordResetModal');
+        const modal = document.getElementById('passwordModal') || document.getElementById('passwordResetModal');
         const openBtn = document.getElementById('openPasswordResetModalBtn');
         const closeBtns = document.querySelectorAll('.close-password-modal');
 
-        function openModal() {
-            if (modal) {
-                modal.classList.remove('hidden');
-                document.body.classList.add('overflow-hidden');
-            }
-        }
-
-        function closeModal() {
-            if (modal) {
-                modal.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-            }
-        }
-
         if (openBtn) {
-            openBtn.addEventListener('click', openModal);
+            openBtn.addEventListener('click', openPasswordModal);
         }
 
         closeBtns.forEach(btn => {
-            btn.addEventListener('click', closeModal);
+            btn.addEventListener('click', closePasswordModal);
         });
 
-        // Close on backdrop click
         if (modal) {
             modal.addEventListener('click', function (e) {
                 if (e.target === modal) {
-                    closeModal();
+                    closePasswordModal();
                 }
             });
         }
 
-        // Close on Escape key
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
-                closeModal();
+                closePasswordModal();
             }
         });
 
         @if ($errors->has('password'))
-            // If validation errors occurred on modal submission, reopen modal automatically
-            openModal();
+            openPasswordModal();
         @endif
     });
 </script>

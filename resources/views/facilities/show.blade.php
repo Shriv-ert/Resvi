@@ -1,130 +1,194 @@
 @extends('layouts.app')
 
-@section('title', $facility->name . ' · Detail Fasilitas')
+@php
+    $fId = is_array($facility) ? $facility['id'] : $facility->id;
+    $fName = is_array($facility) ? $facility['name'] : $facility->name;
+    $fType = is_array($facility) ? $facility['type'] : ($facility->type instanceof \BackedEnum ? $facility->type->value : $facility->type);
+    $fTypeLabel = is_array($facility) ? ucfirst($facility['type']) : ($facility->type instanceof \App\Enums\FacilityType ? $facility->type->label() : ucfirst($fType));
+    $fLocation = is_array($facility) ? $facility['location'] : $facility->location;
+    $fCapacity = is_array($facility) ? ($facility['capacity'] ?? null) : $facility->capacity;
+    $fDescription = is_array($facility) ? $facility['description'] : $facility->description;
+    $fOperational = is_array($facility) ? $facility['operational_status'] : ($facility->operational_status instanceof \BackedEnum ? $facility->operational_status->value : $facility->operational_status);
+    
+    if (is_array($facility)) {
+        $primaryPhotoUrl = $facility['photo'] ?? 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80';
+        $photos = [];
+    } else {
+        $primaryPhoto = $facility->photos?->firstWhere('is_primary', true) ?? $facility->photos?->first();
+        $primaryPhotoUrl = $primaryPhoto ? asset('storage/' . $primaryPhoto->photo_path) : 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80';
+        $photos = $facility->photos ?? collect();
+    }
+@endphp
+
+@section('title', $fName . ' · Detail Fasilitas')
 
 @section('content')
-<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+<div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
+
     <!-- Breadcrumb -->
-    <nav class="mb-6 flex items-center gap-2 text-xs font-semibold text-slate-500">
-        <a href="{{ route('home') }}" class="hover:text-sky-700 transition">Katalog Fasilitas</a>
+    <nav class="flex items-center gap-2 text-xs font-mono text-[#888888] mb-6">
+        <a href="{{ route('facilities.index', request()->has('as_user') ? ['as_user' => 1] : []) }}" class="hover:text-white transition">Katalog Fasilitas</a>
         <span>/</span>
-        <span class="text-slate-900 truncate">{{ $facility->name }}</span>
+        <span class="text-white truncate max-w-xs sm:max-w-md">{{ $fName }}</span>
     </nav>
 
-    <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <!-- Main Detail (Left 2 Columns) -->
-        <div class="lg:col-span-2 space-y-6">
-            <!-- Header Card -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
-                <div class="flex flex-wrap items-center gap-2.5 mb-3">
-                    <span class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-slate-800">
-                        {{ $facility->type->label() }}
+    <!-- Main Content 12-Column Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left 8 Cols: Images & Facility Specs -->
+        <div class="lg:col-span-8 space-y-6">
+            
+            <!-- Main Hero Image Showcase with 1px hairline border -->
+            <div class="relative w-full h-80 sm:h-96 rounded-[6px] overflow-hidden bg-[#161616] border border-[#333333]">
+                <img 
+                    src="{{ $primaryPhotoUrl }}" 
+                    alt="{{ $fName }}" 
+                    class="w-full h-full object-cover"
+                />
+
+                <div class="absolute top-4 left-4 flex flex-wrap gap-2">
+                    <span class="bg-black/80 backdrop-blur-md text-white text-[11px] font-mono uppercase tracking-wider px-3 py-1 rounded-[4px] border border-[#333333] font-medium">
+                        {{ $fTypeLabel }}
                     </span>
-                    <span class="inline-flex items-center rounded-lg px-3 py-1 text-xs font-bold {{ $facility->operational_status->badgeClasses() }}">
-                        {{ $facility->operational_status->label() }}
-                    </span>
+                    @if($fOperational === 'dapat_digunakan')
+                        <span class="bg-[#002b11]/90 backdrop-blur-md text-[#50e3c2] border border-[#005522] text-[11px] font-mono px-3 py-1 rounded-[4px] flex items-center gap-1.5 font-medium">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>
+                            Dapat digunakan
+                        </span>
+                    @else
+                        <span class="bg-[#2b0000]/90 backdrop-blur-md text-[#ff453a] border border-[#550000] text-[11px] font-mono px-3 py-1 rounded-[4px] flex items-center gap-1.5 font-medium">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#ff453a]"></span>
+                            Dalam perbaikan
+                        </span>
+                    @endif
                 </div>
+            </div>
 
-                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 leading-snug">
-                    {{ $facility->name }}
+            <!-- Title & Basic Key Indicators -->
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-semibold text-white tracking-[-0.03em] mb-2">
+                    {{ $fName }}.
                 </h1>
+                <p class="text-xs sm:text-sm text-[#888888] font-mono flex items-center gap-2">
+                    <span>{{ $fLocation }}</span>
+                    <span>•</span>
+                    <span>ID: {{ $fId }}</span>
+                </p>
+            </div>
 
-                <!-- Meta Specs -->
-                <div class="mt-4 flex flex-wrap gap-y-2 gap-x-6 text-sm text-slate-600 border-t border-slate-100 pt-4">
-                    <div class="flex items-center gap-2">
-                        <svg class="h-5 w-5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Lokasi: <strong>{{ $facility->location }}</strong></span>
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <svg class="h-5 w-5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        @if ($facility->capacity !== null)
-                            <span>Kapasitas: <strong>{{ $facility->capacity }} Orang</strong></span>
-                        @else
-                            <span class="text-slate-400 italic">Kapasitas: Tidak berlaku (Alat)</span>
-                        @endif
-                    </div>
+            <!-- Specs Grid (4 Cols) -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-px bg-[#333333] border border-[#333333] rounded-[6px] overflow-hidden">
+                <div class="bg-[#111111] p-4">
+                    <span class="font-mono text-[10px] uppercase tracking-wider text-[#888888] block mb-1">Tipe Sarana</span>
+                    <strong class="text-xs text-white font-medium capitalize">{{ $fTypeLabel }}</strong>
+                </div>
+                <div class="bg-[#111111] p-4">
+                    <span class="font-mono text-[10px] uppercase tracking-wider text-[#888888] block mb-1">Lokasi Gedung</span>
+                    <strong class="text-xs text-white font-medium truncate block" title="{{ $fLocation }}">{{ $fLocation }}</strong>
+                </div>
+                <div class="bg-[#111111] p-4">
+                    <span class="font-mono text-[10px] uppercase tracking-wider text-[#888888] block mb-1">Kapasitas Maks</span>
+                    <strong class="text-xs text-white font-medium">
+                        {{ !empty($fCapacity) ? $fCapacity . ' Orang' : 'Sesuai Unit Alat' }}
+                    </strong>
+                </div>
+                <div class="bg-[#111111] p-4">
+                    <span class="font-mono text-[10px] uppercase tracking-wider text-[#888888] block mb-1">Jam Operasional</span>
+                    <strong class="text-xs font-mono text-[#0070f3] font-medium">07.00 – 20.00 WIB</strong>
                 </div>
             </div>
 
             <!-- Description Card -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
-                <h2 class="text-lg font-bold text-slate-900 mb-3">Deskripsi & Spesifikasi Fasilitas</h2>
-                <div class="text-sm leading-relaxed text-slate-600 space-y-3 whitespace-pre-line">
-                    {{ $facility->description }}
-                </div>
-            </div>
+            <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-6 space-y-4">
+                <h3 class="text-sm font-semibold text-white tracking-tight flex items-center gap-2">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Deskripsi & Spesifikasi Fasilitas.
+                </h3>
+                <p class="text-xs sm:text-sm text-[#a1a1a1] leading-relaxed whitespace-pre-line">
+                    {{ $fDescription }}
+                </p>
 
-            <!-- Photo Showcase / Gallery -->
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
-                <h2 class="text-lg font-bold text-slate-900 mb-4">Galeri Fasilitas</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    @forelse ($facility->photos as $photo)
-                        <div class="relative h-48 rounded-xl bg-slate-100 overflow-hidden border border-slate-200 flex items-center justify-center">
-                            <div class="text-center p-4 text-slate-400">
-                                <svg class="h-10 w-10 mx-auto opacity-50 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <span class="text-xs font-semibold">{{ $facility->name }} - Foto {{ $loop->iteration }}</span>
-                            </div>
+                <!-- Amenities / Supported Info -->
+                <div class="pt-4 border-t border-[#333333]">
+                    <h4 class="font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-3">Fasilitas Penunjang</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-white">
+                        <div class="flex items-center gap-2 bg-[#161616] px-3 py-2 rounded-[4px] border border-[#333333]">
+                            <svg class="w-3.5 h-3.5 text-[#50e3c2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            AC / Sistem Pendingin Udara
                         </div>
-                    @empty
-                        <div class="sm:col-span-2 py-8 text-center text-xs text-slate-400 border border-dashed border-slate-200 rounded-xl">
-                            Belum ada foto tambahan yang diunggah untuk fasilitas ini.
+                        <div class="flex items-center gap-2 bg-[#161616] px-3 py-2 rounded-[4px] border border-[#333333]">
+                            <svg class="w-3.5 h-3.5 text-[#50e3c2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Proyektor & Layar Presentasi
                         </div>
-                    @endforelse
+                        <div class="flex items-center gap-2 bg-[#161616] px-3 py-2 rounded-[4px] border border-[#333333]">
+                            <svg class="w-3.5 h-3.5 text-[#50e3c2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Koneksi Internet Wi-Fi Kampus
+                        </div>
+                        <div class="flex items-center gap-2 bg-[#161616] px-3 py-2 rounded-[4px] border border-[#333333]">
+                            <svg class="w-3.5 h-3.5 text-[#50e3c2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Papan Tulis & Spidol Standar
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Sticky Reservation Action Sidebar (Right Column) -->
-        <div class="space-y-6">
-            <div class="sticky top-24 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h3 class="text-base font-bold text-slate-900 mb-2">Aksi Penggunaan Fasilitas</h3>
-                <p class="text-xs text-slate-500 mb-5 leading-relaxed">
-                    Periksa jadwal yang kosong dan ajukan reservasi melalui form bertahap.
-                </p>
+        <!-- Right 4 Cols: Booking Action Box -->
+        <div class="lg:col-span-4 space-y-6">
+            
+            <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-6 space-y-5">
+                <div class="border-b border-[#333333] pb-4">
+                    <span class="font-mono text-[10px] text-[#888888] uppercase tracking-wider block mb-1">Aksi Permohonan</span>
+                    <h2 class="text-base font-semibold text-white tracking-tight">Ketersediaan & Reservasi.</h2>
+                    <p class="text-xs text-[#888888] mt-0.5">Aturan jadwal interval 30 menit 07.00–20.00 WIB.</p>
+                </div>
 
-                @if ($facility->operational_status === \App\Enums\OperationalStatus::DapatDigunakan)
-                    <div class="rounded-xl bg-emerald-50 border border-emerald-200 p-4 mb-5 text-xs text-emerald-800 leading-relaxed">
-                        <strong>Fasilitas Siap Digunakan</strong><br>
-                        Fasilitas dalam kondisi operasional baik. Anda dapat memeriksa jadwal ketersediaan untuk tanggal yang diinginkan.
+                @if($fOperational === 'dapat_digunakan')
+                    <div class="p-3.5 rounded-[6px] bg-[#002b11] border border-[#005522] text-xs text-[#50e3c2] space-y-1">
+                        <strong class="font-medium text-white block">Siap Digunakan:</strong>
+                        <p class="leading-relaxed">Fasilitas beroperasi normal dan siap menerima permohonan reservasi baru.</p>
                     </div>
 
-                    <a
-                        href="{{ route('reservations.create', ['facility_id' => $facility->id]) }}"
-                        class="w-full flex items-center justify-center gap-2 rounded-xl bg-sky-700 px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-200 transition"
-                    >
-                        Pilih Jadwal & Cek Ketersediaan
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    <a href="{{ route('reservations.create', array_merge(['facility_id' => $fId], request()->has('as_user') ? ['as_user' => 1] : [])) }}" 
+                       class="w-full bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs py-3 rounded-full transition flex items-center justify-center gap-2 active:scale-95">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
+                        Pilih Jadwal & Reservasi
                     </a>
                 @else
-                    <div class="rounded-xl bg-amber-50 border border-amber-200 p-4 mb-5 text-xs text-amber-800 leading-relaxed">
-                        <strong class="text-amber-900">Sedang Dalam Perbaikan</strong><br>
-                        Fasilitas ini sedang dalam pemeliharaan atau perbaikan sarana prasarana. Reservasi dinonaktifkan sementara hingga perbaikan selesai.
+                    <div class="p-3.5 rounded-[6px] bg-[#2b0000] border border-[#550000] text-xs text-[#ff453a] space-y-1">
+                        <strong class="font-medium text-white block">Dalam Perbaikan Fisik:</strong>
+                        <p class="leading-relaxed">Fasilitas sedang ditangani oleh Petugas Sarpras sehingga reservasi dinonaktifkan sementara.</p>
                     </div>
 
-                    <button
-                        type="button"
-                        disabled
-                        class="w-full cursor-not-allowed rounded-xl bg-slate-200 px-5 py-3 text-sm font-bold text-slate-400 transition"
-                    >
-                        Reservasi Dinonaktifkan
+                    <button disabled class="w-full bg-[#1a1a1a] text-[#666666] border border-[#333333] font-medium text-xs py-3 rounded-full cursor-not-allowed">
+                        Reservasi Tidak Tersedia
                     </button>
                 @endif
 
-                <div class="mt-4 pt-4 border-t border-slate-100 text-center">
-                    <a href="{{ route('home') }}" class="text-xs font-semibold text-slate-500 hover:text-slate-800 hover:underline">
-                        ← Kembali ke Katalog
-                    </a>
-                </div>
+                <!-- Report Issue Button -->
+                @if(auth()->check() || request()->has('as_user') || request()->is('my*'))
+                    <div class="pt-4 border-t border-[#333333]">
+                        <a href="{{ route('user.reports.create', array_merge(['facility_id' => $fId], request()->has('as_user') ? ['as_user' => 1] : [])) }}" 
+                           class="w-full bg-[#171717] hover:bg-[#222222] text-white border border-[#333333] hover:border-[#555555] font-medium text-xs py-2.5 rounded-full transition flex items-center justify-center gap-2">
+                            <svg class="w-3.5 h-3.5 text-[#888888]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            Laporkan Masalah / Kerusakan
+                        </a>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Operating Notice Box -->
+            <div class="border border-[#333333] rounded-[6px] bg-[#111111] p-5 font-mono text-[11px] text-[#a1a1a1] space-y-2">
+                <span class="text-[#888888] uppercase tracking-wider block text-[10px]">Ketentuan Sistem</span>
+                <p>• Peminjaman hanya pada rentang jam 07.00 - 20.00 WIB.</p>
+                <p>• Durasi dihitung kelipatan slot 30 menit.</p>
+                <p>• Keputusan persetujuan diterbitkan oleh Petugas Sarpras.</p>
             </div>
         </div>
     </div>
