@@ -3,16 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Enums\LoginAttemptResult;
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Services\AuthenticationService;
+use App\Services\GuestReservationDraftService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
-
-use App\Enums\UserRole;
-use App\Services\GuestReservationDraftService;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -40,12 +39,17 @@ class AuthenticatedSessionController extends Controller
         }
 
         $user = auth()->user();
+
         if ($user && $user->role === UserRole::Pengguna && $draftService->hasDraft()) {
             return redirect()->route('reservations.create');
         }
 
         if ($draftService->hasDraft()) {
             $draftService->clearDraft();
+        }
+
+        if ($user?->isAdmin()) {
+            return redirect()->intended(route('admin.facilities.index'));
         }
 
         return redirect()->intended(route('home'));
