@@ -14,14 +14,15 @@ use App\Models\FacilityStatusLog;
 use App\Models\Reservation;
 use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class FacilityTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     private User $admin;
 
@@ -31,7 +32,7 @@ class FacilityTest extends TestCase
 
         $this->admin = User::query()->create([
             'name' => 'Admin PPK',
-            'email' => 'admin@ppk.test',
+            'email' => 'admin.'.Str::uuid().'@ppk.test',
             'password' => 'PPK-Admin-2026!',
             'role' => UserRole::Admin,
             'user_category' => null,

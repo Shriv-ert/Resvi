@@ -5,13 +5,14 @@ namespace Tests\Feature\Admin;
 use App\Enums\UserCategory;
 use App\Enums\UserRole;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class AccountTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     private User $admin;
 
@@ -21,7 +22,7 @@ class AccountTest extends TestCase
 
         $this->admin = User::query()->create([
             'name' => 'Admin PPK',
-            'email' => 'admin@ppk.test',
+            'email' => 'admin.'.Str::uuid().'@ppk.test',
             'password' => 'PPK-Admin-2026!',
             'role' => UserRole::Admin,
             'user_category' => null,
