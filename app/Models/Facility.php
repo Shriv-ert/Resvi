@@ -57,6 +57,11 @@ class Facility extends Model
         return $this->hasMany(Reservation::class);
     }
 
+    public function statusLogs(): HasMany
+    {
+        return $this->hasMany(FacilityStatusLog::class);
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);

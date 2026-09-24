@@ -89,7 +89,7 @@ class ReservationDraftTest extends TestCase
         $createResponse->assertSee('13:00');
     }
 
-    public function test_admin_login_clears_draft_and_redirects_home(): void
+    public function test_admin_login_clears_draft_and_redirects_to_admin_facilities(): void
     {
         $password = 'Admin-Secret-123!';
         $admin = User::factory()->create([
@@ -114,8 +114,8 @@ class ReservationDraftTest extends TestCase
             'password' => $password,
         ]);
 
-        // Admin dialihkan ke home, draft dihapus (KEPUTUSAN-GLOBAL.md 3.10)
-        $loginResponse->assertRedirect(route('home'));
+        // Admin masuk ke entry point modul Admin dan draft pengunjung dibuang.
+        $loginResponse->assertRedirect(route('admin.facilities.index'));
         $this->assertFalse(session()->has(GuestReservationDraftService::SESSION_KEY));
     }
 }

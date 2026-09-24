@@ -32,4 +32,9 @@ class User extends Authenticatable
             'user_category' => UserCategory::class,
         ];
     }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === UserRole::Admin;
+    }
 }
