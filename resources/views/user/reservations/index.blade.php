@@ -137,10 +137,6 @@
                                 </a>
                             </td>
                         </tr>
-                                    Detail →
-                                </a>
-                            </td>
-                        </tr>
                     @empty
                         <tr>
                             <td colspan="6" class="py-12 text-center text-[#888888]">

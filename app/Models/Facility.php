@@ -71,4 +71,27 @@ class Facility extends Model
     {
         return $query->where('is_active', true);
     }
+
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        if (empty($term)) {
+            return $query;
+        }
+
+        $term = trim($term);
+
+        return $query->where(function (Builder $q) use ($term): void {
+            $q->where('name', 'like', "%{$term}%")
+                ->orWhere('location', 'like', "%{$term}%");
+        });
+    }
+
+    public function scopeOfType(Builder $query, ?string $type): Builder
+    {
+        if (empty($type)) {
+            return $query;
+        }
+
+        return $query->where('type', $type);
+    }
 }

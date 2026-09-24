@@ -20,21 +20,12 @@ class StaffFacilityService
      */
     public function getAllFacilities(?string $search = null, ?string $type = null): Collection
     {
-        $query = Facility::query()->with(['photos', 'statusLogs' => fn ($q) => $q->latest('changed_at')]);
-
-        if (! empty($search)) {
-            $term = trim($search);
-            $query->where(function ($q) use ($term) {
-                $q->where('name', 'like', "%{$term}%")
-                    ->orWhere('location', 'like', "%{$term}%");
-            });
-        }
-
-        if (! empty($type)) {
-            $query->where('type', $type);
-        }
-
-        return $query->orderBy('name', 'asc')->get();
+        return Facility::query()
+            ->with(['photos', 'statusLogs' => fn ($q) => $q->latest('changed_at')])
+            ->search($search)
+            ->ofType($type)
+            ->orderBy('name', 'asc')
+            ->get();
     }
 
     /**
@@ -42,28 +33,18 @@ class StaffFacilityService
      */
     public function getMaintenanceFacilities(?string $search = null, ?string $type = null): Collection
     {
-        $query = Facility::query()
+        return Facility::query()
             ->with([
                 'photos',
                 'statusLogs' => fn ($q) => $q->where('change_type', FacilityStatusChangeType::OperationalStatus)
                     ->latest('changed_at')
                     ->with('changedBy'),
             ])
-            ->where('operational_status', OperationalStatus::DalamPerbaikan);
-
-        if (! empty($search)) {
-            $term = trim($search);
-            $query->where(function ($q) use ($term) {
-                $q->where('name', 'like', "%{$term}%")
-                    ->orWhere('location', 'like', "%{$term}%");
-            });
-        }
-
-        if (! empty($type)) {
-            $query->where('type', $type);
-        }
-
-        return $query->orderBy('name', 'asc')->get();
+            ->where('operational_status', OperationalStatus::DalamPerbaikan)
+            ->search($search)
+            ->ofType($type)
+            ->orderBy('name', 'asc')
+            ->get();
     }
 
     /**

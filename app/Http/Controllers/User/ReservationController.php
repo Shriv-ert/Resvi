@@ -22,14 +22,12 @@ class ReservationController extends Controller
      */
     public function index(Request $request): View
     {
+        Reservation::syncTimeBasedStatuses();
+
         $reservations = Reservation::with(['facility'])
             ->where('user_id', $request->user()->id)
             ->orderBy('created_at', 'desc')
             ->get();
-
-        foreach ($reservations as $reservation) {
-            $reservation->evaluateStatus();
-        }
 
         return view('user.reservations.index', [
             'reservations' => $reservations,

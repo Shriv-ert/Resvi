@@ -18,50 +18,7 @@ class StaffReservationService
      */
     public function syncTimeBasedStatuses(): void
     {
-        $now = now();
-        $today = $now->toDateString();
-        $currentTime = $now->format('H:i:s');
-
-        // 1. Menunggu yang start_time sudah lewat -> Kedaluwarsa
-        Reservation::query()
-            ->where('status', ReservationStatus::Menunggu)
-            ->where(function ($q) use ($today, $currentTime) {
-                $q->where('date', '<', $today)
-                    ->orWhere(function ($sub) use ($today, $currentTime) {
-                        $sub->where('date', $today)
-                            ->where('start_time', '<=', $currentTime);
-                    });
-            })
-            ->update([
-                'status' => ReservationStatus::Kedaluwarsa,
-                'expiration_reason' => 'Waktu mulai reservasi telah terlampaui sebelum disetujui petugas.',
-            ]);
-
-        // 2. Disetujui yang start_time sudah lewat tapi belum end_time -> Berlangsung
-        Reservation::query()
-            ->where('status', ReservationStatus::Disetujui)
-            ->where(function ($q) use ($today, $currentTime) {
-                $q->where('date', $today)
-                    ->where('start_time', '<=', $currentTime)
-                    ->where('end_time', '>', $currentTime);
-            })
-            ->update([
-                'status' => ReservationStatus::Berlangsung,
-            ]);
-
-        // 3. Disetujui atau Berlangsung yang end_time sudah lewat -> Selesai
-        Reservation::query()
-            ->whereIn('status', [ReservationStatus::Disetujui, ReservationStatus::Berlangsung])
-            ->where(function ($q) use ($today, $currentTime) {
-                $q->where('date', '<', $today)
-                    ->orWhere(function ($sub) use ($today, $currentTime) {
-                        $sub->where('date', $today)
-                            ->where('end_time', '<=', $currentTime);
-                    });
-            })
-            ->update([
-                'status' => ReservationStatus::Selesai,
-            ]);
+        Reservation::syncTimeBasedStatuses();
     }
 
     /**
