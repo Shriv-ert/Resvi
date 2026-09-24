@@ -120,17 +120,20 @@
             <!-- Staff User Info -->
             <div class="flex items-center gap-3">
                 <div class="hidden sm:flex flex-col text-right">
-                    <span class="text-xs font-medium text-white">Budi Santoso</span>
-                    <span class="font-mono text-[10px] text-[#888888]">Petugas Sarpras Kampus</span>
+                    <span class="text-xs font-medium text-white">{{ auth()->user()->name ?? 'Petugas Sarpras' }}</span>
+                    <span class="font-mono text-[10px] text-[#888888]">{{ auth()->user()->role ? ucfirst(auth()->user()->role->value) : 'Petugas' }} Sarpras Kampus</span>
                 </div>
                 <div class="w-7 h-7 rounded-[4px] bg-[#1a1a1a] border border-[#333333] text-white font-mono font-medium text-xs flex items-center justify-center">
-                    BS
+                    {{ strtoupper(substr(auth()->user()->name ?? 'PT', 0, 2)) }}
                 </div>
-                <a href="{{ route('facilities.index') }}" title="Keluar ke Portal Publik" class="p-1.5 text-[#888888] hover:text-[#ff453a] hover:bg-[#ff453a]/10 rounded-[4px] transition-colors">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                    </svg>
-                </a>
+                <form method="POST" action="{{ route('logout') }}" class="inline">
+                    @csrf
+                    <button type="submit" title="Keluar dari Sistem" class="p-1.5 text-[#888888] hover:text-[#ff453a] hover:bg-[#ff453a]/10 rounded-[4px] transition-colors cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                    </button>
+                </form>
             </div>
         </div>
     </header>
@@ -141,7 +144,6 @@
             <a href="{{ route('staff.reservations.index') }}" 
                class="px-3 py-1.5 rounded-[6px] font-medium transition flex items-center gap-1.5 {{ request()->routeIs('staff.reservations.index') ? 'bg-white text-black' : 'text-[#a1a1a1] hover:text-white hover:bg-[#1f1f1f]' }}">
                 Antrian Reservasi
-                <span class="font-mono text-[10px] px-1.5 py-0.2 rounded-[4px] {{ request()->routeIs('staff.reservations.index') ? 'bg-black/20 text-black' : 'bg-[#1a1a1a] text-[#888888] border border-[#333333]' }}">1</span>
             </a>
 
             <a href="{{ route('staff.reservations.history') }}" 
@@ -154,7 +156,6 @@
             <a href="{{ route('staff.reports.index') }}" 
                class="px-3 py-1.5 rounded-[6px] font-medium transition flex items-center gap-1.5 {{ request()->routeIs('staff.reports.index') ? 'bg-white text-black' : 'text-[#a1a1a1] hover:text-white hover:bg-[#1f1f1f]' }}">
                 Laporan Kerusakan
-                <span class="font-mono text-[10px] px-1.5 py-0.2 rounded-[4px] {{ request()->routeIs('staff.reports.index') ? 'bg-black/20 text-black' : 'bg-[#1a1a1a] text-[#888888] border border-[#333333]' }}">2</span>
             </a>
 
             <a href="{{ route('staff.reports.history') }}" 
@@ -179,6 +180,29 @@
 
     <!-- Main Content Container: max-w-[1200px] centered -->
     <main class="flex-grow w-full">
+        @if(session('success'))
+            <div class="max-w-[1200px] mx-auto px-4 sm:px-6 pt-6">
+                <div class="p-3.5 rounded-[6px] bg-[#002b11] border border-[#005522] text-xs text-[#50e3c2] flex items-center gap-2">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span>{{ session('success') }}</span>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error') || $errors->any())
+            <div class="max-w-[1200px] mx-auto px-4 sm:px-6 pt-6">
+                <div class="p-3.5 rounded-[6px] bg-[#2b0000] border border-[#550000] text-xs text-[#ff453a] space-y-1">
+                    <div class="flex items-center gap-2 font-medium">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Terjadi Kesalahan:</span>
+                    </div>
+                    <p class="pl-6 text-[#ededed]/90 text-[11px]">
+                        {{ session('error') ?: ($errors->first('approve') ?: $errors->first('reject') ?: $errors->first('cancel') ?: $errors->first('operational_status') ?: $errors->first('reason') ?: $errors->first()) }}
+                    </p>
+                </div>
+            </div>
+        @endif
+
         @yield('content')
     </main>
 

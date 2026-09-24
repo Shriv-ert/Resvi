@@ -98,16 +98,21 @@
                 </thead>
                 <tbody class="divide-y divide-[#333333] text-xs">
                     @forelse($facilities as $f)
+                        @php
+                            $typeVal = $f['type'] instanceof \BackedEnum ? $f['type']->value : (string) $f['type'];
+                            $latestLog = $f->statusLogs?->first();
+                            $logReason = $latestLog?->reason ?? ($f['maintenance_notes'] ?? 'Sedang dalam penanganan perbaikan petugas');
+                        @endphp
                         <tr class="hover:bg-[#161616] transition-colors"
                             data-search="{{ strtolower($f['name']) }}"
-                            data-type="{{ $f['type'] }}">
+                            data-type="{{ $typeVal }}">
                             
                             <td class="py-3.5 px-5 font-medium text-white">
                                 {{ $f['name'] }}
                             </td>
 
                             <td class="py-3.5 px-5 capitalize text-[#888888]">
-                                {{ $f['type'] }}
+                                {{ $typeVal }}
                             </td>
 
                             <td class="py-3.5 px-5 text-[#888888]">
@@ -121,8 +126,8 @@
                                 </span>
                             </td>
 
-                            <td class="py-3.5 px-5 text-[#888888] max-w-xs truncate">
-                                {{ $f['maintenance_notes'] ?? 'Sedang dalam perbaikan teknis oleh petugas' }}
+                            <td class="py-3.5 px-5 text-[#888888] max-w-xs truncate" title="{{ $logReason }}">
+                                {{ $logReason }}
                             </td>
 
                             <td class="py-3.5 px-5 text-right">

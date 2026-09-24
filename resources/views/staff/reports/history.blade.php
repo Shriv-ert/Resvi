@@ -122,10 +122,14 @@
                 </thead>
                 <tbody class="divide-y divide-[#333333] text-xs">
                     @forelse($reports as $rep)
+                        @php
+                            $statusVal = $rep['status'] instanceof \BackedEnum ? $rep['status']->value : (string) $rep['status'];
+                            $catVal = $rep['category'] instanceof \BackedEnum ? $rep['category']->value : (string) $rep['category'];
+                        @endphp
                         <tr class="hover:bg-[#161616] transition-colors"
                             data-search="{{ strtolower($rep['reporter_name'] . ' ' . $rep['facility_name']) }}"
                             data-type="{{ $rep['facility_type'] ?? 'kelas' }}"
-                            data-status="{{ $rep['status'] }}">
+                            data-status="{{ $statusVal }}">
                             
                             <td class="py-3.5 px-5 font-mono text-white font-medium">
                                 {{ $rep['report_number'] }}
@@ -141,11 +145,11 @@
                             </td>
 
                             <td class="py-3.5 px-5 text-[#888888] capitalize">
-                                {{ str_replace('_', ' ', $rep['category']) }}
+                                {{ str_replace('_', ' ', $catVal) }}
                             </td>
 
                             <td class="py-3.5 px-5">
-                                @if($rep['status'] === 'selesai')
+                                @if($statusVal === 'selesai')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[6px] text-[11px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>
                                         Selesai

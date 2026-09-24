@@ -126,10 +126,14 @@
                 </thead>
                 <tbody class="divide-y divide-[#333333] text-xs">
                     @forelse($reports as $rep)
-                        <tr class="hover:bg-[#161616] transition-colors {{ $rep['status'] === 'baru' ? 'bg-[#1a1400]/30' : '' }}"
+                        @php
+                            $statusVal = $rep['status'] instanceof \BackedEnum ? $rep['status']->value : (string) $rep['status'];
+                            $catVal = $rep['category'] instanceof \BackedEnum ? $rep['category']->value : (string) $rep['category'];
+                        @endphp
+                        <tr class="hover:bg-[#161616] transition-colors {{ $statusVal === 'baru' ? 'bg-[#1a1400]/30' : '' }}"
                             data-search="{{ strtolower($rep['reporter_name'] . ' ' . $rep['facility_name']) }}"
                             data-type="{{ $rep['facility_type'] ?? 'kelas' }}"
-                            data-status="{{ $rep['status'] }}">
+                            data-status="{{ $statusVal }}">
                             
                             <td class="py-3.5 px-5 font-mono text-white font-medium">
                                 {{ $rep['report_number'] }}
@@ -145,11 +149,11 @@
                             </td>
 
                             <td class="py-3.5 px-5 text-[#888888] capitalize font-mono text-[11px]">
-                                {{ str_replace('_', ' ', $rep['category']) }}
+                                {{ str_replace('_', ' ', $catVal) }}
                             </td>
 
                             <td class="py-3.5 px-5">
-                                @if($rep['status'] === 'baru')
+                                @if($statusVal === 'baru')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#f5a623] bg-[#2b1e00] border border-[#553c00]">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#f5a623] animate-pulse"></span>
                                         Baru

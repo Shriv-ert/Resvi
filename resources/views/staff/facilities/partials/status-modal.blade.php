@@ -17,14 +17,27 @@
             </button>
         </div>
 
-        <form method="POST" action="{{ route('staff.facilities.update-status', ['facility' => $facility['id'] ?? ($report['facility_id'] ?? '1')]) }}" class="space-y-4">
+        @php
+            $modalFacility = $facility ?? ($report->facility ?? null);
+            $modalFacilityId = $modalFacility?->id ?? ($report['facility_id'] ?? '1');
+            $modalFacilityName = $modalFacility?->name ?? ($report['facility_name'] ?? 'Fasilitas Terpilih');
+            $currentOpStatusVal = ($modalFacility?->operational_status instanceof \BackedEnum) 
+                ? $modalFacility->operational_status->value 
+                : (string)($modalFacility?->operational_status ?? 'dapat_digunakan');
+            $initOpStatus = ($currentOpStatusVal === 'dalam_perbaikan') ? 'dapat_digunakan' : 'dalam_perbaikan';
+        @endphp
+
+        <form method="POST" action="{{ route('staff.facilities.update-status', ['facility' => $modalFacilityId]) }}" class="space-y-4">
             @csrf
+            @if(isset($report))
+                <input type="hidden" name="report_id" value="{{ $report->id ?? $report['id'] }}">
+            @endif
             
             <div class="p-3.5 rounded-[6px] bg-[#161616] border border-[#333333] text-xs text-[#a1a1a1] space-y-1 font-mono">
-                <p>Fasilitas: <strong class="text-white font-sans">{{ $facility['name'] ?? ($report['facility_name'] ?? 'Fasilitas Terpilih') }}</strong></p>
+                <p>Fasilitas: <strong class="text-white font-sans">{{ $modalFacilityName }}</strong></p>
                 <p>Status Saat Ini: 
-                    <span class="font-medium {{ ($facility['operational_status'] ?? 'dapat_digunakan') === 'dapat_digunakan' ? 'text-[#50e3c2]' : 'text-[#ff453a]' }}">
-                        {{ ($facility['operational_status'] ?? 'dapat_digunakan') === 'dapat_digunakan' ? 'Dapat Digunakan' : 'Dalam Perbaikan' }}
+                    <span class="font-medium {{ $currentOpStatusVal === 'dapat_digunakan' ? 'text-[#50e3c2]' : 'text-[#ff453a]' }}">
+                        {{ $currentOpStatusVal === 'dapat_digunakan' ? 'Dapat Digunakan' : 'Dalam Perbaikan' }}
                     </span>
                 </p>
             </div>
@@ -32,9 +45,6 @@
             <!-- Target Status Selection -->
             <div class="space-y-1.5 relative custom-dropdown" id="dropdown-operational_status">
                 <label class="block font-mono text-[11px] uppercase tracking-wider text-[#888888] font-medium">Status Operasional Baru</label>
-                @php
-                    $initOpStatus = (($facility['operational_status'] ?? '') === 'dalam_perbaikan') ? 'dapat_digunakan' : 'dalam_perbaikan';
-                @endphp
                 <input type="hidden" id="operational_status" name="operational_status" value="{{ $initOpStatus }}">
                 <button type="button" onclick="toggleCustomDropdown('operational_status')" id="operational_statusTrigger"
                         class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">

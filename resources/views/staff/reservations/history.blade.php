@@ -134,10 +134,14 @@
                 </thead>
                 <tbody class="divide-y divide-[#333333] text-xs">
                     @forelse($reservations as $res)
+                        @php
+                            $statusVal = $res['status'] instanceof \BackedEnum ? $res['status']->value : (string) $res['status'];
+                            $resDate = $res['date'] instanceof \DateTimeInterface ? $res['date']->format('Y-m-d') : $res['date'];
+                        @endphp
                         <tr class="hover:bg-[#161616] transition-colors"
                             data-search="{{ strtolower($res['applicant_name'] . ' ' . $res['facility_name']) }}"
                             data-type="{{ $res['facility_type'] ?? 'kelas' }}"
-                            data-status="{{ $res['status'] }}">
+                            data-status="{{ $statusVal }}">
                             
                             <td class="py-3.5 px-5 font-mono text-white font-medium">
                                 {{ $res['reservation_number'] }}
@@ -154,24 +158,24 @@
                             </td>
 
                             <td class="py-3.5 px-5 font-mono">
-                                <span class="font-medium text-white block">{{ $res['date'] }}</span>
+                                <span class="font-medium text-white block">{{ $resDate }}</span>
                                 <span class="text-[#888888] text-[11px]">{{ $res['start_time'] }} – {{ $res['end_time'] }} WIB</span>
                             </td>
 
                             <td class="py-3.5 px-5">
-                                @if($res['status'] === 'selesai')
+                                @if($statusVal === 'selesai')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#a1a1a1] bg-[#161616] border border-[#333333]">
                                         Selesai
                                     </span>
-                                @elseif($res['status'] === 'ditolak')
+                                @elseif($statusVal === 'ditolak')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#ff453a] bg-[#2b0000] border border-[#550000]">
                                         Ditolak
                                     </span>
-                                @elseif($res['status'] === 'dibatalkan_oleh_pengguna')
+                                @elseif($statusVal === 'dibatalkan_oleh_pengguna')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#888888] bg-[#161616] border border-[#333333]">
                                         Batal (Pengguna)
                                     </span>
-                                @elseif($res['status'] === 'dibatalkan_oleh_petugas')
+                                @elseif($statusVal === 'dibatalkan_oleh_petugas')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#ff453a] bg-[#2b0000] border border-[#550000]">
                                         Batal (Petugas)
                                     </span>

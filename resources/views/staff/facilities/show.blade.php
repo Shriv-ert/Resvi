@@ -3,6 +3,11 @@
 @section('title', 'Kelola Operasional ' . $facility['name'] . ' · Petugas')
 
 @section('content')
+@php
+    $typeVal = $facility['type'] instanceof \BackedEnum ? $facility['type']->value : (string) $facility['type'];
+    $opStatusVal = $facility['operational_status'] instanceof \BackedEnum ? $facility['operational_status']->value : (string) $facility['operational_status'];
+@endphp
+
 <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
 
     <!-- Breadcrumb -->
@@ -15,7 +20,7 @@
             Kembali ke Daftar Fasilitas
         </a>
 
-        @if($facility['operational_status'] === 'dapat_digunakan')
+        @if($opStatusVal === 'dapat_digunakan')
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[6px] text-xs font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>
                 Operasional: Dapat Digunakan
@@ -33,7 +38,7 @@
         
         <div class="border-b border-[#333333] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <span class="font-mono text-[10px] uppercase font-medium text-[#888888] tracking-wider">{{ $facility['type'] }}</span>
+                <span class="font-mono text-[10px] uppercase font-medium text-[#888888] tracking-wider">{{ $typeVal }}</span>
                 <h1 class="text-2xl font-semibold text-white tracking-[-0.03em]">{{ $facility['name'] }}.</h1>
                 <p class="text-xs text-[#888888] mt-1">{{ $facility['location'] }}</p>
             </div>

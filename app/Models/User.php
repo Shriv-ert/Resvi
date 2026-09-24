@@ -38,6 +38,16 @@ class User extends Authenticatable
         return $this->role === UserRole::Admin;
     }
 
+    public function isPetugas(): bool
+    {
+        return $this->role === UserRole::Petugas;
+    }
+
+    public function isPengguna(): bool
+    {
+        return $this->role === UserRole::Pengguna;
+    }
+
     public function reservations(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Reservation::class);

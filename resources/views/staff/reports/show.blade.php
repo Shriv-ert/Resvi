@@ -3,6 +3,12 @@
 @section('title', 'Detail Laporan #' . $report['report_number'] . ' · Petugas')
 
 @section('content')
+@php
+    $statusVal = $report['status'] instanceof \BackedEnum ? $report['status']->value : (string) $report['status'];
+    $catVal = $report['category'] instanceof \BackedEnum ? $report['category']->value : (string) $report['category'];
+    $photoUrl = $report['photo_url'] ?? (!empty($report['photo_path']) ? (str_starts_with($report['photo_path'], 'http') ? $report['photo_path'] : asset('storage/' . $report['photo_path'])) : null);
+@endphp
+
 <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
 
     <!-- Breadcrumb -->
@@ -16,17 +22,17 @@
         </a>
 
         <!-- Status Badge -->
-        @if($report['status'] === 'baru')
+        @if($statusVal === 'baru')
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[6px] text-xs font-mono text-[#f5a623] bg-[#2b1e00] border border-[#553c00]">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#f5a623] animate-pulse"></span>
                 Status: Baru
             </span>
-        @elseif($report['status'] === 'diproses')
+        @elseif($statusVal === 'diproses')
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[6px] text-xs font-mono text-[#0070f3] bg-[#001733] border border-[#003b80]">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#0070f3] animate-pulse"></span>
                 Status: Sedang Ditangani
             </span>
-        @elseif($report['status'] === 'selesai')
+        @elseif($statusVal === 'selesai')
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[6px] text-xs font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>
                 Status: Selesai Ditangani
@@ -68,7 +74,7 @@
 
             <div class="bg-[#111111] p-4">
                 <span class="font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium block mb-1">Kategori Laporan</span>
-                <h3 class="text-sm font-semibold text-white capitalize">{{ str_replace('_', ' ', $report['category']) }}</h3>
+                <h3 class="text-sm font-semibold text-white capitalize">{{ str_replace('_', ' ', $catVal) }}</h3>
             </div>
         </div>
 
@@ -81,11 +87,11 @@
         </div>
 
         <!-- Photo Evidence if attached -->
-        @if(!empty($report['photo_path']))
+        @if(!empty($photoUrl))
             <div>
                 <h4 class="font-mono text-[11px] uppercase tracking-wider text-[#888888] font-medium mb-2">Foto Lampiran Bukti</h4>
                 <div class="max-w-md rounded-[6px] overflow-hidden border border-[#333333] bg-[#161616]">
-                    <img src="{{ $report['photo_path'] }}" alt="Foto Bukti Masalah" class="w-full h-auto object-cover">
+                    <img src="{{ $photoUrl }}" alt="Foto Bukti Masalah" class="w-full h-auto object-cover">
                 </div>
             </div>
         @endif
@@ -110,7 +116,7 @@
         <!-- Action Bar for Staff -->
         <div class="pt-6 border-t border-[#333333] flex flex-wrap items-center justify-between gap-4">
             
-            @if($report['status'] === 'baru')
+            @if($statusVal === 'baru')
                 <div class="text-xs text-[#888888] font-mono">
                     Laporan baru harus dimulai proses penanganannya sebelum dapat diselesaikan atau ditolak.
                 </div>
@@ -120,13 +126,13 @@
                     @csrf
                     <button 
                         type="submit" 
-                        class="bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs px-4 py-2 rounded-[6px] shadow-none transition flex items-center gap-2">
+                        class="bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs px-4 py-2 rounded-[6px] shadow-none transition flex items-center gap-2 cursor-pointer">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         Mulai Proses Penanganan
                     </button>
                 </form>
 
-            @elseif($report['status'] === 'diproses')
+            @elseif($statusVal === 'diproses')
                 <div class="text-xs text-[#888888] font-mono">
                     Laporan sedang ditangani. Tentukan resolusi penyelesaian atau tandai fasilitas dalam perbaikan.
                 </div>

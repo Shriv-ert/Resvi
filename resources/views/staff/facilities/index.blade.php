@@ -96,9 +96,13 @@
                 </thead>
                 <tbody class="divide-y divide-[#333333] text-xs">
                     @forelse($facilities as $f)
+                        @php
+                            $typeVal = $f['type'] instanceof \BackedEnum ? $f['type']->value : (string) $f['type'];
+                            $opStatusVal = $f['operational_status'] instanceof \BackedEnum ? $f['operational_status']->value : (string) $f['operational_status'];
+                        @endphp
                         <tr class="hover:bg-[#161616] transition-colors"
                             data-search="{{ strtolower($f['name']) }}"
-                            data-type="{{ $f['type'] }}">
+                            data-type="{{ $typeVal }}">
                             
                             <td class="py-3.5 px-5">
                                 <span class="font-medium text-white block">{{ $f['name'] }}</span>
@@ -106,7 +110,7 @@
                             </td>
 
                             <td class="py-3.5 px-5 capitalize text-[#888888] font-mono text-[11px]">
-                                {{ $f['type'] }}
+                                {{ $typeVal }}
                             </td>
 
                             <td class="py-3.5 px-5 text-[#888888]">
@@ -114,7 +118,7 @@
                             </td>
 
                             <td class="py-3.5 px-5">
-                                @if($f['operational_status'] === 'dapat_digunakan')
+                                @if($opStatusVal === 'dapat_digunakan')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>
                                         Dapat Digunakan

@@ -3,6 +3,11 @@
 @section('title', 'Proses Reservasi #' . $reservation['reservation_number'] . ' · Petugas')
 
 @section('content')
+@php
+    $statusVal = $reservation['status'] instanceof \BackedEnum ? $reservation['status']->value : (string) $reservation['status'];
+    $resDate = $reservation['date'] instanceof \DateTimeInterface ? $reservation['date']->format('Y-m-d') : $reservation['date'];
+@endphp
+
 <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
 
     <!-- Breadcrumb -->
@@ -16,30 +21,30 @@
         </a>
 
         <!-- Status Badge -->
-        @if($reservation['status'] === 'menunggu')
+        @if($statusVal === 'menunggu')
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#f5a623] bg-[#2b1e00] border border-[#553c00]">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#f5a623] animate-pulse"></span>
                 Status: Menunggu Persetujuan
             </span>
-        @elseif($reservation['status'] === 'disetujui')
+        @elseif($statusVal === 'disetujui')
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>
                 Status: Disetujui
             </span>
-        @elseif($reservation['status'] === 'berlangsung')
+        @elseif($statusVal === 'berlangsung')
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#c084fc] bg-[#270038] border border-[#581c87]">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#c084fc] animate-pulse"></span>
                 Status: Sedang Berlangsung
             </span>
-        @elseif($reservation['status'] === 'selesai')
+        @elseif($statusVal === 'selesai')
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#a1a1a1] bg-[#161616] border border-[#333333]">
                 Status: Selesai
             </span>
-        @elseif(str_starts_with($reservation['status'], 'dibatalkan'))
+        @elseif(str_starts_with($statusVal, 'dibatalkan'))
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#888888] bg-[#161616] border border-[#333333]">
-                {{ $reservation['status'] === 'dibatalkan_oleh_pengguna' ? 'Dibatalkan Pengguna' : 'Dibatalkan Petugas' }}
+                {{ $statusVal === 'dibatalkan_oleh_pengguna' ? 'Dibatalkan Pengguna' : 'Dibatalkan Petugas' }}
             </span>
-        @elseif($reservation['status'] === 'kedaluwarsa')
+        @elseif($statusVal === 'kedaluwarsa')
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#888888] bg-[#161616] border border-[#333333]">
                 Kedaluwarsa
             </span>
@@ -82,7 +87,7 @@
             <!-- Schedule -->
             <div class="bg-[#111111] p-4">
                 <span class="font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium block mb-1">Jadwal Pinjam</span>
-                <h3 class="text-sm font-semibold text-white tracking-tight font-mono">{{ $reservation['date'] }}</h3>
+                <h3 class="text-sm font-semibold text-white tracking-tight font-mono">{{ $resDate }}</h3>
                 <p class="text-xs text-[#0070f3] font-mono mt-0.5">{{ $reservation['start_time'] }} – {{ $reservation['end_time'] }} WIB</p>
             </div>
         </div>
@@ -95,13 +100,37 @@
             </div>
         </div>
 
+        <!-- Rejection / Cancellation / Expiration Audit Notice if any -->
+        @if(!empty($reservation['rejection_reason']))
+            <div class="p-4 rounded-[6px] bg-[#2b0000]/40 border border-[#550000] text-xs text-[#ff453a] space-y-1">
+                <strong class="font-mono font-medium block">Alasan Penolakan:</strong>
+                <p class="text-[#ededed]">{{ $reservation['rejection_reason'] }}</p>
+            </div>
+        @endif
+
+        @if(!empty($reservation['cancellation_reason']))
+            <div class="p-4 rounded-[6px] bg-[#2b1e00]/40 border border-[#553c00] text-xs text-[#f5a623] space-y-1">
+                <strong class="font-mono font-medium block">Alasan Pembatalan:</strong>
+                <p class="text-[#ededed]">{{ $reservation['cancellation_reason'] }}</p>
+            </div>
+        @endif
+
+        @if(!empty($reservation['expiration_reason']))
+            <div class="p-4 rounded-[6px] bg-[#161616] border border-[#333333] text-xs text-[#888888] space-y-1">
+                <strong class="font-mono font-medium block text-white">Catatan Kedaluwarsa:</strong>
+                <p class="text-[#ededed]">{{ $reservation['expiration_reason'] }}</p>
+            </div>
+        @endif
+
         <!-- System Collision & Operational Notice -->
-        <div class="p-4 rounded-[6px] bg-[#161616] border border-[#333333] text-xs text-[#a1a1a1] space-y-1">
-            <strong class="font-medium text-white block">Validasi Bentrok Otomatis (SRS BR-PTG-01):</strong>
-            <p class="leading-relaxed">
-                Jika Anda menyetujui permohonan ini, sistem secara otomatis menolak permohonan lain yang berstatus <em>Menunggu</em> dan memiliki bentrokan jadwal pada fasilitas ini.
-            </p>
-        </div>
+        @if($statusVal === 'menunggu')
+            <div class="p-4 rounded-[6px] bg-[#161616] border border-[#333333] text-xs text-[#a1a1a1] space-y-1">
+                <strong class="font-medium text-white block">Validasi Bentrok Otomatis (SRS BR-PTG-03):</strong>
+                <p class="leading-relaxed">
+                    Jika Anda menyetujui permohonan ini, sistem secara otomatis menolak permohonan lain yang berstatus <em>Menunggu</em> dan memiliki bentrokan jadwal pada fasilitas ini.
+                </p>
+            </div>
+        @endif
 
         <!-- Actions Toolbar -->
         <div class="pt-6 border-t border-[#333333] flex items-center justify-between flex-wrap gap-4">
@@ -112,12 +141,12 @@
             </div>
 
             <div class="flex items-center gap-2">
-                @if($reservation['status'] === 'menunggu')
+                @if($statusVal === 'menunggu')
                     <!-- Tolak Button -->
                     <button 
                         type="button" 
                         onclick="openRejectModal()" 
-                        class="bg-[#2b0000]/50 hover:bg-[#2b0000] text-[#ff453a] border border-[#550000] text-xs font-medium px-4 py-2 rounded-full transition">
+                        class="bg-[#2b0000]/50 hover:bg-[#2b0000] text-[#ff453a] border border-[#550000] text-xs font-medium px-4 py-2 rounded-full transition cursor-pointer">
                         Tolak Permohonan
                     </button>
 
@@ -126,17 +155,17 @@
                         @csrf
                         <button 
                             type="submit" 
-                            class="bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs px-5 py-2 rounded-full transition flex items-center gap-1.5 active:scale-95 shadow-none">
+                            class="bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs px-5 py-2 rounded-full transition flex items-center gap-1.5 active:scale-95 shadow-none cursor-pointer">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             Setujui Reservasi
                         </button>
                     </form>
-                @elseif($reservation['status'] === 'disetujui')
+                @elseif($statusVal === 'disetujui')
                     <!-- Urgent Cancellation by Staff -->
                     <button 
                         type="button" 
-                        onclick="openCancelModal()" 
-                        class="bg-[#2b0000]/50 hover:bg-[#2b0000] text-[#ff453a] border border-[#550000] text-xs font-medium px-4 py-2 rounded-full transition">
+                        onclick="openCancelModalStaff()" 
+                        class="bg-[#2b0000]/50 hover:bg-[#2b0000] text-[#ff453a] border border-[#550000] text-xs font-medium px-4 py-2 rounded-full transition cursor-pointer">
                         Batalkan Mendesak
                     </button>
                 @endif

@@ -80,6 +80,21 @@ class Report extends Model
         return $this->facility?->name;
     }
 
+    public function getReporterNameAttribute(): ?string
+    {
+        return $this->reporter?->name ?? 'Pelapor';
+    }
+
+    public function getReporterEmailAttribute(): ?string
+    {
+        return $this->reporter?->email;
+    }
+
+    public function getReporterCategoryAttribute(): ?string
+    {
+        return $this->reporter?->user_category ? ucfirst($this->reporter->user_category->value) : 'Civitas';
+    }
+
     /**
      * Accessor for facility_location.
      */

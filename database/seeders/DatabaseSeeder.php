@@ -50,5 +50,30 @@ class DatabaseSeeder extends Seeder
                 'user_category' => UserCategory::Mahasiswa,
             ],
         );
+
+        // 4. Pengguna Demo (Dosen)
+        User::query()->updateOrCreate(
+            ['email' => 'dosen.demo@ppk.test'],
+            [
+                'name' => 'Dr. Budi Santoso, M.Kom.',
+                'password' => Hash::make('password123'),
+                'role' => UserRole::Pengguna,
+                'user_category' => UserCategory::Dosen,
+            ],
+        );
+
+        // 5. Pengguna Demo (Staf)
+        User::query()->updateOrCreate(
+            ['email' => 'staf.demo@ppk.test'],
+            [
+                'name' => 'Siti Aminah, S.AP.',
+                'password' => Hash::make('password123'),
+                'role' => UserRole::Pengguna,
+                'user_category' => UserCategory::Staf,
+            ],
+        );
+
+        // 6. Fasilitas Awal
+        $this->call(FacilitySeeder::class);
     }
 }

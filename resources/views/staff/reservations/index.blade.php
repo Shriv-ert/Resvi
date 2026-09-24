@@ -130,10 +130,13 @@
                 </thead>
                 <tbody class="divide-y divide-[#333333] text-xs">
                     @forelse($reservations as $res)
-                        <tr class="hover:bg-[#161616] transition-colors {{ $res['status'] === 'menunggu' ? 'bg-[#1a1400]/30' : '' }}"
+                        @php
+                            $statusVal = $res['status'] instanceof \BackedEnum ? $res['status']->value : (string) $res['status'];
+                        @endphp
+                        <tr class="hover:bg-[#161616] transition-colors {{ $statusVal === 'menunggu' ? 'bg-[#1a1400]/30' : '' }}"
                             data-search="{{ strtolower($res['applicant_name'] . ' ' . $res['facility_name']) }}"
                             data-type="{{ $res['facility_type'] ?? 'kelas' }}"
-                            data-status="{{ $res['status'] }}">
+                            data-status="{{ $statusVal }}">
                             
                             <!-- Reservation Number -->
                             <td class="py-3.5 px-5 font-mono text-white font-medium">
@@ -154,18 +157,18 @@
 
                             <!-- Schedule Time -->
                             <td class="py-3.5 px-5 font-mono">
-                                <span class="font-medium text-white block">{{ $res['date'] }}</span>
+                                <span class="font-medium text-white block">{{ $res['date'] instanceof \DateTimeInterface ? $res['date']->format('Y-m-d') : $res['date'] }}</span>
                                 <span class="text-[#0070f3] text-[11px]">{{ $res['start_time'] }} – {{ $res['end_time'] }} WIB</span>
                             </td>
 
                             <!-- Status Badge -->
                             <td class="py-3.5 px-5">
-                                @if($res['status'] === 'menunggu')
+                                @if($statusVal === 'menunggu')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#f5a623] bg-[#2b1e00] border border-[#553c00]">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#f5a623] animate-pulse"></span>
                                         Menunggu
                                     </span>
-                                @elseif($res['status'] === 'disetujui')
+                                @elseif($statusVal === 'disetujui')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>
                                         Disetujui

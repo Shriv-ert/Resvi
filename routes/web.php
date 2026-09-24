@@ -6,6 +6,9 @@ use App\Http\Controllers\Admin\RecapController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\FacilityController as PublicFacilityController;
 use App\Http\Controllers\ReservationFlowController;
+use App\Http\Controllers\Staff\FacilityController as StaffFacilityController;
+use App\Http\Controllers\Staff\ReportController as StaffReportController;
+use App\Http\Controllers\Staff\ReservationController as StaffReservationController;
 use App\Http\Controllers\User\ReportController as UserReportController;
 use App\Http\Controllers\User\ReservationController as UserReservationController;
 use Illuminate\Http\Request;
@@ -306,100 +309,28 @@ Route::middleware(['auth', 'role:pengguna'])->prefix('my')->group(function (): v
 // Petugas (Staff) Routes (SRS FR-PTG)
 // -------------------------------------------------------------
 
-Route::prefix('staff')->group(function () {
-    // Antrian Reservasi
-    Route::get('/reservations', function () {
-        $all = MockData::reservations();
-        $active = array_filter($all, fn($r) => in_array($r['status'], ['menunggu', 'disetujui', 'berlangsung']));
-        return view('staff.reservations.index', ['reservations' => $active]);
-    })->name('staff.reservations.index');
+Route::middleware(['auth', 'role:petugas'])->prefix('staff')->name('staff.')->group(function (): void {
+    // Antrian & Riwayat Reservasi Petugas
+    Route::get('/reservations', [StaffReservationController::class, 'index'])->name('reservations.index');
+    Route::get('/reservations/history', [StaffReservationController::class, 'history'])->name('reservations.history');
+    Route::get('/reservations/{reservation}', [StaffReservationController::class, 'show'])->name('reservations.show');
+    Route::post('/reservations/{reservation}/approve', [StaffReservationController::class, 'approve'])->name('reservations.approve');
+    Route::post('/reservations/{reservation}/reject', [StaffReservationController::class, 'reject'])->name('reservations.reject');
+    Route::post('/reservations/{reservation}/cancel', [StaffReservationController::class, 'cancel'])->name('reservations.cancel');
 
-    // Riwayat Reservasi Final
-    Route::get('/reservations/history', function () {
-        $all = MockData::reservations();
-        $history = array_filter($all, fn($r) => in_array($r['status'], ['selesai', 'ditolak', 'dibatalkan_oleh_pengguna', 'dibatalkan_oleh_petugas', 'kedaluwarsa']));
-        return view('staff.reservations.history', ['reservations' => $history]);
-    })->name('staff.reservations.history');
+    // Antrian & Riwayat Laporan Petugas
+    Route::get('/reports', [StaffReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/history', [StaffReportController::class, 'history'])->name('reports.history');
+    Route::get('/reports/{report}', [StaffReportController::class, 'show'])->name('reports.show');
+    Route::post('/reports/{report}/start-process', [StaffReportController::class, 'startProcess'])->name('reports.start-process');
+    Route::post('/reports/{report}/resolve', [StaffReportController::class, 'resolve'])->name('reports.resolve');
+    Route::post('/reports/{report}/reject', [StaffReportController::class, 'reject'])->name('reports.reject');
 
-    // Detail Reservasi Petugas
-    Route::get('/reservations/{reservation}', function ($resId) {
-        $reservations = MockData::reservations();
-        $reservation = collect($reservations)->firstWhere('id', $resId) ?? $reservations[0];
-        return view('staff.reservations.show', ['reservation' => $reservation]);
-    })->name('staff.reservations.show');
-
-    Route::post('/reservations/{reservation}/approve', function ($resId) {
-        return redirect()->route('staff.reservations.index');
-    })->name('staff.reservations.approve');
-
-    Route::post('/reservations/{reservation}/reject', function ($resId) {
-        return redirect()->route('staff.reservations.index');
-    })->name('staff.reservations.reject');
-
-    Route::post('/reservations/{reservation}/cancel', function ($resId) {
-        return redirect()->route('staff.reservations.index');
-    })->name('staff.reservations.cancel');
-
-    // Antrian Laporan
-    Route::get('/reports', function () {
-        $all = MockData::reports();
-        $active = array_filter($all, fn($r) => in_array($r['status'], ['baru', 'diproses']));
-        return view('staff.reports.index', ['reports' => $active]);
-    })->name('staff.reports.index');
-
-    // Riwayat Laporan Final
-    Route::get('/reports/history', function () {
-        $all = MockData::reports();
-        $history = array_filter($all, fn($r) => in_array($r['status'], ['selesai', 'ditolak']));
-        return view('staff.reports.history', ['reports' => $history]);
-    })->name('staff.reports.history');
-
-    // Detail Laporan Petugas
-    Route::get('/reports/{report}', function ($repId) {
-        $reports = MockData::reports();
-        $report = collect($reports)->firstWhere('id', $repId) ?? $reports[0];
-        return view('staff.reports.show', ['report' => $report]);
-    })->name('staff.reports.show');
-
-    Route::post('/reports/{report}/start-process', function ($repId) {
-        return redirect()->route('staff.reports.show', ['report' => $repId]);
-    })->name('staff.reports.start-process');
-
-    Route::post('/reports/{report}/resolve', function ($repId) {
-        return redirect()->route('staff.reports.index');
-    })->name('staff.reports.resolve');
-
-    Route::post('/reports/{report}/reject', function ($repId) {
-        return redirect()->route('staff.reports.index');
-    })->name('staff.reports.reject');
-
-    // Fasilitas Petugas
-    Route::get('/facilities', function () {
-        $facilities = MockData::facilities();
-        return view('staff.facilities.index', ['facilities' => $facilities]);
-    })->name('staff.facilities.index');
-
-    // Fasilitas Dalam Perbaikan
-    Route::get('/facilities/maintenance', function () {
-        $facilities = MockData::facilities();
-        $maintenance = array_values(array_filter($facilities, fn($f) => $f['operational_status'] === 'dalam_perbaikan'));
-        return view('staff.facilities.maintenance', [
-            'facilities' => $maintenance,
-            'maintenanceFacilities' => $maintenance
-        ]);
-    })->name('staff.facilities.maintenance');
-
-    // Detail Fasilitas Petugas
-    Route::get('/facilities/{facility}', function ($facilityId) {
-        $facilities = MockData::facilities();
-        $facility = collect($facilities)->firstWhere('id', $facilityId) ?? $facilities[0];
-        return view('staff.facilities.show', ['facility' => $facility]);
-    })->name('staff.facilities.show');
-
-    // Update Status Operasional
-    Route::post('/facilities/{facility}/update-status', function ($facilityId) {
-        return redirect()->route('staff.facilities.maintenance');
-    })->name('staff.facilities.update-status');
+    // Status Fasilitas & Dalam Perbaikan
+    Route::get('/facilities', [StaffFacilityController::class, 'index'])->name('facilities.index');
+    Route::get('/facilities/maintenance', [StaffFacilityController::class, 'maintenance'])->name('facilities.maintenance');
+    Route::get('/facilities/{facility}', [StaffFacilityController::class, 'show'])->name('facilities.show');
+    Route::post('/facilities/{facility}/update-status', [StaffFacilityController::class, 'updateStatus'])->name('facilities.update-status');
 });
 
 
