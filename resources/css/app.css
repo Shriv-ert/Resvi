@@ -1,9 +1,167 @@
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+  /* Brand Surface Colors - Dark Mode Default */
+  --color-canvas: #0a0a0a;
+  --color-canvas-soft: #111111;
+  --color-canvas-soft-2: #161616;
+
+  /* Ink & Typography Colors */
+  --color-ink: #ededed;
+  --color-primary: #ffffff;
+  --color-on-primary: #000000;
+  --color-body: #a1a1a1;
+  --color-mute: #666666;
+
+  /* Hairlines & Dividers */
+  --color-hairline: #333333;
+  --color-hairline-strong: #444444;
+
+  /* Semantics */
+  --color-link: #0070f3;
+  --color-link-deep: #3291ff;
+  --color-link-bg-soft: #001733;
+  --color-success: #50e3c2;
+  --color-error: #ff453a;
+  --color-error-soft: #330d0d;
+  --color-error-deep: #ee0000;
+  --color-warning: #f5a623;
+  --color-warning-soft: #332200;
+  --color-warning-deep: #f5a623;
+
+  /* Accents & Mesh Gradient stops */
+  --color-violet: #7928ca;
+  --color-cyan: #50e3c2;
+  --color-highlight-pink: #ff0080;
+
+  /* Typography */
+  --font-sans: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Strict Micro Radii (Section 1: 0px or micro 6px) */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 6px;
+  --radius-lg: 6px;
+  --radius-pill: 9999px;
+}
+
+/* Global Vercel Dark Mode Aesthetics */
+body {
+  font-family: var(--font-sans);
+  background-color: #0a0a0a;
+  color: #ededed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Page Shell & Container Standard */
+.page-container {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+@media (min-width: 640px) {
+  .page-container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+/* Vercel Grid Architecture (Section 1.B: 1px divider lines in dark mode) */
+.vercel-grid {
+  display: grid;
+  background-color: #333333;
+  gap: 1px;
+  border: 1px solid #333333;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.vercel-grid-cell {
+  background-color: #111111;
+  padding: 24px;
+  transition: background-color 0.15s ease;
+}
+
+.vercel-grid-cell:hover {
+  background-color: #171717;
+}
+
+/* Mesh Gradients */
+.mesh-gradient-hero {
+  background: radial-gradient(circle at 50% 0%, rgba(0, 112, 243, 0.2) 0%, rgba(121, 40, 202, 0.15) 35%, rgba(255, 0, 128, 0.08) 70%, transparent 100%);
+}
+
+.mesh-gradient-bar {
+  background: linear-gradient(90deg, #007cf0 0%, #00dfd8 25%, #7928ca 50%, #ff0080 75%, #f9cb28 100%);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: #333333;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}
+
+/* Hide number input spinners / steppers */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+input[type="number"] {
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+}
+
+/* Custom Range Slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #222222;
+  border-radius: 9999px;
+  height: 6px;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  border: 2px solid #000000;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  border: 2px solid #000000;
 }
