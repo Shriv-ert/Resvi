@@ -60,22 +60,45 @@
             <!-- Two Columns: Type & Location -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <!-- Type -->
-                <div class="space-y-1.5">
+                <div class="space-y-1.5 relative custom-dropdown" id="dropdown-type">
                     <label for="type" class="block text-xs font-medium text-[#a1a1a1]">
                         Tipe Fasilitas <span class="text-[#ff453a]">*</span>
                     </label>
-                    <select
-                        id="type"
-                        name="type"
-                        required
-                        class="w-full bg-[#0a0a0a] border @error('type') border-[#ff453a] @else border-[#333333] @enderror text-white text-xs rounded-[6px] px-3.5 py-2.5 focus:outline-none focus:border-white transition font-mono"
-                    >
+                    <input type="hidden" id="type" name="type" value="{{ old('type', $fTypeVal) }}" required>
+                    @php
+                        $curEditType = old('type', $fTypeVal);
+                        $curEditTypeLabel = 'Pilih Tipe Fasilitas';
+                        foreach(\App\Enums\FacilityType::cases() as $t) {
+                            if ($t->value === $curEditType) $curEditTypeLabel = $t->label();
+                        }
+                    @endphp
+                    <button type="button" onclick="toggleCustomDropdown('type')" id="typeTrigger"
+                            class="w-full bg-[#0a0a0a] border @error('type') border-[#ff453a] @else border-[#333333] @enderror hover:border-[#555555] text-white text-xs rounded-[6px] px-3.5 py-2.5 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                        <span id="typeLabel">{{ $curEditTypeLabel }}</span>
+                        <svg id="typeChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div id="typeMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                        <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                            <div class="relative">
+                                <input type="text" placeholder="Cari tipe fasilitas..." 
+                                       id="search-type"
+                                       oninput="filterDropdownOptions(this, 'typeMenu')"
+                                       onclick="event.stopPropagation()"
+                                       class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                                <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
                         @foreach(\App\Enums\FacilityType::cases() as $typeEnum)
-                            <option value="{{ $typeEnum->value }}" @selected(old('type', $fTypeVal) === $typeEnum->value)>
-                                {{ $typeEnum->label() }}
-                            </option>
+                            <div onclick="selectCustomDropdown('type', '{{ $typeEnum->value }}', '{{ $typeEnum->label() }}')" data-value="{{ $typeEnum->value }}" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $curEditType === $typeEnum->value ? 'bg-[#1f1f1f] text-white' : '' }}">
+                                <span>{{ $typeEnum->label() }}</span>
+                                <span class="check-icon text-[#50e3c2] text-xs {{ $curEditType === $typeEnum->value ? '' : 'hidden' }}">✓</span>
+                            </div>
                         @endforeach
-                    </select>
+                    </div>
                     @error('type')
                         <p class="text-[11px] text-[#ff453a] font-mono">{{ $message }}</p>
                     @enderror

@@ -48,10 +48,14 @@
 
     <style>
         body { font-family: 'Geist', 'Inter', sans-serif; background-color: #0a0a0a; color: #ededed; -webkit-font-smoothing: antialiased; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #333333; border-radius: 9999px; }
         ::-webkit-scrollbar-thumb:hover { background: #555555; }
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #333333 transparent;
+        }
         .mesh-line { background: linear-gradient(90deg, #007cf0 0%, #00dfd8 25%, #7928ca 50%, #ff0080 75%, #f9cb28 100%); }
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
@@ -210,6 +214,78 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        function toggleCustomDropdown(id) {
+            const menu = document.getElementById(id + 'Menu');
+            const chevron = document.getElementById(id + 'Chevron');
+            const isOpen = menu && !menu.classList.contains('hidden');
+
+            document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+            document.querySelectorAll('.custom-dropdown-chevron').forEach(c => c.classList.remove('rotate-180'));
+
+            if (!isOpen && menu) {
+                menu.classList.remove('hidden');
+                if (chevron) chevron.classList.add('rotate-180');
+
+                const searchInput = menu.querySelector('input[type="text"]');
+                if (searchInput) {
+                    searchInput.value = '';
+                    filterDropdownOptions(searchInput, id + 'Menu');
+                    setTimeout(() => searchInput.focus(), 50);
+                }
+            }
+        }
+
+        function filterDropdownOptions(inputEl, menuId) {
+            const q = inputEl.value.toLowerCase().trim();
+            const menu = document.getElementById(menuId);
+            if (!menu) return;
+            menu.querySelectorAll('.dropdown-item').forEach(item => {
+                const text = item.innerText.toLowerCase();
+                item.style.display = text.includes(q) ? 'flex' : 'none';
+            });
+        }
+
+        function selectCustomDropdown(id, val, label, onSelectCallback) {
+            const input = document.getElementById(id);
+            const labelEl = document.getElementById(id + 'Label');
+            const menu = document.getElementById(id + 'Menu');
+            const chevron = document.getElementById(id + 'Chevron');
+
+            if (input) input.value = val;
+            if (labelEl) labelEl.innerText = label;
+
+            if (menu) {
+                menu.querySelectorAll('.dropdown-item').forEach(item => {
+                    if (item.dataset.value === val) {
+                        item.classList.add('bg-[#1f1f1f]', 'text-white');
+                        const check = item.querySelector('.check-icon');
+                        if (check) check.classList.remove('hidden');
+                    } else {
+                        item.classList.remove('bg-[#1f1f1f]', 'text-white');
+                        const check = item.querySelector('.check-icon');
+                        if (check) check.classList.add('hidden');
+                    }
+                });
+                menu.classList.add('hidden');
+            }
+            if (chevron) chevron.classList.remove('rotate-180');
+
+            if (typeof onSelectCallback === 'function') {
+                onSelectCallback(val, label);
+            } else if (typeof window[onSelectCallback] === 'function') {
+                window[onSelectCallback](val, label);
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.custom-dropdown')) {
+                document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+                document.querySelectorAll('.custom-dropdown-chevron').forEach(c => c.classList.remove('rotate-180'));
+            }
+        });
+    </script>
 
     @stack('scripts')
 </body>

@@ -89,47 +89,79 @@
 
             <!-- Row 1: Period Selection (Month, Year) -->
             <div class="flex flex-wrap items-center gap-4">
-                <div class="w-full sm:w-auto">
-                    <label for="month" class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1.5">
+                @php
+                    $months = [
+                        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+                    ];
+                @endphp
+                <div class="w-full sm:w-auto relative custom-dropdown" id="dropdown-month">
+                    <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1.5">
                         Bulan Kalender
                     </label>
-                    <select
-                        id="month"
-                        name="month"
-                        class="w-full sm:w-52 bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] px-3 py-2 focus:outline-none focus:border-white transition font-mono"
-                        onchange="this.form.submit()"
-                    >
-                        @php
-                            $months = [
-                                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
-                            ];
-                        @endphp
+                    <input type="hidden" id="month" name="month" value="{{ $selectedMonth }}">
+                    <button type="button" onclick="toggleCustomDropdown('month')" id="monthTrigger"
+                            class="w-full sm:w-52 bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                        <span id="monthLabel">{{ $months[$selectedMonth] ?? 'Pilih Bulan' }}</span>
+                        <svg id="monthChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div id="monthMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 sm:right-auto sm:w-52 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                        <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                            <div class="relative">
+                                <input type="text" placeholder="Cari bulan..." 
+                                       id="search-month"
+                                       oninput="filterDropdownOptions(this, 'monthMenu')"
+                                       onclick="event.stopPropagation()"
+                                       class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                                <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
                         @foreach ($months as $num => $name)
-                            <option value="{{ $num }}" @selected($selectedMonth == $num)>
-                                {{ $name }}
-                            </option>
+                            <div onclick="selectCustomDropdown('month', '{{ $num }}', '{{ $name }}', () => document.getElementById('recapFilterForm').submit())" data-value="{{ $num }}" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $selectedMonth == $num ? 'bg-[#1f1f1f] text-white' : '' }}">
+                                <span>{{ $name }}</span>
+                                <span class="check-icon text-[#50e3c2] text-xs {{ $selectedMonth == $num ? '' : 'hidden' }}">✓</span>
+                            </div>
                         @endforeach
-                    </select>
+                    </div>
                 </div>
 
-                <div class="w-full sm:w-auto">
-                    <label for="year" class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1.5">
+                <div class="w-full sm:w-auto relative custom-dropdown" id="dropdown-year">
+                    <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1.5">
                         Tahun
                     </label>
-                    <select
-                        id="year"
-                        name="year"
-                        class="w-full sm:w-36 bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] px-3 py-2 focus:outline-none focus:border-white transition font-mono"
-                        onchange="this.form.submit()"
-                    >
+                    <input type="hidden" id="year" name="year" value="{{ $selectedYear }}">
+                    <button type="button" onclick="toggleCustomDropdown('year')" id="yearTrigger"
+                            class="w-full sm:w-36 bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                        <span id="yearLabel">{{ $selectedYear }}</span>
+                        <svg id="yearChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div id="yearMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 sm:right-auto sm:w-36 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                        <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                            <div class="relative">
+                                <input type="text" placeholder="Cari tahun..." 
+                                       id="search-year"
+                                       oninput="filterDropdownOptions(this, 'yearMenu')"
+                                       onclick="event.stopPropagation()"
+                                       class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                                <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
                         @for ($y = (int) now()->year + 1; $y >= 2024; $y--)
-                            <option value="{{ $y }}" @selected($selectedYear == $y)>
-                                {{ $y }}
-                            </option>
+                            <div onclick="selectCustomDropdown('year', '{{ $y }}', '{{ $y }}', () => document.getElementById('recapFilterForm').submit())" data-value="{{ $y }}" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $selectedYear == $y ? 'bg-[#1f1f1f] text-white' : '' }}">
+                                <span>{{ $y }}</span>
+                                <span class="check-icon text-[#50e3c2] text-xs {{ $selectedYear == $y ? '' : 'hidden' }}">✓</span>
+                            </div>
                         @endfor
-                    </select>
+                    </div>
                 </div>
             </div>
 

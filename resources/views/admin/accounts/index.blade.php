@@ -44,31 +44,92 @@
             </div>
         </div>
 
-        <div>
-            <label for="roleSelect" class="block text-[10px] font-mono uppercase text-[#888888] tracking-wider mb-1.5">Peran</label>
-            <select 
-                id="roleSelect" 
-                name="role"
-                class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] px-3 py-2 focus:outline-none focus:border-white transition font-mono"
-            >
-                <option value="">Semua Peran</option>
-                <option value="petugas" {{ request('role', $selectedRole ?? '') === 'petugas' ? 'selected' : '' }}>Petugas</option>
-                <option value="pengguna" {{ request('role', $selectedRole ?? '') === 'pengguna' ? 'selected' : '' }}>Pengguna</option>
-            </select>
+        <div class="relative custom-dropdown" id="dropdown-roleSelect">
+            <label class="block text-[10px] font-mono uppercase text-[#888888] tracking-wider mb-1.5">Peran</label>
+            <input type="hidden" id="roleSelect" name="role" value="{{ request('role', $selectedRole ?? '') }}">
+            @php
+                $curRoleVal = request('role', $selectedRole ?? '');
+                $curRoleLabel = $curRoleVal === 'petugas' ? 'Petugas' : ($curRoleVal === 'pengguna' ? 'Pengguna' : 'Semua Peran');
+            @endphp
+            <button type="button" onclick="toggleCustomDropdown('roleSelect')" id="roleSelectTrigger"
+                    class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                <span id="roleSelectLabel">{{ $curRoleLabel }}</span>
+                <svg id="roleSelectChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </button>
+            <div id="roleSelectMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                    <div class="relative">
+                        <input type="text" placeholder="Cari peran..." 
+                               id="search-roleSelect"
+                               oninput="filterDropdownOptions(this, 'roleSelectMenu')"
+                               onclick="event.stopPropagation()"
+                               class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                        <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div onclick="selectCustomDropdown('roleSelect', '', 'Semua Peran')" data-value="" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between {{ empty($curRoleVal) ? 'bg-[#1f1f1f]' : '' }}">
+                    <span>Semua Peran</span>
+                    <span class="check-icon text-[#50e3c2] text-xs {{ empty($curRoleVal) ? '' : 'hidden' }}">✓</span>
+                </div>
+                <div onclick="selectCustomDropdown('roleSelect', 'petugas', 'Petugas')" data-value="petugas" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $curRoleVal === 'petugas' ? 'bg-[#1f1f1f] text-white' : '' }}">
+                    <span>Petugas</span>
+                    <span class="check-icon text-[#50e3c2] text-xs {{ $curRoleVal === 'petugas' ? '' : 'hidden' }}">✓</span>
+                </div>
+                <div onclick="selectCustomDropdown('roleSelect', 'pengguna', 'Pengguna')" data-value="pengguna" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $curRoleVal === 'pengguna' ? 'bg-[#1f1f1f] text-white' : '' }}">
+                    <span>Pengguna</span>
+                    <span class="check-icon text-[#50e3c2] text-xs {{ $curRoleVal === 'pengguna' ? '' : 'hidden' }}">✓</span>
+                </div>
+            </div>
         </div>
 
-        <div>
-            <label for="categorySelect" class="block text-[10px] font-mono uppercase text-[#888888] tracking-wider mb-1.5">Kategori Civitas</label>
-            <select 
-                id="categorySelect" 
-                name="category"
-                class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] px-3 py-2 focus:outline-none focus:border-white transition font-mono"
-            >
-                <option value="">Semua Kategori</option>
-                <option value="mahasiswa" {{ request('category', $selectedCategory ?? '') === 'mahasiswa' ? 'selected' : '' }}>Mahasiswa</option>
-                <option value="dosen" {{ request('category', $selectedCategory ?? '') === 'dosen' ? 'selected' : '' }}>Dosen</option>
-                <option value="staf" {{ request('category', $selectedCategory ?? '') === 'staf' ? 'selected' : '' }}>Staf</option>
-            </select>
+        <div class="relative custom-dropdown" id="dropdown-categorySelect">
+            <label class="block text-[10px] font-mono uppercase text-[#888888] tracking-wider mb-1.5">Kategori Civitas</label>
+            <input type="hidden" id="categorySelect" name="category" value="{{ request('category', $selectedCategory ?? '') }}">
+            @php
+                $curCatVal = request('category', $selectedCategory ?? '');
+                $curCatLabel = $curCatVal === 'mahasiswa' ? 'Mahasiswa' : ($curCatVal === 'dosen' ? 'Dosen' : ($curCatVal === 'staf' ? 'Staf' : 'Semua Kategori'));
+            @endphp
+            <button type="button" onclick="toggleCustomDropdown('categorySelect')" id="categorySelectTrigger"
+                    class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                <span id="categorySelectLabel">{{ $curCatLabel }}</span>
+                <svg id="categorySelectChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </button>
+            <div id="categorySelectMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                    <div class="relative">
+                        <input type="text" placeholder="Cari kategori civitas..." 
+                               id="search-categorySelect"
+                               oninput="filterDropdownOptions(this, 'categorySelectMenu')"
+                               onclick="event.stopPropagation()"
+                               class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                        <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div onclick="selectCustomDropdown('categorySelect', '', 'Semua Kategori')" data-value="" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between {{ empty($curCatVal) ? 'bg-[#1f1f1f]' : '' }}">
+                    <span>Semua Kategori</span>
+                    <span class="check-icon text-[#50e3c2] text-xs {{ empty($curCatVal) ? '' : 'hidden' }}">✓</span>
+                </div>
+                <div onclick="selectCustomDropdown('categorySelect', 'mahasiswa', 'Mahasiswa')" data-value="mahasiswa" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $curCatVal === 'mahasiswa' ? 'bg-[#1f1f1f] text-white' : '' }}">
+                    <span>Mahasiswa</span>
+                    <span class="check-icon text-[#50e3c2] text-xs {{ $curCatVal === 'mahasiswa' ? '' : 'hidden' }}">✓</span>
+                </div>
+                <div onclick="selectCustomDropdown('categorySelect', 'dosen', 'Dosen')" data-value="dosen" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $curCatVal === 'dosen' ? 'bg-[#1f1f1f] text-white' : '' }}">
+                    <span>Dosen</span>
+                    <span class="check-icon text-[#50e3c2] text-xs {{ $curCatVal === 'dosen' ? '' : 'hidden' }}">✓</span>
+                </div>
+                <div onclick="selectCustomDropdown('categorySelect', 'staf', 'Staf')" data-value="staf" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $curCatVal === 'staf' ? 'bg-[#1f1f1f] text-white' : '' }}">
+                    <span>Staf</span>
+                    <span class="check-icon text-[#50e3c2] text-xs {{ $curCatVal === 'staf' ? '' : 'hidden' }}">✓</span>
+                </div>
+            </div>
         </div>
 
         <div class="flex items-center gap-2">

@@ -117,20 +117,52 @@
             </div>
 
             <!-- Category Field (Required if role = pengguna, SRS FR-ADM-03) -->
-            <div id="categoryContainer" class="space-y-1.5">
+            <div id="categoryContainer" class="space-y-1.5 relative custom-dropdown" id="dropdown-user_category">
                 <label for="user_category" class="block text-xs font-medium text-[#a1a1a1]">
                     Kategori Pengguna <span class="text-rose-500">*</span>
                 </label>
-                <select 
-                    id="user_category" 
-                    name="user_category" 
-                    class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-sm rounded-[6px] px-3.5 py-2.5 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition font-mono"
-                >
-                    <option value="">Pilih Kategori Civitas...</option>
-                    <option value="mahasiswa" {{ old('user_category') === 'mahasiswa' ? 'selected' : '' }}>Mahasiswa</option>
-                    <option value="dosen" {{ old('user_category') === 'dosen' ? 'selected' : '' }}>Dosen</option>
-                    <option value="staf" {{ old('user_category') === 'staf' ? 'selected' : '' }}>Staf</option>
-                </select>
+                <input type="hidden" id="user_category" name="user_category" value="{{ old('user_category', '') }}">
+                @php
+                    $curUserCat = old('user_category', '');
+                    $curUserCatLabel = $curUserCat === 'mahasiswa' ? 'Mahasiswa' : ($curUserCat === 'dosen' ? 'Dosen' : ($curUserCat === 'staf' ? 'Staf' : 'Pilih Kategori Civitas...'));
+                @endphp
+                <button type="button" onclick="toggleCustomDropdown('user_category')" id="user_categoryTrigger"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3.5 py-2.5 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                    <span id="user_categoryLabel">{{ $curUserCatLabel }}</span>
+                    <svg id="user_categoryChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div id="user_categoryMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                    <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                        <div class="relative">
+                            <input type="text" placeholder="Cari kategori civitas..." 
+                                   id="search-user_category"
+                                   oninput="filterDropdownOptions(this, 'user_categoryMenu')"
+                                   onclick="event.stopPropagation()"
+                                   class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                            <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div onclick="selectCustomDropdown('user_category', '', 'Pilih Kategori Civitas...')" data-value="" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between {{ empty($curUserCat) ? 'bg-[#1f1f1f]' : '' }}">
+                        <span>Pilih Kategori Civitas...</span>
+                        <span class="check-icon text-[#50e3c2] text-xs {{ empty($curUserCat) ? '' : 'hidden' }}">✓</span>
+                    </div>
+                    <div onclick="selectCustomDropdown('user_category', 'mahasiswa', 'Mahasiswa')" data-value="mahasiswa" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $curUserCat === 'mahasiswa' ? 'bg-[#1f1f1f] text-white' : '' }}">
+                        <span>Mahasiswa</span>
+                        <span class="check-icon text-[#50e3c2] text-xs {{ $curUserCat === 'mahasiswa' ? '' : 'hidden' }}">✓</span>
+                    </div>
+                    <div onclick="selectCustomDropdown('user_category', 'dosen', 'Dosen')" data-value="dosen" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $curUserCat === 'dosen' ? 'bg-[#1f1f1f] text-white' : '' }}">
+                        <span>Dosen</span>
+                        <span class="check-icon text-[#50e3c2] text-xs {{ $curUserCat === 'dosen' ? '' : 'hidden' }}">✓</span>
+                    </div>
+                    <div onclick="selectCustomDropdown('user_category', 'staf', 'Staf')" data-value="staf" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $curUserCat === 'staf' ? 'bg-[#1f1f1f] text-white' : '' }}">
+                        <span>Staf</span>
+                        <span class="check-icon text-[#50e3c2] text-xs {{ $curUserCat === 'staf' ? '' : 'hidden' }}">✓</span>
+                    </div>
+                </div>
                 @error('user_category')
                     <p class="mt-1 text-xs text-rose-400 font-medium">{{ $message }}</p>
                 @enderror

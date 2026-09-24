@@ -62,6 +62,53 @@
             -webkit-appearance: none; 
             margin: 0; 
         }
+
+        /* Custom sleek dark scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333333; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555555; }
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #333333 transparent;
+        }
+
+        /* Custom Range Slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: #222222;
+            border-radius: 9999px;
+            height: 6px;
+            outline: none;
+            cursor: pointer;
+            touch-action: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: grab;
+            border: 2px solid #000000;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:active {
+            cursor: grabbing;
+            transform: scale(1.15);
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: grab;
+            border: 2px solid #000000;
+        }
     </style>
 </head>
 <body class="min-h-screen bg-[#0a0a0a] text-[#ededed] flex flex-col font-sans selection:bg-[#333333] selection:text-white">

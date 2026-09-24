@@ -48,51 +48,134 @@
             </div>
 
             <!-- Tipe Fasilitas -->
-            <div class="space-y-1.5">
-                <label for="type" class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Tipe Fasilitas</label>
-                <select 
-                    id="type"
-                    name="type"
-                    class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] px-3 py-2 focus:outline-none focus:border-white transition font-mono"
-                >
-                    <option value="">Semua Tipe</option>
+            <div class="space-y-1.5 relative custom-dropdown" id="dropdown-type">
+                <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Tipe Fasilitas</label>
+                <input type="hidden" id="type" name="type" value="{{ $selectedType ?? request('type', '') }}">
+                @php
+                    $curTypeVal = $selectedType ?? request('type', '');
+                    $curTypeLabel = 'Semua Tipe';
+                    foreach(\App\Enums\FacilityType::cases() as $t) {
+                        if ($t->value === $curTypeVal) $curTypeLabel = $t->label();
+                    }
+                @endphp
+                <button type="button" onclick="toggleCustomDropdown('type')" id="typeTrigger"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                    <span id="typeLabel">{{ $curTypeLabel }}</span>
+                    <svg id="typeChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div id="typeMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-72 overflow-y-auto">
+                    <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                        <div class="relative">
+                            <input type="text" placeholder="Cari tipe fasilitas..." 
+                                   id="search-type"
+                                   oninput="filterDropdownOptions(this, 'typeMenu')"
+                                   onclick="event.stopPropagation()"
+                                   class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                            <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div onclick="selectCustomDropdown('type', '', 'Semua Tipe')" data-value="" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between {{ empty($curTypeVal) ? 'bg-[#1f1f1f]' : '' }}">
+                        <span>Semua Tipe</span>
+                        <span class="check-icon text-[#50e3c2] text-xs {{ empty($curTypeVal) ? '' : 'hidden' }}">✓</span>
+                    </div>
                     @foreach(\App\Enums\FacilityType::cases() as $typeEnum)
-                        <option value="{{ $typeEnum->value }}" @selected(($selectedType ?? request('type')) === $typeEnum->value)>
-                            {{ $typeEnum->label() }}
-                        </option>
+                        <div onclick="selectCustomDropdown('type', '{{ $typeEnum->value }}', '{{ $typeEnum->label() }}')" data-value="{{ $typeEnum->value }}" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $curTypeVal === $typeEnum->value ? 'bg-[#1f1f1f] text-white' : '' }}">
+                            <span>{{ $typeEnum->label() }}</span>
+                            <span class="check-icon text-[#50e3c2] text-xs {{ $curTypeVal === $typeEnum->value ? '' : 'hidden' }}">✓</span>
+                        </div>
                     @endforeach
-                </select>
+                </div>
             </div>
 
             <!-- Status Master -->
-            <div class="space-y-1.5">
-                <label for="master_status" class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Status Data Master</label>
-                <select 
-                    id="master_status"
-                    name="master_status"
-                    class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] px-3 py-2 focus:outline-none focus:border-white transition font-mono"
-                >
-                    <option value="">Semua Status Master</option>
-                    <option value="active" @selected(($selectedMasterStatus ?? request('master_status')) === 'active')>Aktif</option>
-                    <option value="inactive" @selected(($selectedMasterStatus ?? request('master_status')) === 'inactive')>Nonaktif</option>
-                </select>
+            <div class="space-y-1.5 relative custom-dropdown" id="dropdown-master_status">
+                <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Status Data Master</label>
+                <input type="hidden" id="master_status" name="master_status" value="{{ $selectedMasterStatus ?? request('master_status', '') }}">
+                @php
+                    $curMasterVal = $selectedMasterStatus ?? request('master_status', '');
+                    $curMasterLabel = $curMasterVal === 'active' ? 'Aktif' : ($curMasterVal === 'inactive' ? 'Nonaktif' : 'Semua Status Master');
+                @endphp
+                <button type="button" onclick="toggleCustomDropdown('master_status')" id="master_statusTrigger"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                    <span id="master_statusLabel">{{ $curMasterLabel }}</span>
+                    <svg id="master_statusChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div id="master_statusMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                    <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                        <div class="relative">
+                            <input type="text" placeholder="Cari status master..." 
+                                   id="search-master_status"
+                                   oninput="filterDropdownOptions(this, 'master_statusMenu')"
+                                   onclick="event.stopPropagation()"
+                                   class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                            <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div onclick="selectCustomDropdown('master_status', '', 'Semua Status Master')" data-value="" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between {{ empty($curMasterVal) ? 'bg-[#1f1f1f]' : '' }}">
+                        <span>Semua Status Master</span>
+                        <span class="check-icon text-[#50e3c2] text-xs {{ empty($curMasterVal) ? '' : 'hidden' }}">✓</span>
+                    </div>
+                    <div onclick="selectCustomDropdown('master_status', 'active', 'Aktif')" data-value="active" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $curMasterVal === 'active' ? 'bg-[#1f1f1f] text-white' : '' }}">
+                        <span>Aktif</span>
+                        <span class="check-icon text-[#50e3c2] text-xs {{ $curMasterVal === 'active' ? '' : 'hidden' }}">✓</span>
+                    </div>
+                    <div onclick="selectCustomDropdown('master_status', 'inactive', 'Nonaktif')" data-value="inactive" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $curMasterVal === 'inactive' ? 'bg-[#1f1f1f] text-white' : '' }}">
+                        <span>Nonaktif</span>
+                        <span class="check-icon text-[#50e3c2] text-xs {{ $curMasterVal === 'inactive' ? '' : 'hidden' }}">✓</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Status Operasional -->
-            <div class="space-y-1.5">
-                <label for="operational_status" class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Status Operasional</label>
-                <select 
-                    id="operational_status"
-                    name="operational_status"
-                    class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] px-3 py-2 focus:outline-none focus:border-white transition font-mono"
-                >
-                    <option value="">Semua Status Operasional</option>
+            <div class="space-y-1.5 relative custom-dropdown" id="dropdown-operational_status">
+                <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Status Operasional</label>
+                <input type="hidden" id="operational_status" name="operational_status" value="{{ $selectedOperationalStatus ?? request('operational_status', '') }}">
+                @php
+                    $curOpVal = $selectedOperationalStatus ?? request('operational_status', '');
+                    $curOpLabel = 'Semua Status Operasional';
+                    foreach(\App\Enums\OperationalStatus::cases() as $op) {
+                        if ($op->value === $curOpVal) $curOpLabel = $op->label();
+                    }
+                @endphp
+                <button type="button" onclick="toggleCustomDropdown('operational_status')" id="operational_statusTrigger"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                    <span id="operational_statusLabel">{{ $curOpLabel }}</span>
+                    <svg id="operational_statusChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div id="operational_statusMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                    <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                        <div class="relative">
+                            <input type="text" placeholder="Cari status operasional..." 
+                                   id="search-operational_status"
+                                   oninput="filterDropdownOptions(this, 'operational_statusMenu')"
+                                   onclick="event.stopPropagation()"
+                                   class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                            <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div onclick="selectCustomDropdown('operational_status', '', 'Semua Status Operasional')" data-value="" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between {{ empty($curOpVal) ? 'bg-[#1f1f1f]' : '' }}">
+                        <span>Semua Status Operasional</span>
+                        <span class="check-icon text-[#50e3c2] text-xs {{ empty($curOpVal) ? '' : 'hidden' }}">✓</span>
+                    </div>
                     @foreach(\App\Enums\OperationalStatus::cases() as $opEnum)
-                        <option value="{{ $opEnum->value }}" @selected(($selectedOperationalStatus ?? request('operational_status')) === $opEnum->value)>
-                            {{ $opEnum->label() }}
-                        </option>
+                        <div onclick="selectCustomDropdown('operational_status', '{{ $opEnum->value }}', '{{ $opEnum->label() }}')" data-value="{{ $opEnum->value }}" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $curOpVal === $opEnum->value ? 'bg-[#1f1f1f] text-white' : '' }}">
+                            <span>{{ $opEnum->label() }}</span>
+                            <span class="check-icon text-[#50e3c2] text-xs {{ $curOpVal === $opEnum->value ? '' : 'hidden' }}">✓</span>
+                        </div>
                     @endforeach
-                </select>
+                </div>
             </div>
 
             <div class="sm:col-span-2 lg:col-span-4 flex items-center justify-between pt-2 border-t border-[#333333]">

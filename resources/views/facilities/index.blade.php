@@ -66,7 +66,20 @@
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                     </button>
-                    <div id="typeMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                    <div id="typeMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-80 overflow-y-auto">
+                        <!-- Dropdown Search Box -->
+                        <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                            <div class="relative">
+                                <input type="text" placeholder="Cari tipe fasilitas..." 
+                                       id="search-type"
+                                       oninput="filterDropdownOptions(this, 'typeMenu')"
+                                       onclick="event.stopPropagation()"
+                                       class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                                <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
                         <div onclick="selectCustomDropdown('type', '', 'Semua Tipe')" data-value="" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between {{ empty(request('type')) ? 'bg-[#1f1f1f]' : '' }}">
                             <span>Semua Tipe</span>
                             <span class="check-icon text-[#50e3c2] text-xs {{ empty(request('type')) ? '' : 'hidden' }}">✓</span>
@@ -110,6 +123,19 @@
                         </svg>
                     </button>
                     <div id="locationMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                        <!-- Dropdown Search Box -->
+                        <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                            <div class="relative">
+                                <input type="text" placeholder="Cari lokasi gedung..." 
+                                       id="search-location"
+                                       oninput="filterDropdownOptions(this, 'locationMenu')"
+                                       onclick="event.stopPropagation()"
+                                       class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                                <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
                         <div onclick="selectCustomDropdown('location', '', 'Semua Lokasi')" data-value="" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between {{ empty(request('location')) ? 'bg-[#1f1f1f]' : '' }}">
                             <span>Semua Lokasi</span>
                             <span class="check-icon text-[#50e3c2] text-xs {{ empty(request('location')) ? '' : 'hidden' }}">✓</span>
@@ -134,18 +160,79 @@
                     </div>
                 </div>
 
-                <!-- Filter Capacity -->
-                <div class="space-y-1.5 relative">
-                    <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Min. Kapasitas (Orang)</label>
-                    <input
-                        type="number"
-                        id="capacity"
-                        name="capacity"
-                        min="0"
-                        value="{{ request('capacity', '') }}"
-                        placeholder="Contoh: 30"
-                        class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] px-3 py-2 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]"
-                    >
+                <!-- Custom Capacity Input + Range Slider Popover -->
+                <div class="space-y-1.5 relative" id="capacityFilterContainer">
+                    <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Kapasitas</label>
+                    <div class="relative flex items-center">
+                        <input type="number" id="capacityInput" min="0" max="250" 
+                               value="{{ request('capacity') }}"
+                               placeholder="Semua (0)" 
+                               oninput="onManualCapacityInput(this.value)"
+                               onfocus="openCapacityPopup()"
+                               class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] focus:border-white text-white text-xs rounded-[6px] pl-3 pr-9 py-2 focus:outline-none transition font-mono">
+                        <button type="button" onclick="toggleCapacityPopup()" title="Buka slider range kapasitas" class="absolute right-1 px-1.5 py-1 text-[#888888] hover:text-white transition rounded-[4px] hover:bg-[#1f1f1f]">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="4" y1="21" x2="4" y2="14"></line>
+                                <line x1="4" y1="10" x2="4" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12" y2="3"></line>
+                                <line x1="20" y1="21" x2="20" y2="16"></line>
+                                <line x1="20" y1="12" x2="20" y2="3"></line>
+                                <line x1="1" y1="14" x2="7" y2="14"></line>
+                                <line x1="9" y1="8" x2="15" y2="8"></line>
+                                <line x1="17" y1="16" x2="23" y2="16"></line>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <input type="hidden" id="capacity" name="capacity" value="{{ request('capacity', 0) }}">
+
+                    <!-- Popup Range Kapasitas Slider -->
+                    <div id="capacityPopup" class="hidden absolute top-full left-0 right-0 sm:right-auto sm:w-80 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[8px] p-4 shadow-2xl backdrop-blur-md space-y-4">
+                        <div class="flex items-center justify-between border-b border-[#222222] pb-2.5">
+                            <span class="text-xs font-semibold text-white">Range Kapasitas</span>
+                            <span class="font-mono text-xs px-2 py-0.5 rounded-[4px] bg-[#1a1a1a] text-[#50e3c2] border border-[#333333]" id="sliderCapDisplay">
+                                @if(request('capacity') > 0)
+                                    ≥ {{ request('capacity') }} Orang
+                                @else
+                                    Semua (0 Orang)
+                                @endif
+                            </span>
+                        </div>
+
+                        <!-- Slider Range -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-[10px] font-mono text-[#888888]">
+                                <span>0</span>
+                                <span>50</span>
+                                <span>100</span>
+                                <span>150+</span>
+                            </div>
+                            <input type="range" id="capacitySlider" min="0" max="150" step="5" value="{{ request('capacity', 0) }}"
+                                   oninput="onSliderCapacityChange(this.value)"
+                                   class="w-full accent-[#50e3c2]">
+                        </div>
+
+                        <!-- Preset Chips -->
+                        <div class="space-y-1.5">
+                            <span class="text-[10px] font-mono uppercase text-[#888888] tracking-wider block">Pilihan Cepat</span>
+                            <div class="grid grid-cols-4 gap-1.5 text-[11px] font-mono">
+                                <button type="button" onclick="setCapacityPreset(0)" class="px-2 py-1 rounded-[4px] bg-[#1a1a1a] hover:bg-[#262626] border border-[#333333] text-[#ededed] text-center transition">Semua</button>
+                                <button type="button" onclick="setCapacityPreset(20)" class="px-2 py-1 rounded-[4px] bg-[#1a1a1a] hover:bg-[#262626] border border-[#333333] text-[#ededed] text-center transition">≥ 20</button>
+                                <button type="button" onclick="setCapacityPreset(40)" class="px-2 py-1 rounded-[4px] bg-[#1a1a1a] hover:bg-[#262626] border border-[#333333] text-[#ededed] text-center transition">≥ 40</button>
+                                <button type="button" onclick="setCapacityPreset(80)" class="px-2 py-1 rounded-[4px] bg-[#1a1a1a] hover:bg-[#262626] border border-[#333333] text-[#ededed] text-center transition">≥ 80</button>
+                            </div>
+                        </div>
+
+                        <div class="text-[10px] text-[#777777] leading-relaxed border-t border-[#222222] pt-2">
+                            *Alat tanpa kapasitas (null) dikecualikan jika kapasitas > 0.
+                        </div>
+
+                        <div class="pt-1 flex items-center justify-between text-xs">
+                            <button type="button" onclick="setCapacityPreset(0)" class="text-[#888888] hover:text-white underline text-[11px]">Reset</button>
+                            <button type="button" onclick="closeCapacityPopup()" class="px-3.5 py-1 bg-white hover:bg-[#e6e6e6] text-black font-medium rounded-[4px] text-xs transition">Tutup</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -294,13 +381,29 @@
         const chevron = document.getElementById(id + 'Chevron');
         const isOpen = menu && !menu.classList.contains('hidden');
 
-        document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
-        document.querySelectorAll('.custom-dropdown-chevron').forEach(c => c.classList.remove('rotate-180'));
+        closeAllPopups();
 
         if (!isOpen && menu) {
             menu.classList.remove('hidden');
             if (chevron) chevron.classList.add('rotate-180');
+
+            const searchInput = menu.querySelector('input[type="text"]');
+            if (searchInput) {
+                searchInput.value = '';
+                filterDropdownOptions(searchInput, id + 'Menu');
+                setTimeout(() => searchInput.focus(), 50);
+            }
         }
+    }
+
+    function filterDropdownOptions(inputEl, menuId) {
+        const q = inputEl.value.toLowerCase().trim();
+        const menu = document.getElementById(menuId);
+        if (!menu) return;
+        menu.querySelectorAll('.dropdown-item').forEach(item => {
+            const text = item.innerText.toLowerCase();
+            item.style.display = text.includes(q) ? 'flex' : 'none';
+        });
     }
 
     function selectCustomDropdown(id, val, label) {
@@ -329,10 +432,109 @@
         if (chevron) chevron.classList.remove('rotate-180');
     }
 
+    // Capacity Popover Logic
+    function closeAllPopups() {
+        document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+        document.querySelectorAll('.custom-dropdown-chevron').forEach(c => c.classList.remove('rotate-180'));
+        const capPopup = document.getElementById('capacityPopup');
+        if (capPopup) capPopup.classList.add('hidden');
+    }
+
+    function toggleCapacityPopup() {
+        const popup = document.getElementById('capacityPopup');
+        const isOpen = popup && !popup.classList.contains('hidden');
+        closeAllPopups();
+        if (!isOpen && popup) {
+            popup.classList.remove('hidden');
+        }
+    }
+
+    function openCapacityPopup() {
+        closeAllPopups();
+        const popup = document.getElementById('capacityPopup');
+        if (popup) popup.classList.remove('hidden');
+    }
+
+    function closeCapacityPopup() {
+        const popup = document.getElementById('capacityPopup');
+        if (popup) popup.classList.add('hidden');
+    }
+
+    function onManualCapacityInput(val) {
+        let num = parseInt(val, 10);
+        if (isNaN(num) || num < 0) num = 0;
+        document.getElementById('capacity').value = num;
+        const slider = document.getElementById('capacitySlider');
+        if (slider) slider.value = Math.min(num, 150);
+        updateCapacityUI(num);
+    }
+
+    function onSliderCapacityChange(val) {
+        const num = parseInt(val, 10) || 0;
+        document.getElementById('capacity').value = num;
+        const input = document.getElementById('capacityInput');
+        if (input) input.value = num === 0 ? '' : num;
+        updateCapacityUI(num);
+    }
+
+    function setCapacityPreset(num) {
+        document.getElementById('capacity').value = num;
+        const slider = document.getElementById('capacitySlider');
+        if (slider) slider.value = Math.min(num, 150);
+        const input = document.getElementById('capacityInput');
+        if (input) input.value = num === 0 ? '' : num;
+        updateCapacityUI(num);
+    }
+
+    function updateCapacityUI(num) {
+        const display = document.getElementById('sliderCapDisplay');
+        if (display) {
+            display.innerText = num > 0 ? `≥ ${num} Orang` : 'Semua (0 Orang)';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const slider = document.getElementById('capacitySlider');
+        if (slider) {
+            let isDragging = false;
+            const updateFromPointer = (e) => {
+                const rect = slider.getBoundingClientRect();
+                const pos = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+                const pct = pos / rect.width;
+                const min = parseFloat(slider.min) || 0;
+                const max = parseFloat(slider.max) || 150;
+                const step = parseFloat(slider.step) || 5;
+                let val = min + pct * (max - min);
+                val = Math.round(val / step) * step;
+                val = Math.max(min, Math.min(max, val));
+                slider.value = val;
+                onSliderCapacityChange(val);
+            };
+
+            slider.addEventListener('pointerdown', (e) => {
+                isDragging = true;
+                slider.setPointerCapture(e.pointerId);
+                updateFromPointer(e);
+            });
+            slider.addEventListener('pointermove', (e) => {
+                if (isDragging) {
+                    updateFromPointer(e);
+                }
+            });
+            const stopDrag = (e) => {
+                if (isDragging) {
+                    isDragging = false;
+                    try { slider.releasePointerCapture(e.pointerId); } catch(err) {}
+                }
+            };
+            slider.addEventListener('pointerup', stopDrag);
+            slider.addEventListener('pointercancel', stopDrag);
+        }
+    });
+
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.custom-dropdown')) {
-            document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
-            document.querySelectorAll('.custom-dropdown-chevron').forEach(c => c.classList.remove('rotate-180'));
+        if (!e.target.closest('.custom-dropdown') && !e.target.closest('#capacityFilterContainer')) {
+            closeAllPopups();
         }
     });
 </script>
