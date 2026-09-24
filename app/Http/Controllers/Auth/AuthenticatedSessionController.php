@@ -52,6 +52,10 @@ class AuthenticatedSessionController extends Controller
             return redirect()->intended(route('admin.facilities.index'));
         }
 
+        if ($user?->role === UserRole::Petugas) {
+            return redirect()->intended(route('staff.reservations.index'));
+        }
+
         return redirect()->intended(route('home'));
     }
 

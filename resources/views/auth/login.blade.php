@@ -81,6 +81,25 @@
                 <p class="text-xs text-[#a1a1a1] mt-1">Masuk dengan kredensial akun yang didaftarkan Administrator.</p>
             </div>
 
+            <!-- Error Banner -->
+            @if ($errors->any())
+                <div class="p-3.5 rounded-[6px] bg-[#2b0000] border border-[#ff453a]/40 text-xs text-[#ff453a] space-y-1">
+                    <div class="flex items-center gap-2 font-medium">
+                        <svg class="w-4 h-4 shrink-0 text-[#ff453a]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Gagal Masuk</span>
+                    </div>
+                    <p class="text-[11px] text-[#ededed]/90 pl-6">
+                        {{ $errors->first('login') ?: $errors->first('email') ?: $errors->first('password') ?: $errors->first() }}
+                    </p>
+                </div>
+            @endif
+
+            @if(session('status'))
+                <div class="p-3 rounded-[6px] bg-[#002b11] border border-[#005522] text-xs text-[#50e3c2]">
+                    {{ session('status') }}
+                </div>
+            @endif
+
             @if(request()->has('draft_facility'))
                 <div class="p-3 rounded-[6px] bg-[#001733] border border-[#003b80] text-xs text-[#0070f3] flex items-center gap-2">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -98,12 +117,12 @@
                 <div class="space-y-1.5">
                     <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium" for="email">Alamat Email</label>
                     <input
-                        class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] px-3 py-2 focus:outline-none focus:border-white transition placeholder-[#666666]"
+                        class="w-full bg-[#0a0a0a] border {{ $errors->any() ? 'border-[#ff453a]' : 'border-[#333333]' }} text-white text-xs rounded-[6px] px-3 py-2 focus:outline-none focus:border-white transition placeholder-[#666666]"
                         id="email"
                         name="email"
                         type="email"
                         required
-                        value="mahasiswa@ppk.test"
+                        value="{{ old('email', 'admin@ppk.test') }}"
                         placeholder="nama@kampus.ac.id"
                     />
                 </div>
@@ -112,7 +131,7 @@
                 <div class="space-y-1.5">
                     <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium" for="password">Kata Sandi</label>
                     <input
-                        class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] px-3 py-2 focus:outline-none focus:border-white transition placeholder-[#666666]"
+                        class="w-full bg-[#0a0a0a] border {{ $errors->any() ? 'border-[#ff453a]' : 'border-[#333333]' }} text-white text-xs rounded-[6px] px-3 py-2 focus:outline-none focus:border-white transition placeholder-[#666666]"
                         id="password"
                         name="password"
                         type="password"
@@ -133,16 +152,19 @@
 
             <!-- Quick Demo Login Helpers -->
             <div class="pt-4 border-t border-[#333333] space-y-2">
-                <span class="block font-mono text-[9px] uppercase tracking-wider text-[#888888]">Masuk Cepat Simulator:</span>
+                <div class="flex items-center justify-between">
+                    <span class="block font-mono text-[9px] uppercase tracking-wider text-[#888888]">Masuk Cepat Simulator:</span>
+                    <span class="font-mono text-[9px] text-[#555555]">Sandi: password123</span>
+                </div>
                 <div class="grid grid-cols-3 gap-2 text-[11px] font-mono">
-                    <button type="button" onclick="setDemo('mahasiswa@ppk.test')" class="px-2 py-1.5 rounded-[4px] bg-[#161616] hover:bg-[#222222] text-white border border-[#333333] transition text-center truncate">
-                        Pengguna
-                    </button>
-                    <button type="button" onclick="setDemo('petugas@ppk.test')" class="px-2 py-1.5 rounded-[4px] bg-[#161616] hover:bg-[#222222] text-white border border-[#333333] transition text-center truncate">
-                        Petugas
-                    </button>
                     <button type="button" onclick="setDemo('admin@ppk.test')" class="px-2 py-1.5 rounded-[4px] bg-[#161616] hover:bg-[#222222] text-white border border-[#333333] transition text-center truncate">
                         Admin
+                    </button>
+                    <button type="button" onclick="setDemo('petugas.demo@ppk.test')" class="px-2 py-1.5 rounded-[4px] bg-[#161616] hover:bg-[#222222] text-white border border-[#333333] transition text-center truncate">
+                        Petugas
+                    </button>
+                    <button type="button" onclick="setDemo('mahasiswa.demo@ppk.test')" class="px-2 py-1.5 rounded-[4px] bg-[#161616] hover:bg-[#222222] text-white border border-[#333333] transition text-center truncate">
+                        Pengguna
                     </button>
                 </div>
             </div>
