@@ -267,7 +267,7 @@
                         <h2 class="text-sm font-semibold text-white">Tujuan Penggunaan & Konfirmasi Pengajuan</h2>
                     </div>
 
-                    <form method="POST" action="{{ route('user.reservations.index') }}" class="space-y-4" id="userReservationForm">
+                    <form method="POST" action="{{ route('user.reservations.store') }}" class="space-y-4" id="userReservationForm">
                         @csrf
                         <input type="hidden" name="facility_id" value="{{ $fId }}">
                         <input type="hidden" name="date" id="user_date" value="{{ $selectedDate }}">

@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\RecapController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\FacilityController as PublicFacilityController;
 use App\Http\Controllers\ReservationFlowController;
+use App\Http\Controllers\User\ReportController as UserReportController;
+use App\Http\Controllers\User\ReservationController as UserReservationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -285,51 +287,18 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
 // Pengguna (User) Routes (SRS FR-PGN)
 // -------------------------------------------------------------
 
-Route::prefix('my')->group(function () {
-    // Riwayat Reservasi Pengguna
-    Route::get('/reservations', function () {
-        $reservations = MockData::reservations();
-        return view('user.reservations.index', ['reservations' => $reservations]);
-    })->name('user.reservations.index');
+Route::middleware(['auth', 'role:pengguna'])->prefix('my')->group(function (): void {
+    // Riwayat & Pengajuan Reservasi Pengguna
+    Route::get('/reservations', [UserReservationController::class, 'index'])->name('user.reservations.index');
+    Route::post('/reservations', [UserReservationController::class, 'store'])->name('user.reservations.store');
+    Route::get('/reservations/{reservation}', [UserReservationController::class, 'show'])->name('user.reservations.show');
+    Route::post('/reservations/{reservation}/cancel', [UserReservationController::class, 'cancel'])->name('user.reservations.cancel');
 
-    Route::post('/reservations', function () {
-        return redirect()->route('user.reservations.index', ['as_user' => 1]);
-    });
-
-    // Detail Reservasi Pengguna
-    Route::get('/reservations/{reservation}', function ($resId) {
-        $reservations = MockData::reservations();
-        $reservation = collect($reservations)->firstWhere('id', $resId) ?? $reservations[0];
-        return view('user.reservations.show', ['reservation' => $reservation]);
-    })->name('user.reservations.show');
-
-    // Cancel Reservasi Pengguna
-    Route::post('/reservations/{reservation}/cancel', function ($resId) {
-        return redirect()->route('user.reservations.show', ['reservation' => $resId, 'as_user' => 1]);
-    })->name('user.reservations.cancel');
-
-    // Riwayat Laporan Pengguna
-    Route::get('/reports', function () {
-        $reports = MockData::reports();
-        return view('user.reports.index', ['reports' => $reports]);
-    })->name('user.reports.index');
-
-    Route::post('/reports', function () {
-        return redirect()->route('user.reports.index', ['as_user' => 1]);
-    });
-
-    // Buat Laporan Pengguna
-    Route::get('/reports/create', function () {
-        $facilities = MockData::facilities();
-        return view('user.reports.create', ['facilities' => $facilities]);
-    })->name('user.reports.create');
-
-    // Detail Laporan Pengguna
-    Route::get('/reports/{report}', function ($repId) {
-        $reports = MockData::reports();
-        $report = collect($reports)->firstWhere('id', $repId) ?? $reports[0];
-        return view('user.reports.show', ['report' => $report]);
-    })->name('user.reports.show');
+    // Riwayat & Pelaporan Kerusakan Pengguna
+    Route::get('/reports', [UserReportController::class, 'index'])->name('user.reports.index');
+    Route::get('/reports/create', [UserReportController::class, 'create'])->name('user.reports.create');
+    Route::post('/reports', [UserReportController::class, 'store'])->name('user.reports.store');
+    Route::get('/reports/{report}', [UserReportController::class, 'show'])->name('user.reports.show');
 });
 
 

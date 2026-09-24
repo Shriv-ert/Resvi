@@ -3,6 +3,15 @@
 @section('title', 'Detail Reservasi #' . $reservation['reservation_number'])
 
 @section('content')
+@php
+    $statusVal = is_object($reservation['status']) && property_exists($reservation['status'], 'value') ? $reservation['status']->value : (string)$reservation['status'];
+    $resDate = $reservation['date'] instanceof \DateTimeInterface ? $reservation['date']->format('Y-m-d') : (string)$reservation['date'];
+    $resStart = substr((string)$reservation['start_time'], 0, 5);
+    $resEnd = substr((string)$reservation['end_time'], 0, 5);
+    $resCreated = $reservation['created_at'] instanceof \DateTimeInterface ? $reservation['created_at']->format('Y-m-d H:i') : (string)$reservation['created_at'];
+    $resUpdated = $reservation['updated_at'] instanceof \DateTimeInterface ? $reservation['updated_at']->format('Y-m-d H:i') : (string)$reservation['updated_at'];
+    $canCancel = in_array($statusVal, ['menunggu', 'disetujui']) && now()->lt(\Carbon\Carbon::parse($resDate . ' ' . $resStart));
+@endphp
 <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
 
     <!-- Breadcrumb -->
@@ -16,30 +25,30 @@
         </a>
 
         <!-- Status Badge -->
-        @if($reservation['status'] === 'menunggu')
+        @if($statusVal === 'menunggu')
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#f5a623] bg-[#2b1e00] border border-[#553c00]">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#f5a623] animate-pulse"></span>
                 Menunggu Persetujuan
             </span>
-        @elseif($reservation['status'] === 'disetujui')
+        @elseif($statusVal === 'disetujui')
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>
                 Disetujui
             </span>
-        @elseif($reservation['status'] === 'berlangsung')
+        @elseif($statusVal === 'berlangsung')
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#a855f7] bg-[#1a0033] border border-[#4a1d96]">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#a855f7] animate-pulse"></span>
                 Sedang Berlangsung
             </span>
-        @elseif($reservation['status'] === 'selesai')
+        @elseif($statusVal === 'selesai')
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#a1a1a1] bg-[#161616] border border-[#333333]">
                 Selesai Digunakan
             </span>
-        @elseif(str_starts_with($reservation['status'], 'dibatalkan'))
+        @elseif(str_starts_with($statusVal, 'dibatalkan'))
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#888888] bg-[#161616] border border-[#333333]">
-                {{ $reservation['status'] === 'dibatalkan_oleh_pengguna' ? 'Dibatalkan Pengguna' : 'Dibatalkan Petugas' }}
+                {{ $statusVal === 'dibatalkan_oleh_pengguna' ? 'Dibatalkan Pengguna' : 'Dibatalkan Petugas' }}
             </span>
-        @elseif($reservation['status'] === 'kedaluwarsa')
+        @elseif($statusVal === 'kedaluwarsa')
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#888888] bg-[#161616] border border-[#333333]">
                 Kedaluwarsa
             </span>
@@ -50,6 +59,24 @@
         @endif
     </div>
 
+    @if(session('success'))
+        <div class="mb-6 p-4 rounded-[6px] border border-[#005522] bg-[#002b11] text-xs text-[#50e3c2] flex items-center justify-between">
+            <div class="flex items-center gap-2 font-mono">
+                <span class="font-bold">✓</span>
+                <span>{{ session('success') }}</span>
+            </div>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="mb-6 p-4 rounded-[6px] border border-[#550000] bg-[#2b0000] text-xs text-[#ff453a] flex items-center justify-between">
+            <div class="flex items-center gap-2 font-mono">
+                <span class="font-bold">✕</span>
+                <span>{{ session('error') }}</span>
+            </div>
+        </div>
+    @endif
+
     <!-- Main Detail Card: Crisp border, micro 6px radius, NO soft shadows -->
     <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-6 sm:p-8 space-y-6">
         
@@ -59,8 +86,8 @@
                 <h1 class="text-2xl font-semibold font-mono text-white tracking-tight">{{ $reservation['reservation_number'] }}</h1>
             </div>
             <div class="text-xs text-[#888888] font-mono sm:text-right">
-                <span>Diajukan: {{ $reservation['created_at'] }}</span>
-                <span class="block text-[11px] text-[#888888]">Pembaruan: {{ $reservation['updated_at'] }}</span>
+                <span>Diajukan: {{ $resCreated }}</span>
+                <span class="block text-[11px] text-[#888888]">Pembaruan: {{ $resUpdated }}</span>
             </div>
         </div>
 
@@ -78,9 +105,9 @@
             <!-- Schedule Information -->
             <div class="bg-[#111111] p-4">
                 <span class="font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium block mb-1">Jadwal Penggunaan</span>
-                <h3 class="text-sm font-semibold text-white tracking-tight font-mono">{{ $reservation['date'] }}</h3>
+                <h3 class="text-sm font-semibold text-white tracking-tight font-mono">{{ $resDate }}</h3>
                 <p class="text-xs text-[#0070f3] font-mono mt-1">
-                    {{ $reservation['start_time'] }} – {{ $reservation['end_time'] }} WIB (Slot 30m)
+                    {{ $resStart }} – {{ $resEnd }} WIB (Slot 30m)
                 </p>
             </div>
         </div>
@@ -93,16 +120,30 @@
             </div>
         </div>
 
-        <!-- Cancellation Note (if any) -->
+        <!-- Cancellation / Rejection / Expiration Note -->
         @if(!empty($reservation['cancellation_reason']))
             <div class="p-4 rounded-[6px] bg-[#2b0000] border border-[#550000] text-xs text-[#ff453a] space-y-1">
-                <strong class="font-medium text-white block">Catatan Pembatalan / Penolakan:</strong>
+                <strong class="font-medium text-white block">Catatan Pembatalan:</strong>
                 <p class="leading-relaxed">{{ $reservation['cancellation_reason'] }}</p>
             </div>
         @endif
 
+        @if(!empty($reservation['rejection_reason']))
+            <div class="p-4 rounded-[6px] bg-[#2b0000] border border-[#550000] text-xs text-[#ff453a] space-y-1">
+                <strong class="font-medium text-white block">Alasan Penolakan oleh Petugas:</strong>
+                <p class="leading-relaxed">{{ $reservation['rejection_reason'] }}</p>
+            </div>
+        @endif
+
+        @if(!empty($reservation['expiration_reason']))
+            <div class="p-4 rounded-[6px] bg-[#1f1f1f] border border-[#333333] text-xs text-[#888888] space-y-1 font-mono">
+                <strong class="font-medium text-white block">Keterangan Kedaluwarsa:</strong>
+                <p class="leading-relaxed">{{ $reservation['expiration_reason'] }}</p>
+            </div>
+        @endif
+
         <!-- Action Section: Cancel reservation button if status allows -->
-        @if($reservation['status'] === 'menunggu' || $reservation['status'] === 'disetujui')
+        @if($canCancel)
             <div class="pt-6 border-t border-[#333333] flex items-center justify-between flex-wrap gap-4">
                 <div class="text-xs text-[#888888]">
                     Anda dapat membatalkan reservasi ini secara mandiri sebelum waktu mulai penggunaan.

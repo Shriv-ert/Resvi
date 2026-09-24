@@ -29,6 +29,24 @@
         </div>
     </div>
 
+    @if(session('success'))
+        <div class="mb-6 p-4 rounded-[6px] border border-[#005522] bg-[#002b11] text-xs text-[#50e3c2] flex items-center justify-between">
+            <div class="flex items-center gap-2 font-mono">
+                <span class="font-bold">✓</span>
+                <span>{{ session('success') }}</span>
+            </div>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="mb-6 p-4 rounded-[6px] border border-[#550000] bg-[#2b0000] text-xs text-[#ff453a] flex items-center justify-between">
+            <div class="flex items-center gap-2 font-mono">
+                <span class="font-bold">✕</span>
+                <span>{{ session('error') }}</span>
+            </div>
+        </div>
+    @endif
+
     <!-- Reservations Table: Crisp border, micro 6px radius, NO soft shadows -->
     <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
         <div class="overflow-x-auto">
@@ -45,6 +63,13 @@
                 </thead>
                 <tbody class="divide-y divide-[#333333] text-xs">
                     @forelse($reservations as $res)
+                        @php
+                            $statusVal = is_object($res['status']) && property_exists($res['status'], 'value') ? $res['status']->value : (string)$res['status'];
+                            $resDate = $res['date'] instanceof \DateTimeInterface ? $res['date']->format('Y-m-d') : (string)$res['date'];
+                            $resStart = substr((string)$res['start_time'], 0, 5);
+                            $resEnd = substr((string)$res['end_time'], 0, 5);
+                            $resCreated = $res['created_at'] instanceof \DateTimeInterface ? $res['created_at']->format('Y-m-d H:i') : (string)$res['created_at'];
+                        @endphp
                         <tr class="hover:bg-[#171717] transition-colors">
                             <!-- Reservation Number -->
                             <td class="py-3.5 px-5 font-mono text-white font-medium">
@@ -59,36 +84,36 @@
 
                             <!-- Schedule Time -->
                             <td class="py-3.5 px-5 font-mono">
-                                <span class="font-medium text-white block">{{ $res['date'] }}</span>
-                                <span class="text-[#0070f3] text-[11px]">{{ $res['start_time'] }} – {{ $res['end_time'] }} WIB</span>
+                                <span class="font-medium text-white block">{{ $resDate }}</span>
+                                <span class="text-[#0070f3] text-[11px]">{{ $resStart }} – {{ $resEnd }} WIB</span>
                             </td>
 
                             <!-- Status Badge -->
                             <td class="py-3.5 px-5">
-                                @if($res['status'] === 'menunggu')
+                                @if($statusVal === 'menunggu')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#f5a623] bg-[#2b1e00] border border-[#553c00]">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#f5a623] animate-pulse"></span>
                                         Menunggu
                                     </span>
-                                @elseif($res['status'] === 'disetujui')
+                                @elseif($statusVal === 'disetujui')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>
                                         Disetujui
                                     </span>
-                                @elseif($res['status'] === 'berlangsung')
+                                @elseif($statusVal === 'berlangsung')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#a855f7] bg-[#1a0033] border border-[#4a1d96]">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#a855f7] animate-pulse"></span>
                                         Berlangsung
                                     </span>
-                                @elseif($res['status'] === 'selesai')
+                                @elseif($statusVal === 'selesai')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#a1a1a1] bg-[#161616] border border-[#333333]">
                                         Selesai
                                     </span>
-                                @elseif(str_starts_with($res['status'], 'dibatalkan'))
+                                @elseif(str_starts_with($statusVal, 'dibatalkan'))
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#888888] bg-[#161616] border border-[#333333]">
-                                        {{ $res['status'] === 'dibatalkan_oleh_pengguna' ? 'Dibatalkan Pengguna' : 'Dibatalkan Petugas' }}
+                                        {{ $statusVal === 'dibatalkan_oleh_pengguna' ? 'Dibatalkan Pengguna' : 'Dibatalkan Petugas' }}
                                     </span>
-                                @elseif($res['status'] === 'kedaluwarsa')
+                                @elseif($statusVal === 'kedaluwarsa')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#888888] bg-[#161616] border border-[#333333]">
                                         Kedaluwarsa
                                     </span>
@@ -101,13 +126,17 @@
 
                             <!-- Created Timestamp -->
                             <td class="py-3.5 px-5 font-mono text-[11px] text-[#888888]">
-                                {{ $res['created_at'] }}
+                                {{ $resCreated }}
                             </td>
 
                             <!-- Action Links -->
                             <td class="py-3.5 px-5 text-right">
                                 <a href="{{ route('user.reservations.show', ['reservation' => $res['id'], 'as_user' => 1]) }}" 
                                    class="text-white hover:text-[#0070f3] font-medium transition inline-flex items-center gap-1 text-xs">
+                                    Detail →
+                                </a>
+                            </td>
+                        </tr>
                                     Detail →
                                 </a>
                             </td>

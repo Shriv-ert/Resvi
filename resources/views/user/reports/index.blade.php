@@ -29,6 +29,24 @@
         </div>
     </div>
 
+    @if(session('success'))
+        <div class="mb-6 p-4 rounded-[6px] border border-[#005522] bg-[#002b11] text-xs text-[#50e3c2] flex items-center justify-between">
+            <div class="flex items-center gap-2 font-mono">
+                <span class="font-bold">✓</span>
+                <span>{{ session('success') }}</span>
+            </div>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="mb-6 p-4 rounded-[6px] border border-[#550000] bg-[#2b0000] text-xs text-[#ff453a] flex items-center justify-between">
+            <div class="flex items-center gap-2 font-mono">
+                <span class="font-bold">✕</span>
+                <span>{{ session('error') }}</span>
+            </div>
+        </div>
+    @endif
+
     <!-- Reports Table: Crisp border, micro 6px radius, NO soft shadows -->
     <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
         <div class="overflow-x-auto">
@@ -45,6 +63,11 @@
                 </thead>
                 <tbody class="divide-y divide-[#333333] text-xs">
                     @forelse($reports as $rep)
+                        @php
+                            $statusVal = is_object($rep['status']) && property_exists($rep['status'], 'value') ? $rep['status']->value : (string)$rep['status'];
+                            $catVal = is_object($rep['category']) && property_exists($rep['category'], 'value') ? $rep['category']->value : (string)$rep['category'];
+                            $repCreated = $rep['created_at'] instanceof \DateTimeInterface ? $rep['created_at']->format('Y-m-d H:i') : (string)$rep['created_at'];
+                        @endphp
                         <tr class="hover:bg-[#171717] transition-colors">
                             <td class="py-3.5 px-5 font-mono text-white font-medium">
                                 {{ $rep['report_number'] }}
@@ -53,23 +76,23 @@
                                 {{ $rep['facility_name'] }}
                             </td>
                             <td class="py-3.5 px-5 text-[#a1a1a1] capitalize font-mono text-[11px]">
-                                {{ str_replace('_', ' ', $rep['category']) }}
+                                {{ str_replace('_', ' ', $catVal) }}
                             </td>
                             <td class="py-3.5 px-5 text-[#888888] font-mono text-[11px]">
-                                {{ $rep['created_at'] }}
+                                {{ $repCreated }}
                             </td>
                             <td class="py-3.5 px-5">
-                                @if($rep['status'] === 'baru')
+                                @if($statusVal === 'baru')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#f5a623] bg-[#2b1e00] border border-[#553c00]">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#f5a623] animate-pulse"></span>
                                         Baru
                                     </span>
-                                @elseif($rep['status'] === 'diproses')
+                                @elseif($statusVal === 'diproses')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#0070f3] bg-[#001733] border border-[#003b80]">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#0070f3] animate-pulse"></span>
                                         Diproses
                                     </span>
-                                @elseif($rep['status'] === 'selesai')
+                                @elseif($statusVal === 'selesai')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
                                         Selesai
                                     </span>

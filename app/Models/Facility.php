@@ -57,6 +57,11 @@ class Facility extends Model
         return $this->hasMany(Reservation::class);
     }
 
+    public function reports(): HasMany
+    {
+        return $this->hasMany(Report::class);
+    }
+
     public function statusLogs(): HasMany
     {
         return $this->hasMany(FacilityStatusLog::class);

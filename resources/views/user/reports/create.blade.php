@@ -32,14 +32,26 @@
 
     <!-- Report Form Card: Crisp border, micro 6px radius, NO soft shadows -->
     <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-6 sm:p-8 space-y-6">
-        <form method="POST" action="{{ route('user.reports.index', ['as_user' => 1]) }}" enctype="multipart/form-data" class="space-y-6">
+        @if ($errors->any())
+            <div class="p-4 rounded-[6px] border border-[#550000] bg-[#2b0000] text-xs text-[#ff453a] space-y-1">
+                <strong class="font-semibold text-white block">Gagal Mengirim Laporan:</strong>
+                <ul class="list-disc list-inside space-y-1 text-[#ededed]">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('user.reports.store', ['as_user' => 1]) }}" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
             <!-- Facility Target -->
             @php
                 $preselectedFacilityId = old('facility_id', request('facility_id', ''));
                 $preselectedFacility = collect($facilities)->firstWhere('id', $preselectedFacilityId);
-                $facilityLabel = $preselectedFacility ? ($preselectedFacility['name'] . ' (' . ucfirst($preselectedFacility['type']) . ' — ' . $preselectedFacility['location'] . ')') : 'Pilih Fasilitas Kampus...';
+                $preType = $preselectedFacility ? (is_object($preselectedFacility['type']) && property_exists($preselectedFacility['type'], 'value') ? $preselectedFacility['type']->value : (string)$preselectedFacility['type']) : '';
+                $facilityLabel = $preselectedFacility ? ($preselectedFacility['name'] . ' (' . ucfirst($preType) . ' — ' . $preselectedFacility['location'] . ')') : 'Pilih Fasilitas Kampus...';
             @endphp
             <div class="space-y-1.5 relative custom-dropdown" id="dropdown-facility_id">
                 <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">
@@ -60,7 +72,8 @@
                     </div>
                     @foreach($facilities as $f)
                         @php
-                            $optLabel = $f['name'] . ' (' . ucfirst($f['type']) . ' — ' . $f['location'] . ')';
+                            $fType = is_object($f['type']) && property_exists($f['type'], 'value') ? $f['type']->value : (string)$f['type'];
+                            $optLabel = $f['name'] . ' (' . ucfirst($fType) . ' — ' . $f['location'] . ')';
                             $isSelected = ($preselectedFacilityId == $f['id']);
                         @endphp
                         <div onclick="selectCustomDropdown('facility_id', '{{ $f['id'] }}', '{{ addslashes($optLabel) }}')" data-value="{{ $f['id'] }}" class="dropdown-item px-3 py-2 text-xs font-mono {{ $isSelected ? 'bg-[#1f1f1f] text-white' : 'text-[#cccccc]' }} hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">

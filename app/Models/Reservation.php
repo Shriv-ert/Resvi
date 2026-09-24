@@ -57,4 +57,59 @@ class Reservation extends Model
     {
         return $this->belongsTo(Facility::class);
     }
+
+    public function cancelledBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelled_by_id');
+    }
+
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by_id');
+    }
+
+    public function rejectedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by_id');
+    }
+
+    public function getFacilityNameAttribute(): ?string
+    {
+        return $this->facility?->name;
+    }
+
+    public function getFacilityLocationAttribute(): ?string
+    {
+        return $this->facility?->location;
+    }
+
+    public function getFacilityTypeAttribute(): ?string
+    {
+        return $this->facility?->type?->value;
+    }
+
+    /**
+     * Evaluasi status otomatis berdasarkan waktu (BR-PGN-05, BR-PTG-02).
+     */
+    public function evaluateStatus(): self
+    {
+        $now = now();
+        $dateStr = $this->date instanceof \DateTimeInterface ? $this->date->format('Y-m-d') : (string) $this->date;
+        $startDateTime = \Carbon\Carbon::parse($dateStr . ' ' . $this->start_time);
+        $endDateTime = \Carbon\Carbon::parse($dateStr . ' ' . $this->end_time);
+
+        if ($this->status === ReservationStatus::Menunggu && $now->gte($startDateTime)) {
+            $this->status = ReservationStatus::Kedaluwarsa;
+            $this->expiration_reason = 'Waktu mulai reservasi telah terlampaui sebelum disetujui petugas.';
+            $this->saveQuietly();
+        } elseif ($this->status === ReservationStatus::Disetujui && $now->gte($startDateTime) && $now->lt($endDateTime)) {
+            $this->status = ReservationStatus::Berlangsung;
+            $this->saveQuietly();
+        } elseif (($this->status === ReservationStatus::Berlangsung || $this->status === ReservationStatus::Disetujui) && $now->gte($endDateTime)) {
+            $this->status = ReservationStatus::Selesai;
+            $this->saveQuietly();
+        }
+
+        return $this;
+    }
 }

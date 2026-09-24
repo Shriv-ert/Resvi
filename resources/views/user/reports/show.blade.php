@@ -3,6 +3,14 @@
 @section('title', 'Detail Laporan #' . $report['report_number'])
 
 @section('content')
+@php
+    $statusVal = is_object($report['status']) && property_exists($report['status'], 'value') ? $report['status']->value : (string)$report['status'];
+    $catVal = is_object($report['category']) && property_exists($report['category'], 'value') ? $report['category']->value : (string)$report['category'];
+    $repCreated = $report['created_at'] instanceof \DateTimeInterface ? $report['created_at']->format('Y-m-d H:i') : (string)$report['created_at'];
+    $repUpdated = $report['updated_at'] instanceof \DateTimeInterface ? $report['updated_at']->format('Y-m-d H:i') : (string)$report['updated_at'];
+    $photoPath = $report['photo_path'] ?? null;
+    $photoUrl = $photoPath ? (str_starts_with($photoPath, 'http') ? $photoPath : asset('storage/' . $photoPath)) : null;
+@endphp
 <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
 
     <!-- Breadcrumb -->
@@ -16,17 +24,17 @@
         </a>
 
         <!-- Status Badge -->
-        @if($report['status'] === 'baru')
+        @if($statusVal === 'baru')
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#f5a623] bg-[#2b1e00] border border-[#553c00]">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#f5a623] animate-pulse"></span>
                 Status: Baru Dikirim
             </span>
-        @elseif($report['status'] === 'diproses')
+        @elseif($statusVal === 'diproses')
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#0070f3] bg-[#001733] border border-[#003b80]">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#0070f3] animate-pulse"></span>
                 Status: Sedang Ditangani
             </span>
-        @elseif($report['status'] === 'selesai')
+        @elseif($statusVal === 'selesai')
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>
                 Status: Penanganan Selesai
@@ -39,6 +47,15 @@
         @endif
     </div>
 
+    @if(session('success'))
+        <div class="mb-6 p-4 rounded-[6px] border border-[#005522] bg-[#002b11] text-xs text-[#50e3c2] flex items-center justify-between">
+            <div class="flex items-center gap-2 font-mono">
+                <span class="font-bold">✓</span>
+                <span>{{ session('success') }}</span>
+            </div>
+        </div>
+    @endif
+
     <!-- Report Detail Card -->
     <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-6 sm:p-8 space-y-6">
         
@@ -48,8 +65,8 @@
                 <h1 class="text-2xl font-semibold font-mono text-white tracking-tight">{{ $report['report_number'] }}</h1>
             </div>
             <div class="text-xs text-[#888888] font-mono sm:text-right">
-                <span>Dilaporkan pada: {{ $report['created_at'] }}</span>
-                <span class="block text-[11px] text-[#888888]">Pembaruan: {{ $report['updated_at'] }}</span>
+                <span>Dilaporkan pada: {{ $repCreated }}</span>
+                <span class="block text-[11px] text-[#888888]">Pembaruan: {{ $repUpdated }}</span>
             </div>
         </div>
 
@@ -62,7 +79,7 @@
 
             <div class="bg-[#111111] p-4">
                 <span class="font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium block mb-1">Kategori Masalah</span>
-                <h3 class="text-sm font-semibold text-white tracking-tight capitalize">{{ str_replace('_', ' ', $report['category']) }}.</h3>
+                <h3 class="text-sm font-semibold text-white tracking-tight capitalize">{{ str_replace('_', ' ', $catVal) }}.</h3>
             </div>
         </div>
 
@@ -75,11 +92,11 @@
         </div>
 
         <!-- Photo Evidence if attached -->
-        @if(!empty($report['photo_path']))
+        @if(!empty($photoUrl))
             <div>
                 <h4 class="font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-2">Foto Lampiran Bukti</h4>
                 <div class="max-w-md rounded-[4px] overflow-hidden border border-[#333333] bg-[#161616]">
-                    <img src="{{ $report['photo_path'] }}" alt="Bukti Masalah" class="w-full h-auto object-cover">
+                    <img src="{{ $photoUrl }}" alt="Bukti Masalah" class="w-full h-auto object-cover">
                 </div>
             </div>
         @endif

@@ -37,4 +37,14 @@ class User extends Authenticatable
     {
         return $this->role === UserRole::Admin;
     }
+
+    public function reservations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
+    public function reports(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Report::class, 'reporter_id');
+    }
 }
