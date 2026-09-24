@@ -28,19 +28,10 @@ final readonly class FacilityService
         ?string $operationalStatus = null,
         int $perPage = 15,
     ): LengthAwarePaginator {
-        $query = Facility::query()->with(['photos']);
-
-        if (! empty($search)) {
-            $searchTerm = trim($search);
-            $query->where(function ($q) use ($searchTerm): void {
-                $q->where('name', 'like', "%{$searchTerm}%")
-                    ->orWhere('location', 'like', "%{$searchTerm}%");
-            });
-        }
-
-        if (! empty($type)) {
-            $query->where('type', $type);
-        }
+        $query = Facility::query()
+            ->with(['photos'])
+            ->search($search)
+            ->ofType($type);
 
         if ($masterStatus === 'active') {
             $query->where('is_active', true);

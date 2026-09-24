@@ -1,0 +1,263 @@
+@extends('layouts.staff')
+
+@section('title', 'Antrian Laporan Kerusakan · Petugas')
+
+@section('content')
+<div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
+
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-semibold text-white tracking-[-0.03em]">
+                Antrean kerja laporan kerusakan aktif.
+            </h1>
+            <p class="text-xs sm:text-sm text-[#a1a1a1] mt-1">
+                Laporan kerusakan sarpras baru dan dalam penanganan yang perlu ditindaklanjuti.
+            </p>
+        </div>
+
+        <div>
+            <a href="{{ route('staff.reports.history') }}" 
+               class="bg-[#171717] hover:bg-[#222222] text-white border border-[#333333] text-xs font-medium px-4 py-2 rounded-full transition flex items-center gap-1.5 shadow-none">
+                <svg class="w-3.5 h-3.5 text-[#888888]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Buka Riwayat Laporan Final →
+            </a>
+        </div>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-4 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        
+        <!-- Left: Search by reporter OR facility -->
+        <div class="w-full md:w-80 relative">
+            <input 
+                type="text" 
+                id="searchReport" 
+                placeholder="Cari pelapor atau fasilitas..." 
+                class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] pl-8 pr-3 py-2 focus:outline-none focus:border-white transition placeholder-[#666666]"
+            />
+            <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+        </div>
+
+        <!-- Right: Filter Type & Status -->
+        <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+            <!-- Filter Type -->
+            <div class="relative custom-dropdown min-w-[170px]" id="dropdown-filterTypeReport">
+                <input type="hidden" id="filterTypeReport" value="">
+                <button type="button" onclick="toggleCustomDropdown('filterTypeReport')" id="filterTypeReportTrigger"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                    <span id="filterTypeReportLabel">Semua Tipe Fasilitas</span>
+                    <svg id="filterTypeReportChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div id="filterTypeReportMenu" class="custom-dropdown-menu hidden absolute top-full right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 min-w-[180px]">
+                    <div onclick="selectCustomDropdown('filterTypeReport', '', 'Semua Tipe Fasilitas')" data-value="" class="dropdown-item px-3 py-2 text-xs font-mono text-white bg-[#1f1f1f] hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between">
+                        <span>Semua Tipe Fasilitas</span>
+                        <span class="check-icon text-[#50e3c2] text-xs">✓</span>
+                    </div>
+                    <div onclick="selectCustomDropdown('filterTypeReport', 'kelas', 'Ruang Kelas')" data-value="kelas" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                        <span>Ruang Kelas</span>
+                        <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                    </div>
+                    <div onclick="selectCustomDropdown('filterTypeReport', 'laboratorium', 'Laboratorium')" data-value="laboratorium" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                        <span>Laboratorium</span>
+                        <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                    </div>
+                    <div onclick="selectCustomDropdown('filterTypeReport', 'aula', 'Aula')" data-value="aula" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                        <span>Aula</span>
+                        <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                    </div>
+                    <div onclick="selectCustomDropdown('filterTypeReport', 'alat', 'Alat Khusus')" data-value="alat" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                        <span>Alat Khusus</span>
+                        <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                    </div>
+                    <div onclick="selectCustomDropdown('filterTypeReport', 'lapangan', 'Lapangan')" data-value="lapangan" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                        <span>Lapangan</span>
+                        <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Status -->
+            <div class="relative custom-dropdown min-w-[150px]" id="dropdown-filterStatusReport">
+                <input type="hidden" id="filterStatusReport" value="">
+                <button type="button" onclick="toggleCustomDropdown('filterStatusReport')" id="filterStatusReportTrigger"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                    <span id="filterStatusReportLabel">Semua Status Aktif</span>
+                    <svg id="filterStatusReportChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div id="filterStatusReportMenu" class="custom-dropdown-menu hidden absolute top-full right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 min-w-[160px]">
+                    <div onclick="selectCustomDropdown('filterStatusReport', '', 'Semua Status Aktif')" data-value="" class="dropdown-item px-3 py-2 text-xs font-mono text-white bg-[#1f1f1f] hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between">
+                        <span>Semua Status Aktif</span>
+                        <span class="check-icon text-[#50e3c2] text-xs">✓</span>
+                    </div>
+                    <div onclick="selectCustomDropdown('filterStatusReport', 'baru', 'Baru')" data-value="baru" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                        <span>Baru</span>
+                        <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                    </div>
+                    <div onclick="selectCustomDropdown('filterStatusReport', 'diproses', 'Diproses')" data-value="diproses" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between">
+                        <span>Diproses</span>
+                        <span class="check-icon text-[#50e3c2] text-xs hidden">✓</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Reports Table -->
+    <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-[#ededed]" id="reportsQueueTable">
+                <thead class="bg-[#161616] border-b border-[#333333] text-[10px] font-mono uppercase text-[#888888] tracking-wider">
+                    <tr>
+                        <th class="py-3 px-5 font-medium">No. Laporan</th>
+                        <th class="py-3 px-5 font-medium">Nama Pelapor</th>
+                        <th class="py-3 px-5 font-medium">Fasilitas Sasaran</th>
+                        <th class="py-3 px-5 font-medium">Kategori</th>
+                        <th class="py-3 px-5 font-medium">Status Laporan</th>
+                        <th class="py-3 px-5 font-medium">Waktu Lapor</th>
+                        <th class="py-3 px-5 text-right font-medium">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#333333] text-xs">
+                    @forelse($reports as $rep)
+                        @php
+                            $statusVal = $rep['status'] instanceof \BackedEnum ? $rep['status']->value : (string) $rep['status'];
+                            $catVal = $rep['category'] instanceof \BackedEnum ? $rep['category']->value : (string) $rep['category'];
+                        @endphp
+                        <tr class="hover:bg-[#161616] transition-colors {{ $statusVal === 'baru' ? 'bg-[#1a1400]/30' : '' }}"
+                            data-search="{{ strtolower($rep['reporter_name'] . ' ' . $rep['facility_name']) }}"
+                            data-type="{{ $rep['facility_type'] ?? 'kelas' }}"
+                            data-status="{{ $statusVal }}">
+                            
+                            <td class="py-3.5 px-5 font-mono text-white font-medium">
+                                {{ $rep['report_number'] }}
+                            </td>
+
+                            <td class="py-3.5 px-5 font-medium text-white">
+                                {{ $rep['reporter_name'] }}
+                            </td>
+
+                            <td class="py-3.5 px-5">
+                                <span class="font-medium text-white block">{{ $rep['facility_name'] }}</span>
+                                <span class="text-[#888888] text-[11px] font-mono">{{ $rep['facility_location'] ?? 'Kampus' }}</span>
+                            </td>
+
+                            <td class="py-3.5 px-5 text-[#888888] capitalize font-mono text-[11px]">
+                                {{ str_replace('_', ' ', $catVal) }}
+                            </td>
+
+                            <td class="py-3.5 px-5">
+                                @if($statusVal === 'baru')
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#f5a623] bg-[#2b1e00] border border-[#553c00]">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#f5a623] animate-pulse"></span>
+                                        Baru
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#0070f3] bg-[#001733] border border-[#003b80]">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#0070f3] animate-pulse"></span>
+                                        Diproses
+                                    </span>
+                                @endif
+                            </td>
+
+                            <td class="py-3.5 px-5 font-mono text-[11px] text-[#888888]">
+                                {{ $rep['created_at'] }}
+                            </td>
+
+                            <td class="py-3.5 px-5 text-right">
+                                <a href="{{ route('staff.reports.show', ['report' => $rep['id']]) }}" 
+                                   class="text-[#a1a1a1] hover:text-white font-medium transition inline-flex items-center gap-1 text-xs">
+                                    Tindak Lanjuti →
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="py-12 text-center text-[#888888]">
+                                Tidak ada laporan kerusakan aktif yang menunggu penanganan.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+<script>
+    const searchReport = document.getElementById('searchReport');
+    const filterTypeReport = document.getElementById('filterTypeReport');
+    const filterStatusReport = document.getElementById('filterStatusReport');
+    const rowsReports = document.querySelectorAll('#reportsQueueTable tbody tr[data-search]');
+
+    function filterReportsTable() {
+        const query = searchReport.value.toLowerCase().trim();
+        const type = filterTypeReport.value.toLowerCase();
+        const status = filterStatusReport.value.toLowerCase();
+
+        rowsReports.forEach(row => {
+            const matchesSearch = !query || row.dataset.search.includes(query);
+            const matchesType = !type || row.dataset.type === type;
+            const matchesStatus = !status || row.dataset.status === status;
+
+            row.style.display = (matchesSearch && matchesType && matchesStatus) ? '' : 'none';
+        });
+    }
+
+    searchReport.addEventListener('input', filterReportsTable);
+
+    function toggleCustomDropdown(name) {
+        const menu = document.getElementById(name + 'Menu');
+        const chevron = document.getElementById(name + 'Chevron');
+        const isOpen = !menu.classList.contains('hidden');
+
+        document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+        document.querySelectorAll('.custom-dropdown-chevron').forEach(c => c.classList.remove('rotate-180'));
+
+        if (!isOpen) {
+            menu.classList.remove('hidden');
+            chevron.classList.add('rotate-180');
+        }
+    }
+
+    function selectCustomDropdown(name, value, label) {
+        document.getElementById(name).value = value;
+        document.getElementById(name + 'Label').textContent = label;
+        
+        const menu = document.getElementById(name + 'Menu');
+        menu.querySelectorAll('.dropdown-item').forEach(item => {
+            const check = item.querySelector('.check-icon');
+            if (item.getAttribute('data-value') === value) {
+                item.classList.add('bg-[#1f1f1f]', 'text-white');
+                item.classList.remove('text-[#cccccc]');
+                if (check) check.classList.remove('hidden');
+            } else {
+                item.classList.remove('bg-[#1f1f1f]', 'text-white');
+                item.classList.add('text-[#cccccc]');
+                if (check) check.classList.add('hidden');
+            }
+        });
+
+        menu.classList.add('hidden');
+        const chevron = document.getElementById(name + 'Chevron');
+        if (chevron) chevron.classList.remove('rotate-180');
+
+        filterReportsTable();
+    }
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.custom-dropdown')) {
+            document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+            document.querySelectorAll('.custom-dropdown-chevron').forEach(c => c.classList.remove('rotate-180'));
+        }
+    });
+</script>
+@endpush

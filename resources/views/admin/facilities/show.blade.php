@@ -1,202 +1,164 @@
 @extends('layouts.admin')
 
-@section('title', 'Detail Fasilitas: ' . $facility->name)
+@php
+    $fId = is_array($facility) ? $facility['id'] : $facility->id;
+    $fName = is_array($facility) ? $facility['name'] : $facility->name;
+    $fTypeLabel = is_array($facility) ? ucfirst($facility['type']) : ($facility->type instanceof \App\Enums\FacilityType ? $facility->type->label() : ucfirst($facility->type));
+    $fLocation = is_array($facility) ? $facility['location'] : $facility->location;
+    $fCapacity = is_array($facility) ? ($facility['capacity'] ?? null) : $facility->capacity;
+    $fDescription = is_array($facility) ? $facility['description'] : $facility->description;
+    $fOperational = is_array($facility) ? $facility['operational_status'] : ($facility->operational_status instanceof \BackedEnum ? $facility->operational_status->value : $facility->operational_status);
+    $fIsActive = is_array($facility) ? ($facility['is_active'] ?? true) : $facility->is_active;
+
+    if (is_array($facility)) {
+        $photoUrl = $facility['photo'] ?? null;
+        $statusLogs = [];
+    } else {
+        $primaryPhoto = $facility->photos?->firstWhere('is_primary', true) ?? $facility->photos?->first();
+        $photoUrl = $facility->primary_photo_url ?? ($primaryPhoto ? $primaryPhoto->url : null);
+        $statusLogs = $facility->statusLogs ?? collect();
+    }
+@endphp
+
+@section('title', 'Detail Fasilitas · ' . $fName)
 
 @section('content')
-<div class="space-y-6">
+<div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
+
     <!-- Breadcrumb -->
-    <nav class="flex items-center gap-2 text-xs font-medium text-slate-500">
-        <a href="{{ route('admin.facilities.index') }}" class="hover:text-slate-900 transition">Kelola Fasilitas</a>
+    <nav class="flex items-center gap-2 text-xs font-mono text-[#888888] mb-6">
+        <a href="{{ route('admin.facilities.index') }}" class="hover:text-white transition">Master Fasilitas</a>
         <span>/</span>
-        <span class="text-slate-900">Rincian Fasilitas</span>
+        <span class="text-white truncate max-w-xs">{{ $fName }}</span>
     </nav>
 
     <!-- Header Actions -->
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-            <h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ $facility->name }}</h1>
-            <p class="mt-1 text-xs text-slate-500">{{ $facility->location }} — {{ $facility->type->label() }}</p>
+            <h1 class="text-2xl sm:text-3xl font-semibold text-white tracking-[-0.03em] flex items-center gap-3">
+                {{ $fName }}
+                @if($fIsActive)
+                    <span class="px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">Aktif</span>
+                @else
+                    <span class="px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#888888] bg-[#161616] border border-[#333333]">Nonaktif</span>
+                @endif
+            </h1>
+            <p class="text-xs text-[#888888] mt-1 font-mono">
+                Lokasi: <span class="text-white">{{ $fLocation }}</span> • Tipe: <span class="text-white">{{ $fTypeLabel }}</span>
+            </p>
         </div>
-        <div class="flex flex-wrap items-center gap-2.5">
-            <a
-                href="{{ route('admin.facilities.edit', $facility) }}"
-                class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
-            >
-                <span>✏</span>
-                Edit Master
+
+        <div class="flex items-center gap-2">
+            <a href="{{ route('admin.facilities.edit', $facility) }}" 
+               class="bg-[#171717] hover:bg-[#222222] text-white border border-[#333333] font-medium text-xs px-3.5 py-2 rounded-[6px] transition flex items-center gap-1.5 shadow-none">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                Ubah Data
             </a>
 
-            @if ($facility->is_active)
-                <button
-                    type="button"
-                    id="openDeactivateModalBtn"
-                    class="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-200"
-                >
-                    <span>⚠</span>
-                    Nonaktifkan
+            @if($fIsActive)
+                <button type="button" 
+                        onclick="document.getElementById('deactivateModal').classList.remove('hidden')"
+                        class="bg-[#2b0000] hover:bg-[#3d0000] text-[#ff453a] border border-[#550000] font-medium text-xs px-3.5 py-2 rounded-[6px] transition flex items-center gap-1.5 shadow-none">
+                    Nonaktifkan Fasilitas
                 </button>
             @else
-                <button
-                    type="button"
-                    id="openReactivateModalBtn"
-                    class="inline-flex items-center gap-1.5 rounded-xl bg-sky-700 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-200"
-                >
-                    <span>↺</span>
+                <button type="button" 
+                        onclick="document.getElementById('reactivateModal').classList.remove('hidden')"
+                        class="bg-[#002b11] hover:bg-[#003d18] text-[#50e3c2] border border-[#005522] font-medium text-xs px-3.5 py-2 rounded-[6px] transition flex items-center gap-1.5 shadow-none">
                     Aktifkan Kembali
                 </button>
             @endif
-
-            <a
-                href="{{ route('admin.facilities.index') }}"
-                class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-            >
-                ← Kembali
-            </a>
         </div>
     </div>
 
-    <!-- Main Overview Card -->
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <!-- Photo & Badges Card -->
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col items-center text-center">
-            @php
-                $primaryPhoto = $facility->photos->firstWhere('is_primary', true) ?? $facility->photos->first();
-            @endphp
-            @if ($primaryPhoto)
-                <img
-                    src="{{ asset('storage/' . $primaryPhoto->photo_path) }}"
-                    alt="{{ $facility->name }}"
-                    class="h-48 w-full rounded-xl object-cover border border-slate-200 shadow-sm"
-                >
-            @else
-                <div class="flex h-48 w-full items-center justify-center rounded-xl bg-slate-100 text-slate-400 font-bold text-base border border-slate-200">
-                    🏢 Tidak Ada Foto
-                </div>
-            @endif
+    <!-- Main Detail Card -->
+    <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-6 space-y-6">
+        @if(!empty($photoUrl))
+            <div class="h-64 rounded-[6px] overflow-hidden border border-[#333333] bg-[#161616]">
+                <img src="{{ $photoUrl }}" alt="{{ $fName }}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80';">
+            </div>
+        @endif
 
-            <div class="mt-4 flex flex-wrap justify-center gap-2">
-                <!-- Master Status Badge -->
-                @if ($facility->is_active)
-                    <span class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-700/10">
-                        Status Master: Aktif
-                    </span>
-                @else
-                    <span class="inline-flex items-center rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 ring-1 ring-inset ring-rose-700/10">
-                        Status Master: Nonaktif
-                    </span>
-                @endif
-
-                <!-- Operational Status Badge -->
-                @if ($facility->operational_status->value === 'dapat_digunakan')
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 ring-1 ring-inset ring-sky-700/10">
-                        <span class="h-1.5 w-1.5 rounded-full bg-sky-600"></span>
-                        Operasional: Dapat digunakan
-                    </span>
-                @else
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-700/10">
-                        <span class="h-1.5 w-1.5 rounded-full bg-amber-600"></span>
-                        Operasional: Dalam perbaikan
-                    </span>
-                @endif
+        <!-- 3 Grid Info Cells -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 bg-[#333333] gap-[1px] border border-[#333333] rounded-[6px] overflow-hidden">
+            <div class="bg-[#111111] p-4">
+                <span class="text-[11px] text-[#888888] font-mono block mb-0.5">Kapasitas orang</span>
+                <h3 class="text-sm font-semibold text-white font-mono">{{ $fCapacity ? $fCapacity . ' Orang' : '— (Unit Alat)' }}</h3>
             </div>
 
-            <div class="mt-4 w-full border-t border-slate-100 pt-3 text-left text-xs text-slate-500 space-y-1">
-                <p><strong>UUID:</strong> <span class="font-mono text-[11px]">{{ $facility->id }}</span></p>
-                <p><strong>Didaftarkan:</strong> {{ $facility->created_at ? $facility->created_at->translatedFormat('d F Y, H:i') : '-' }} WIB</p>
-                <p><strong>Pembaruan Terakhir:</strong> {{ $facility->updated_at ? $facility->updated_at->translatedFormat('d F Y, H:i') : '-' }} WIB</p>
+            <div class="bg-[#111111] p-4">
+                <span class="text-[11px] text-[#888888] font-mono block mb-0.5">Status operasional fisik</span>
+                <h3 class="text-sm font-semibold {{ $fOperational === 'dapat_digunakan' ? 'text-[#50e3c2]' : 'text-[#ff453a]' }}">
+                    {{ $fOperational === 'dapat_digunakan' ? 'Dapat Digunakan' : 'Dalam Perbaikan' }}
+                </h3>
+                <span class="text-[10px] text-[#666666] font-mono">Dikelola oleh petugas</span>
+            </div>
+
+            <div class="bg-[#111111] p-4">
+                <span class="text-[11px] text-[#888888] font-mono block mb-0.5">Status data master</span>
+                <h3 class="text-sm font-semibold {{ $fIsActive ? 'text-[#50e3c2]' : 'text-[#888888]' }}">
+                    {{ $fIsActive ? 'Aktif (Katalog Publik)' : 'Nonaktif (Arsip)' }}
+                </h3>
+                <span class="text-[10px] text-[#666666] font-mono">Dikelola oleh admin</span>
             </div>
         </div>
 
-        <!-- Specifications & Description -->
-        <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm space-y-6">
-            <h2 class="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
-                Spesifikasi & Informasi Master
-            </h2>
-
-            <dl class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 text-sm">
-                <div>
-                    <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">Tipe Objek</dt>
-                    <dd class="mt-1 font-semibold text-slate-900">{{ $facility->type->label() }}</dd>
-                </div>
-
-                <div>
-                    <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">Lokasi / Gedung</dt>
-                    <dd class="mt-1 font-semibold text-slate-900">{{ $facility->location }}</dd>
-                </div>
-
-                <div>
-                    <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">Kapasitas Daya Tampung</dt>
-                    <dd class="mt-1 font-semibold text-slate-900">
-                        {{ $facility->capacity ? number_format($facility->capacity) . ' Orang' : '— (Objek Alat / Tidak Ditentukan)' }}
-                    </dd>
-                </div>
-
-                <div>
-                    <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">Wewenang Operasional</dt>
-                    <dd class="mt-1 text-xs text-slate-600">
-                        Status operasional fisik dikelola secara eksklusif oleh <strong>Petugas</strong> melalui penanganan laporan kerusakan & pemeliharaan.
-                    </dd>
-                </div>
-            </dl>
-
-            <div>
-                <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Deskripsi Fasilitas</h3>
-                <div class="rounded-xl bg-slate-50 p-4 text-xs leading-relaxed text-slate-700 whitespace-pre-line border border-slate-100">
-                    {{ $facility->description }}
-                </div>
+        <!-- Description -->
+        <div>
+            <h4 class="text-xs font-semibold text-[#888888] uppercase tracking-wider mb-2 font-mono">Deskripsi lengkap</h4>
+            <div class="bg-[#161616] border border-[#333333] rounded-[6px] p-4 text-xs text-[#ededed] leading-relaxed whitespace-pre-line">
+                {{ $fDescription }}
             </div>
         </div>
     </div>
 
     <!-- Status History & Audit Logs Section -->
-    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div class="border-b border-slate-200 bg-slate-50/75 px-6 py-4">
-            <h2 class="text-sm font-bold text-slate-900">
+    <div class="bg-[#111111] border border-[#333333] rounded-[6px] mt-8 overflow-hidden">
+        <div class="border-b border-[#333333] bg-[#161616] px-6 py-4">
+            <h2 class="text-sm font-semibold text-white">
                 Riwayat Status & Mutasi Fasilitas
             </h2>
-            <p class="text-xs text-slate-500 mt-0.5">
+            <p class="text-xs text-[#888888] mt-0.5 font-mono">
                 Rekam jejak perubahan status master data (oleh Admin) dan status operasional fisik (oleh Petugas).
             </p>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-600">
-                <thead class="border-b border-slate-200 bg-slate-50/50 text-slate-700 font-semibold uppercase tracking-wider text-[11px]">
+            <table class="w-full text-left text-xs text-[#ededed]">
+                <thead class="border-b border-[#333333] bg-[#111111] text-[#888888] font-mono uppercase text-[10px]">
                     <tr>
-                        <th class="px-6 py-3">Waktu Mutasi</th>
-                        <th class="px-6 py-3">Jenis Perubahan</th>
-                        <th class="px-6 py-3">Transisi Nilai</th>
-                        <th class="px-6 py-3">Alasan / Catatan</th>
-                        <th class="px-6 py-3">Pelaku</th>
+                        <th class="px-5 py-3">Waktu Mutasi</th>
+                        <th class="px-5 py-3">Jenis Perubahan</th>
+                        <th class="px-5 py-3">Transisi Nilai</th>
+                        <th class="px-5 py-3">Alasan / Catatan</th>
+                        <th class="px-5 py-3">Pelaku</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse ($facility->statusLogs as $log)
-                        <tr class="hover:bg-slate-50/60 transition">
-                            <td class="whitespace-nowrap px-6 py-3.5 font-medium text-slate-500">
+                <tbody class="divide-y divide-[#222222]">
+                    @forelse ($statusLogs as $log)
+                        <tr class="hover:bg-[#161616] transition">
+                            <td class="whitespace-nowrap px-5 py-3 font-mono text-[#888888]">
                                 {{ $log->changed_at ? $log->changed_at->translatedFormat('d M Y, H:i') : '-' }} WIB
                             </td>
-                            <td class="whitespace-nowrap px-6 py-3.5">
-                                <span class="font-semibold text-slate-900">
-                                    {{ $log->change_type->label() }}
-                                </span>
+                            <td class="whitespace-nowrap px-5 py-3 font-medium text-white">
+                                {{ $log->change_type->label() }}
                             </td>
-                            <td class="whitespace-nowrap px-6 py-3.5 font-mono text-xs">
-                                <span class="text-slate-400">{{ $log->old_value }}</span>
-                                <span class="mx-1 text-slate-400">→</span>
-                                <span class="font-bold text-slate-900">{{ $log->new_value }}</span>
+                            <td class="whitespace-nowrap px-5 py-3 font-mono">
+                                <span class="text-[#888888]">{{ $log->old_value }}</span>
+                                <span class="mx-1 text-[#666666]">→</span>
+                                <span class="text-white font-semibold">{{ $log->new_value }}</span>
                             </td>
-                            <td class="px-6 py-3.5 text-slate-700 max-w-sm">
+                            <td class="px-5 py-3 text-[#a1a1a1] max-w-sm">
                                 {{ $log->reason ?? '—' }}
                             </td>
-                            <td class="whitespace-nowrap px-6 py-3.5">
-                                <div class="font-medium text-slate-900">{{ $log->changedBy->name ?? 'Sistem' }}</div>
-                                <div class="text-[10px] text-slate-400 uppercase tracking-wider">{{ $log->changedBy->role->label() ?? 'System' }}</div>
+                            <td class="whitespace-nowrap px-5 py-3 font-mono">
+                                <div class="text-white">{{ $log->changedBy->name ?? 'Sistem' }}</div>
+                                <div class="text-[10px] text-[#666666] uppercase">{{ $log->changedBy->role->label() ?? 'System' }}</div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-8 text-center text-slate-400">
+                            <td colspan="5" class="px-5 py-6 text-center text-[#888888] font-mono">
                                 Belum ada riwayat mutasi status yang tercatat untuk fasilitas ini.
                             </td>
                         </tr>

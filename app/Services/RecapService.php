@@ -74,23 +74,16 @@ final readonly class RecapService
         Carbon $startDate,
         Carbon $endDate,
     ): array {
-        // Query completed reservations in period
-        $completedReservations = Reservation::query()
+        // Query completed reservations duration per facility directly in MySQL
+        $facilityUsageMap = Reservation::query()
             ->where('status', ReservationStatus::Selesai)
             ->whereDate('date', '>=', $period['start_date'])
             ->whereDate('date', '<=', $period['end_date'])
-            ->get();
-
-        // Calculate usage per facility
-        $facilityUsageMap = [];
-        foreach ($completedReservations as $reservation) {
-            $startTime = Carbon::parse($reservation->start_time);
-            $endTime = Carbon::parse($reservation->end_time);
-            $durationInHours = round($startTime->diffInMinutes($endTime) / 60, 2);
-
-            $facilityId = (string) $reservation->facility_id;
-            $facilityUsageMap[$facilityId] = ($facilityUsageMap[$facilityId] ?? 0.0) + $durationInHours;
-        }
+            ->selectRaw('facility_id, SUM(TIME_TO_SEC(TIMEDIFF(end_time, start_time))) / 3600 as used_hours')
+            ->groupBy('facility_id')
+            ->pluck('used_hours', 'facility_id')
+            ->map(fn ($hours) => round((float) $hours, 2))
+            ->all();
 
         // Query status logs for active master state transitions
         $statusLogs = FacilityStatusLog::query()
@@ -199,23 +192,22 @@ final readonly class RecapService
         Carbon $startDate,
         Carbon $endDate,
     ): array {
-        // Query operational status transition logs from 'dapat_digunakan' to 'dalam_perbaikan'
-        $damageLogs = FacilityStatusLog::query()
+        // Query operational status transition logs directly aggregated in MySQL
+        $damageAggr = FacilityStatusLog::query()
             ->where('change_type', FacilityStatusChangeType::OperationalStatus)
             ->where('old_value', OperationalStatus::DapatDigunakan->value)
             ->where('new_value', OperationalStatus::DalamPerbaikan->value)
             ->whereBetween('changed_at', [$startDate, $endDate])
-            ->orderBy('changed_at')
-            ->get();
+            ->selectRaw('facility_id, COUNT(*) as incident_count, MAX(changed_at) as latest_incident_at')
+            ->groupBy('facility_id')
+            ->get()
+            ->keyBy('facility_id');
 
-        $facilityIncidentMap = $damageLogs->groupBy('facility_id');
-
-        $facilityRows = $facilities->map(function (Facility $facility) use ($facilityIncidentMap): array {
+        $facilityRows = $facilities->map(function (Facility $facility) use ($damageAggr): array {
             $facilityId = (string) $facility->id;
-            $incidents = $facilityIncidentMap->get($facilityId, collect());
-            $incidentCount = $incidents->count();
-            /** @var Carbon|null $latestIncident */
-            $latestIncident = $incidents->max('changed_at');
+            $aggr = $damageAggr->get($facilityId);
+            $incidentCount = $aggr ? (int) $aggr->incident_count : 0;
+            $latestIncident = $aggr?->latest_incident_at;
 
             return [
                 'facility_id' => $facilityId,

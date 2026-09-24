@@ -1,225 +1,283 @@
 @extends('layouts.admin')
 
-@section('title', 'Kelola Fasilitas — Beranda Admin')
+@section('title', 'Kelola Fasilitas Master · Admin')
 
 @section('content')
-<div class="space-y-6">
-    <!-- Header Page -->
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+<div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
+
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-            <h1 class="text-2xl font-bold tracking-tight text-slate-900">Kelola Fasilitas</h1>
-            <p class="mt-1 text-sm text-slate-600">
-                Beranda direktori fasilitas kampus (ruang kelas, aula, lab, alat, dan lapangan) dengan pemantauan status operasional terkini.
+            <h1 class="text-2xl sm:text-3xl font-semibold text-white tracking-[-0.03em]">
+                Master Fasilitas & Ruangan.
+            </h1>
+            <p class="text-xs sm:text-sm text-[#a1a1a1] mt-1">
+                Kelola data sarana prasarana kampus, status master aktif/nonaktif, dan pantau status operasional.
             </p>
         </div>
-        <div>
-            <a
-                href="{{ route('admin.facilities.create') }}"
-                class="inline-flex items-center gap-2 rounded-xl bg-sky-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-200"
-            >
-                <span class="text-base leading-none">+</span>
-                Tambah Fasilitas
-            </a>
-        </div>
+
+        <a href="{{ route('admin.facilities.create') }}" 
+           class="bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs px-4 py-2 rounded-full transition inline-flex items-center gap-2 self-start sm:self-auto active:scale-95 shadow-none">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Tambah Fasilitas
+        </a>
     </div>
 
-    <!-- Filter & Search Panel -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <form method="GET" action="{{ route('admin.facilities.index') }}" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            <!-- Search Keyword -->
-            <div class="lg:col-span-2">
-                <label for="search" class="block text-xs font-semibold uppercase tracking-wider text-slate-700">Cari Fasilitas</label>
-                <input
-                    type="text"
-                    id="search"
-                    name="search"
-                    value="{{ request('search') }}"
-                    placeholder="Nama fasilitas atau lokasi/gedung..."
-                    class="mt-1.5 block w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-600 focus:ring-4 focus:ring-sky-100"
-                >
-            </div>
-
-            <!-- Type Filter -->
-            <div>
-                <label for="type" class="block text-xs font-semibold uppercase tracking-wider text-slate-700">Tipe Fasilitas</label>
-                <select
-                    id="type"
-                    name="type"
-                    class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm shadow-sm outline-none transition focus:border-sky-600 focus:ring-4 focus:ring-sky-100"
-                >
-                    <option value="">Semua Tipe</option>
-                    @foreach (\App\Enums\FacilityType::cases() as $typeCase)
-                        <option value="{{ $typeCase->value }}" {{ request('type') === $typeCase->value ? 'selected' : '' }}>
-                            {{ $typeCase->label() }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Master Status Filter -->
-            <div>
-                <label for="master_status" class="block text-xs font-semibold uppercase tracking-wider text-slate-700">Status Master Data</label>
-                <select
-                    id="master_status"
-                    name="master_status"
-                    class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm shadow-sm outline-none transition focus:border-sky-600 focus:ring-4 focus:ring-sky-100"
-                >
-                    <option value="">Semua Status Master</option>
-                    <option value="active" {{ request('master_status') === 'active' ? 'selected' : '' }}>Aktif</option>
-                    <option value="inactive" {{ request('master_status') === 'inactive' ? 'selected' : '' }}>Nonaktif</option>
-                </select>
-            </div>
-
-            <!-- Operational Status Filter -->
-            <div>
-                <label for="operational_status" class="block text-xs font-semibold uppercase tracking-wider text-slate-700">Status Operasional</label>
-                <select
-                    id="operational_status"
-                    name="operational_status"
-                    class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm shadow-sm outline-none transition focus:border-sky-600 focus:ring-4 focus:ring-sky-100"
-                >
-                    <option value="">Semua Kondisi</option>
-                    @foreach (\App\Enums\OperationalStatus::cases() as $opCase)
-                        <option value="{{ $opCase->value }}" {{ request('operational_status') === $opCase->value ? 'selected' : '' }}>
-                            {{ $opCase->label() }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Submit & Reset Buttons -->
-            <div class="flex items-center gap-2 sm:col-span-2 lg:col-span-5 pt-1">
-                <button
-                    type="submit"
-                    class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
-                >
-                    Terapkan Filter
-                </button>
-
-                @if(request()->hasAny(['search', 'type', 'master_status', 'operational_status']))
-                    <a
-                        href="{{ route('admin.facilities.index') }}"
-                        class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+    <!-- Filter Bar -->
+    <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-5 mb-8">
+        <form method="GET" action="{{ route('admin.facilities.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <!-- Search -->
+            <div class="space-y-1.5">
+                <label for="search" class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Cari Fasilitas / Lokasi</label>
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="search"
+                        name="search"
+                        value="{{ $search ?? request('search', '') }}"
+                        placeholder="Nama atau lokasi fasilitas..."
+                        class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-xs rounded-[6px] pl-8 pr-3 py-2 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]"
                     >
-                        Reset Filter
-                    </a>
-                @endif
+                    <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Tipe Fasilitas -->
+            <div class="space-y-1.5 relative custom-dropdown" id="dropdown-type">
+                <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Tipe Fasilitas</label>
+                <input type="hidden" id="type" name="type" value="{{ $selectedType ?? request('type', '') }}">
+                @php
+                    $curTypeVal = $selectedType ?? request('type', '');
+                    $curTypeLabel = 'Semua Tipe';
+                    foreach(\App\Enums\FacilityType::cases() as $t) {
+                        if ($t->value === $curTypeVal) $curTypeLabel = $t->label();
+                    }
+                @endphp
+                <button type="button" onclick="toggleCustomDropdown('type')" id="typeTrigger"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                    <span id="typeLabel">{{ $curTypeLabel }}</span>
+                    <svg id="typeChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div id="typeMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-72 overflow-y-auto">
+                    <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                        <div class="relative">
+                            <input type="text" placeholder="Cari tipe fasilitas..." 
+                                   id="search-type"
+                                   oninput="filterDropdownOptions(this, 'typeMenu')"
+                                   onclick="event.stopPropagation()"
+                                   class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                            <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div onclick="selectCustomDropdown('type', '', 'Semua Tipe')" data-value="" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between {{ empty($curTypeVal) ? 'bg-[#1f1f1f]' : '' }}">
+                        <span>Semua Tipe</span>
+                        <span class="check-icon text-[#50e3c2] text-xs {{ empty($curTypeVal) ? '' : 'hidden' }}">✓</span>
+                    </div>
+                    @foreach(\App\Enums\FacilityType::cases() as $typeEnum)
+                        <div onclick="selectCustomDropdown('type', '{{ $typeEnum->value }}', '{{ $typeEnum->label() }}')" data-value="{{ $typeEnum->value }}" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $curTypeVal === $typeEnum->value ? 'bg-[#1f1f1f] text-white' : '' }}">
+                            <span>{{ $typeEnum->label() }}</span>
+                            <span class="check-icon text-[#50e3c2] text-xs {{ $curTypeVal === $typeEnum->value ? '' : 'hidden' }}">✓</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Status Master -->
+            <div class="space-y-1.5 relative custom-dropdown" id="dropdown-master_status">
+                <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Status Data Master</label>
+                <input type="hidden" id="master_status" name="master_status" value="{{ $selectedMasterStatus ?? request('master_status', '') }}">
+                @php
+                    $curMasterVal = $selectedMasterStatus ?? request('master_status', '');
+                    $curMasterLabel = $curMasterVal === 'active' ? 'Aktif' : ($curMasterVal === 'inactive' ? 'Nonaktif' : 'Semua Status Master');
+                @endphp
+                <button type="button" onclick="toggleCustomDropdown('master_status')" id="master_statusTrigger"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                    <span id="master_statusLabel">{{ $curMasterLabel }}</span>
+                    <svg id="master_statusChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div id="master_statusMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                    <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                        <div class="relative">
+                            <input type="text" placeholder="Cari status master..." 
+                                   id="search-master_status"
+                                   oninput="filterDropdownOptions(this, 'master_statusMenu')"
+                                   onclick="event.stopPropagation()"
+                                   class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                            <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div onclick="selectCustomDropdown('master_status', '', 'Semua Status Master')" data-value="" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between {{ empty($curMasterVal) ? 'bg-[#1f1f1f]' : '' }}">
+                        <span>Semua Status Master</span>
+                        <span class="check-icon text-[#50e3c2] text-xs {{ empty($curMasterVal) ? '' : 'hidden' }}">✓</span>
+                    </div>
+                    <div onclick="selectCustomDropdown('master_status', 'active', 'Aktif')" data-value="active" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $curMasterVal === 'active' ? 'bg-[#1f1f1f] text-white' : '' }}">
+                        <span>Aktif</span>
+                        <span class="check-icon text-[#50e3c2] text-xs {{ $curMasterVal === 'active' ? '' : 'hidden' }}">✓</span>
+                    </div>
+                    <div onclick="selectCustomDropdown('master_status', 'inactive', 'Nonaktif')" data-value="inactive" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $curMasterVal === 'inactive' ? 'bg-[#1f1f1f] text-white' : '' }}">
+                        <span>Nonaktif</span>
+                        <span class="check-icon text-[#50e3c2] text-xs {{ $curMasterVal === 'inactive' ? '' : 'hidden' }}">✓</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Operasional -->
+            <div class="space-y-1.5 relative custom-dropdown" id="dropdown-operational_status">
+                <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Status Operasional</label>
+                <input type="hidden" id="operational_status" name="operational_status" value="{{ $selectedOperationalStatus ?? request('operational_status', '') }}">
+                @php
+                    $curOpVal = $selectedOperationalStatus ?? request('operational_status', '');
+                    $curOpLabel = 'Semua Status Operasional';
+                    foreach(\App\Enums\OperationalStatus::cases() as $op) {
+                        if ($op->value === $curOpVal) $curOpLabel = $op->label();
+                    }
+                @endphp
+                <button type="button" onclick="toggleCustomDropdown('operational_status')" id="operational_statusTrigger"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                    <span id="operational_statusLabel">{{ $curOpLabel }}</span>
+                    <svg id="operational_statusChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div id="operational_statusMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                    <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                        <div class="relative">
+                            <input type="text" placeholder="Cari status operasional..." 
+                                   id="search-operational_status"
+                                   oninput="filterDropdownOptions(this, 'operational_statusMenu')"
+                                   onclick="event.stopPropagation()"
+                                   class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                            <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div onclick="selectCustomDropdown('operational_status', '', 'Semua Status Operasional')" data-value="" class="dropdown-item px-3 py-2 text-xs font-mono text-white hover:bg-[#1f1f1f] cursor-pointer flex items-center justify-between {{ empty($curOpVal) ? 'bg-[#1f1f1f]' : '' }}">
+                        <span>Semua Status Operasional</span>
+                        <span class="check-icon text-[#50e3c2] text-xs {{ empty($curOpVal) ? '' : 'hidden' }}">✓</span>
+                    </div>
+                    @foreach(\App\Enums\OperationalStatus::cases() as $opEnum)
+                        <div onclick="selectCustomDropdown('operational_status', '{{ $opEnum->value }}', '{{ $opEnum->label() }}')" data-value="{{ $opEnum->value }}" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $curOpVal === $opEnum->value ? 'bg-[#1f1f1f] text-white' : '' }}">
+                            <span>{{ $opEnum->label() }}</span>
+                            <span class="check-icon text-[#50e3c2] text-xs {{ $curOpVal === $opEnum->value ? '' : 'hidden' }}">✓</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="sm:col-span-2 lg:col-span-4 flex items-center justify-between pt-2 border-t border-[#333333]">
+                <div class="text-xs text-[#888888] font-mono">
+                    Total: <strong class="text-white">{{ count($facilities) }}</strong> fasilitas
+                </div>
+                <div class="flex items-center gap-2">
+                    @if(request()->anyFilled(['search', 'type', 'master_status', 'operational_status']))
+                        <a href="{{ route('admin.facilities.index') }}" class="text-xs text-[#888888] hover:text-white underline font-mono mr-2">Reset</a>
+                    @endif
+                    <button type="submit" class="bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs px-4 py-1.5 rounded-[6px] transition">
+                        Terapkan Filter
+                    </button>
+                </div>
             </div>
         </form>
     </div>
 
-    <!-- Table of Facilities -->
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <!-- Master Facilities Table -->
+    <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm text-slate-600">
-                <thead class="border-b border-slate-200 bg-slate-50/75 text-xs font-semibold uppercase tracking-wider text-slate-700">
+            <table class="w-full text-left text-sm text-[#ededed]">
+                <thead class="bg-[#161616] border-b border-[#333333] text-[10px] font-mono uppercase text-[#888888] tracking-wider">
                     <tr>
-                        <th class="px-6 py-4">Fasilitas</th>
-                        <th class="px-6 py-4">Tipe</th>
-                        <th class="px-6 py-4">Lokasi</th>
-                        <th class="px-6 py-4">Kapasitas</th>
-                        <th class="px-6 py-4">Status Master</th>
-                        <th class="px-6 py-4">Status Operasional</th>
-                        <th class="px-6 py-4 text-right">Aksi</th>
+                        <th class="py-3 px-5 font-medium">Nama Fasilitas</th>
+                        <th class="py-3 px-5 font-medium">Tipe</th>
+                        <th class="py-3 px-5 font-medium">Lokasi Gedung</th>
+                        <th class="py-3 px-5 font-medium">Kapasitas</th>
+                        <th class="py-3 px-5 font-medium">Status Data Master</th>
+                        <th class="py-3 px-5 font-medium">Status Operasional</th>
+                        <th class="py-3 px-5 text-right font-medium">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200">
-                    @forelse ($facilities as $facility)
-                        <tr class="transition hover:bg-slate-50/60 {{ ! $facility->is_active ? 'bg-slate-50/40 text-slate-400' : '' }}">
-                            <!-- Name & Thumbnail -->
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    @php
-                                        $primaryPhoto = $facility->photos->firstWhere('is_primary', true) ?? $facility->photos->first();
-                                    @endphp
-                                    @if ($primaryPhoto)
-                                        <img
-                                            src="{{ asset('storage/' . $primaryPhoto->photo_path) }}"
-                                            alt="{{ $facility->name }}"
-                                            class="h-11 w-11 flex-shrink-0 rounded-xl object-cover border border-slate-200 shadow-sm"
-                                        >
-                                    @else
-                                        <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400 font-bold text-xs border border-slate-200">
-                                            🏢
-                                        </div>
-                                    @endif
-                                    <div>
-                                        <div class="font-bold text-slate-900 {{ ! $facility->is_active ? 'text-slate-600' : '' }}">
-                                            {{ $facility->name }}
-                                        </div>
-                                        <div class="text-xs text-slate-500 line-clamp-1 max-w-xs">
-                                            {{ $facility->description }}
-                                        </div>
-                                    </div>
-                                </div>
+                <tbody class="divide-y divide-[#333333] text-xs">
+                    @forelse($facilities as $facility)
+                        @php
+                            $fId = is_array($facility) ? $facility['id'] : $facility->id;
+                            $fName = is_array($facility) ? $facility['name'] : $facility->name;
+                            $fType = is_array($facility) ? $facility['type'] : ($facility->type instanceof \BackedEnum ? $facility->type->value : $facility->type);
+                            $fTypeLabel = is_array($facility) ? ucfirst($facility['type']) : ($facility->type instanceof \App\Enums\FacilityType ? $facility->type->label() : ucfirst($fType));
+                            $fLocation = is_array($facility) ? $facility['location'] : $facility->location;
+                            $fCapacity = is_array($facility) ? ($facility['capacity'] ?? null) : $facility->capacity;
+                            $fIsActive = is_array($facility) ? ($facility['is_active'] ?? true) : $facility->is_active;
+                            $fOperational = is_array($facility) ? $facility['operational_status'] : ($facility->operational_status instanceof \BackedEnum ? $facility->operational_status->value : $facility->operational_status);
+                        @endphp
+
+                        <tr class="hover:bg-[#161616] transition-colors {{ !$fIsActive ? 'opacity-70 bg-[#161616]/40' : '' }}">
+                            <td class="py-3.5 px-5">
+                                <span class="font-medium text-white block">{{ $fName }}</span>
                             </td>
 
-                            <!-- Type -->
-                            <td class="whitespace-nowrap px-6 py-4">
-                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                                    {{ $facility->type->label() }}
-                                </span>
+                            <td class="py-3.5 px-5 capitalize text-[#888888] font-mono text-[11px]">
+                                {{ $fTypeLabel }}
                             </td>
 
-                            <!-- Location -->
-                            <td class="whitespace-nowrap px-6 py-4 font-medium text-slate-700">
-                                {{ $facility->location }}
+                            <td class="py-3.5 px-5 text-[#888888]">
+                                {{ $fLocation }}
                             </td>
 
-                            <!-- Capacity -->
-                            <td class="whitespace-nowrap px-6 py-4 font-medium text-slate-700">
-                                {{ $facility->capacity ? number_format($facility->capacity) . ' Orang' : '—' }}
+                            <td class="py-3.5 px-5 font-mono text-[11px] text-[#888888]">
+                                {{ $fCapacity ? $fCapacity . ' Orang' : '—' }}
                             </td>
 
                             <!-- Master Status -->
-                            <td class="whitespace-nowrap px-6 py-4">
-                                @if ($facility->is_active)
-                                    <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-700/10">
+                            <td class="py-3.5 px-5">
+                                @if($fIsActive)
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>
                                         Aktif
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 ring-1 ring-inset ring-rose-700/10">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#888888] bg-[#161616] border border-[#333333]">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#888888]"></span>
                                         Nonaktif
                                     </span>
                                 @endif
                             </td>
 
                             <!-- Operational Status -->
-                            <td class="whitespace-nowrap px-6 py-4">
-                                @if ($facility->operational_status->value === 'dapat_digunakan')
-                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700 ring-1 ring-inset ring-sky-700/10">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-sky-600"></span>
+                            <td class="py-3.5 px-5">
+                                @if($fOperational === 'dapat_digunakan')
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
                                         Dapat digunakan
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-700/10">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-amber-600"></span>
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#ff453a] bg-[#2b0000] border border-[#550000]">
                                         Dalam perbaikan
                                     </span>
                                 @endif
                             </td>
 
-                            <!-- Actions -->
-                            <td class="whitespace-nowrap px-6 py-4 text-right">
-                                <a
-                                    href="{{ route('admin.facilities.show', $facility) }}"
-                                    class="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
-                                >
-                                    Rincian & Kelola
-                                    <span>→</span>
+                            <td class="py-3.5 px-5 text-right space-x-2">
+                                <a href="{{ route('admin.facilities.show', $facility) }}" 
+                                   class="text-[#a1a1a1] hover:text-white font-medium transition inline-flex items-center gap-1 text-xs font-mono">
+                                    Detail & Kelola →
                                 </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center">
-                                <div class="mx-auto flex max-w-sm flex-col items-center">
-                                    <span class="text-3xl text-slate-400">🏛</span>
-                                    <h3 class="mt-3 text-sm font-semibold text-slate-900">Tidak ada fasilitas ditemukan</h3>
-                                    <p class="mt-1 text-xs text-slate-500">
-                                        Tidak ada fasilitas yang cocok dengan kriteria pencarian dan filter saat ini.
-                                    </p>
-                                </div>
+                            <td colspan="7" class="py-12 text-center text-[#888888] font-mono text-xs">
+                                Tidak ada data fasilitas yang sesuai dengan filter.
                             </td>
                         </tr>
                     @endforelse
@@ -227,8 +285,8 @@
             </table>
         </div>
 
-        @if ($facilities->hasPages())
-            <div class="border-t border-slate-200 px-6 py-4">
+        @if(method_exists($facilities, 'hasPages') && $facilities->hasPages())
+            <div class="p-4 border-t border-[#333333]">
                 {{ $facilities->links() }}
             </div>
         @endif

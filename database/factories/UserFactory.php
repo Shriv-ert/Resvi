@@ -37,6 +37,46 @@ class UserFactory extends Factory
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Indicate that the user is an admin.
      */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => UserRole::Admin,
+            'user_category' => null,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a petugas.
+     */
+    public function petugas(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => UserRole::Petugas,
+            'user_category' => null,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a dosen.
+     */
+    public function dosen(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => UserRole::Pengguna,
+            'user_category' => UserCategory::Dosen,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a staf.
+     */
+    public function staf(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => UserRole::Pengguna,
+            'user_category' => UserCategory::Staf,
+        ]);
+    }
 }

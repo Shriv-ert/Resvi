@@ -31,9 +31,32 @@ class ReservationFlowController extends Controller
 
         $facility = $detailService->getFacility($facilityId);
 
-        $date = $request->query('date') ?? $draft['date'] ?? CarbonImmutable::now('Asia/Jakarta')->toDateString();
-        $startTime = $request->query('start_time') ?? $draft['start_time'] ?? '08:00';
-        $endTime = $request->query('end_time') ?? $draft['end_time'] ?? '10:00';
+        $now = CarbonImmutable::now('Asia/Jakarta');
+        $defaultDate = $now->toDateString();
+        if ($now->hour >= 19) {
+            $defaultDate = $now->addDay()->toDateString();
+            $defaultStart = '08:00';
+            $defaultEnd = '10:00';
+        } else {
+            $nextMinute = $now->minute < 30 ? 30 : 0;
+            $nextHour = $now->minute < 30 ? $now->hour : $now->hour + 1;
+            if ($nextHour < 7) {
+                $nextHour = 7;
+                $nextMinute = 0;
+            }
+            $startCarbon = $now->setTime($nextHour, $nextMinute);
+            $defaultStart = $startCarbon->format('H:i');
+            $endCarbon = $startCarbon->addHours(2);
+            if ($endCarbon->hour > 20 || ($endCarbon->hour == 20 && $endCarbon->minute > 0)) {
+                $defaultEnd = '20:00';
+            } else {
+                $defaultEnd = $endCarbon->format('H:i');
+            }
+        }
+
+        $date = $request->query('date') ?? $draft['date'] ?? $defaultDate;
+        $startTime = $request->query('start_time') ?? $draft['start_time'] ?? $defaultStart;
+        $endTime = $request->query('end_time') ?? $draft['end_time'] ?? $defaultEnd;
 
         return view('reservations.create', [
             'facility' => $facility,

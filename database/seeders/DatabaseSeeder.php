@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserCategory;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -17,14 +18,62 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::query()->firstOrCreate(
+        // 1. Admin PPK
+        User::query()->updateOrCreate(
             ['email' => 'admin@ppk.test'],
             [
                 'name' => 'Administrator PPK',
-                'password' => Hash::make('PPK-Admin-2026!'),
+                'password' => Hash::make('password123'),
                 'role' => UserRole::Admin,
                 'user_category' => null,
             ],
         );
+
+        // 2. Petugas Demo
+        User::query()->updateOrCreate(
+            ['email' => 'petugas.demo@ppk.test'],
+            [
+                'name' => 'Petugas Sarpras Kampus',
+                'password' => Hash::make('password123'),
+                'role' => UserRole::Petugas,
+                'user_category' => null,
+            ],
+        );
+
+        // 3. Pengguna Demo (Mahasiswa)
+        User::query()->updateOrCreate(
+            ['email' => 'mahasiswa.demo@ppk.test'],
+            [
+                'name' => 'Ahmad Mahasiswa',
+                'password' => Hash::make('password123'),
+                'role' => UserRole::Pengguna,
+                'user_category' => UserCategory::Mahasiswa,
+            ],
+        );
+
+        // 4. Pengguna Demo (Dosen)
+        User::query()->updateOrCreate(
+            ['email' => 'dosen.demo@ppk.test'],
+            [
+                'name' => 'Dr. Budi Santoso, M.Kom.',
+                'password' => Hash::make('password123'),
+                'role' => UserRole::Pengguna,
+                'user_category' => UserCategory::Dosen,
+            ],
+        );
+
+        // 5. Pengguna Demo (Staf)
+        User::query()->updateOrCreate(
+            ['email' => 'staf.demo@ppk.test'],
+            [
+                'name' => 'Siti Aminah, S.AP.',
+                'password' => Hash::make('password123'),
+                'role' => UserRole::Pengguna,
+                'user_category' => UserCategory::Staf,
+            ],
+        );
+
+        // 6. Fasilitas Awal
+        $this->call(FacilitySeeder::class);
     }
 }

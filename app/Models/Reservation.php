@@ -57,4 +57,137 @@ class Reservation extends Model
     {
         return $this->belongsTo(Facility::class);
     }
+
+    public function cancelledBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelled_by_id');
+    }
+
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by_id');
+    }
+
+    public function rejectedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by_id');
+    }
+
+    public function getFacilityNameAttribute(): ?string
+    {
+        return $this->facility?->name;
+    }
+
+    public function getFacilityLocationAttribute(): ?string
+    {
+        return $this->facility?->location;
+    }
+
+    public function getFacilityTypeAttribute(): ?string
+    {
+        return $this->facility?->type?->value;
+    }
+
+    public function getApplicantNameAttribute(): ?string
+    {
+        return $this->user?->name ?? 'Pemohon';
+    }
+
+    public function getApplicantEmailAttribute(): ?string
+    {
+        return $this->user?->email;
+    }
+
+    public function getApplicantCategoryAttribute(): ?string
+    {
+        return $this->user?->user_category ? ucfirst($this->user->user_category->value) : 'Civitas';
+    }
+
+    public function getStartDateTimeAttribute(): \Carbon\Carbon
+    {
+        $dateStr = $this->date instanceof \DateTimeInterface ? $this->date->format('Y-m-d') : (string) $this->date;
+        return \Carbon\Carbon::parse($dateStr . ' ' . $this->start_time);
+    }
+
+    public function getEndDateTimeAttribute(): \Carbon\Carbon
+    {
+        $dateStr = $this->date instanceof \DateTimeInterface ? $this->date->format('Y-m-d') : (string) $this->date;
+        return \Carbon\Carbon::parse($dateStr . ' ' . $this->end_time);
+    }
+
+    /**
+     * Evaluasi status otomatis berdasarkan waktu (BR-PGN-05, BR-PTG-02).
+     */
+    public function evaluateStatus(): self
+    {
+        $now = now();
+        $dateStr = $this->date instanceof \DateTimeInterface ? $this->date->format('Y-m-d') : (string) $this->date;
+        $startDateTime = \Carbon\Carbon::parse($dateStr . ' ' . $this->start_time);
+        $endDateTime = \Carbon\Carbon::parse($dateStr . ' ' . $this->end_time);
+
+        if ($this->status === ReservationStatus::Menunggu && $now->gte($startDateTime)) {
+            $this->status = ReservationStatus::Kedaluwarsa;
+            $this->expiration_reason = 'Waktu mulai reservasi telah terlampaui sebelum disetujui petugas.';
+            $this->saveQuietly();
+        } elseif ($this->status === ReservationStatus::Disetujui && $now->gte($startDateTime) && $now->lt($endDateTime)) {
+            $this->status = ReservationStatus::Berlangsung;
+            $this->saveQuietly();
+        } elseif (($this->status === ReservationStatus::Berlangsung || $this->status === ReservationStatus::Disetujui) && $now->gte($endDateTime)) {
+            $this->status = ReservationStatus::Selesai;
+            $this->saveQuietly();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Batch update automatic time-based statuses for reservations (BR-PGN-05, BR-PTG-02).
+     */
+    public static function syncTimeBasedStatuses(): void
+    {
+        $now = now();
+        $today = $now->toDateString();
+        $currentTime = $now->format('H:i:s');
+
+        // 1. Menunggu yang start_time sudah lewat -> Kedaluwarsa
+        static::query()
+            ->where('status', ReservationStatus::Menunggu)
+            ->where(function ($q) use ($today, $currentTime) {
+                $q->where('date', '<', $today)
+                    ->orWhere(function ($sub) use ($today, $currentTime) {
+                        $sub->where('date', $today)
+                            ->where('start_time', '<=', $currentTime);
+                    });
+            })
+            ->update([
+                'status' => ReservationStatus::Kedaluwarsa,
+                'expiration_reason' => 'Waktu mulai reservasi telah terlampaui sebelum disetujui petugas.',
+            ]);
+
+        // 2. Disetujui yang start_time sudah lewat tapi belum end_time -> Berlangsung
+        static::query()
+            ->where('status', ReservationStatus::Disetujui)
+            ->where(function ($q) use ($today, $currentTime) {
+                $q->where('date', $today)
+                    ->where('start_time', '<=', $currentTime)
+                    ->where('end_time', '>', $currentTime);
+            })
+            ->update([
+                'status' => ReservationStatus::Berlangsung,
+            ]);
+
+        // 3. Disetujui atau Berlangsung yang end_time sudah lewat -> Selesai
+        static::query()
+            ->whereIn('status', [ReservationStatus::Disetujui, ReservationStatus::Berlangsung])
+            ->where(function ($q) use ($today, $currentTime) {
+                $q->where('date', '<', $today)
+                    ->orWhere(function ($sub) use ($today, $currentTime) {
+                        $sub->where('date', $today)
+                            ->where('end_time', '<=', $currentTime);
+                    });
+            })
+            ->update([
+                'status' => ReservationStatus::Selesai,
+            ]);
+    }
 }

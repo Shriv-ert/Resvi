@@ -3,12 +3,15 @@
 @section('title', 'Rekapitulasi Operasional & Okupansi — PPK Room Reservation')
 
 @section('content')
-<div class="space-y-6">
+<div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-8 space-y-6">
+
     <!-- Header Page & Export Dropdown -->
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold tracking-tight text-slate-900">Rekapitulasi Operasional & Okupansi</h1>
-            <p class="mt-1 text-sm text-slate-600">
+            <h1 class="text-2xl sm:text-3xl font-semibold text-white tracking-[-0.03em]">
+                Rekapitulasi Operasional & Okupansi
+            </h1>
+            <p class="text-xs sm:text-sm text-[#a1a1a1] mt-1">
                 Pusat pelaporan analitik berkala tingkat pemanfaatan fasilitas dan frekuensi insiden kerusakan sarana-prasarana kampus.
             </p>
         </div>
@@ -18,13 +21,14 @@
             <button
                 type="button"
                 id="exportButton"
-                class="inline-flex items-center gap-2 rounded-xl bg-sky-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-200"
+                onclick="toggleExportMenu()"
+                class="bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs px-4 py-2 rounded-[6px] transition flex items-center gap-2 active:scale-95 shadow-none"
             >
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
                 <span>Unduh Laporan</span>
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="h-3 w-3 text-[#555555]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
             </button>
@@ -32,45 +36,45 @@
             <!-- Dropdown Menu -->
             <div
                 id="exportMenu"
-                class="hidden absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-2xl border border-slate-200 bg-white p-2 shadow-xl ring-1 ring-black/5"
+                class="hidden absolute right-0 z-50 mt-2 w-64 origin-top-right rounded-[6px] border border-[#333333] bg-[#111111] p-1.5 shadow-2xl"
             >
-                <div class="px-3 py-2 border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <div class="px-3 py-2 border-b border-[#222222] text-[10px] font-mono uppercase tracking-wider text-[#888888]">
                     Pilih Format Berkas
                 </div>
                 <a
                     href="{{ route('admin.recaps.export', ['month' => $selectedMonth, 'year' => $selectedYear, 'metric' => $selectedMetric, 'group_by' => $selectedGroupBy, 'format' => 'csv']) }}"
-                    class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
+                    class="flex items-center gap-3 rounded-[4px] px-3 py-2 text-xs font-medium text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white transition"
                 >
-                    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 font-bold text-xs">
+                    <span class="flex h-6 w-6 items-center justify-center rounded-[4px] bg-[#002b11] text-[#50e3c2] border border-[#005522] font-mono font-bold text-[10px]">
                         CSV
                     </span>
                     <div>
-                        <div class="font-semibold text-slate-900">Format CSV (.csv)</div>
-                        <div class="text-[11px] text-slate-500">Standar pemisah koma UTF-8</div>
+                        <div class="font-medium text-white text-xs">Format CSV (.csv)</div>
+                        <div class="text-[10px] text-[#888888]">Standar pemisah koma UTF-8</div>
                     </div>
                 </a>
                 <a
                     href="{{ route('admin.recaps.export', ['month' => $selectedMonth, 'year' => $selectedYear, 'metric' => $selectedMetric, 'group_by' => $selectedGroupBy, 'format' => 'xlsx']) }}"
-                    class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
+                    class="flex items-center gap-3 rounded-[4px] px-3 py-2 text-xs font-medium text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white transition"
                 >
-                    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-sky-700 font-bold text-xs">
+                    <span class="flex h-6 w-6 items-center justify-center rounded-[4px] bg-[#001733] text-[#0070f3] border border-[#003b80] font-mono font-bold text-[10px]">
                         XLS
                     </span>
                     <div>
-                        <div class="font-semibold text-slate-900">Microsoft Excel (.xlsx)</div>
-                        <div class="text-[11px] text-slate-500">Spreadsheet terformat rapi</div>
+                        <div class="font-medium text-white text-xs">Microsoft Excel (.xlsx)</div>
+                        <div class="text-[10px] text-[#888888]">Spreadsheet terformat rapi</div>
                     </div>
                 </a>
                 <a
                     href="{{ route('admin.recaps.export', ['month' => $selectedMonth, 'year' => $selectedYear, 'metric' => $selectedMetric, 'group_by' => $selectedGroupBy, 'format' => 'pdf']) }}"
-                    class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
+                    class="flex items-center gap-3 rounded-[4px] px-3 py-2 text-xs font-medium text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white transition"
                 >
-                    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 text-rose-600 font-bold text-xs">
+                    <span class="flex h-6 w-6 items-center justify-center rounded-[4px] bg-[#2b0000] text-[#ff453a] border border-[#550000] font-mono font-bold text-[10px]">
                         PDF
                     </span>
                     <div>
-                        <div class="font-semibold text-slate-900">Dokumen PDF (.pdf)</div>
-                        <div class="text-[11px] text-slate-500">Layout landscape siap cetak</div>
+                        <div class="font-medium text-white text-xs">Dokumen PDF (.pdf)</div>
+                        <div class="text-[10px] text-[#888888]">Layout landscape siap cetak</div>
                     </div>
                 </a>
             </div>
@@ -78,92 +82,124 @@
     </div>
 
     <!-- Filter & Segmented Control Panel -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+    <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-5 space-y-4">
         <form id="recapFilterForm" method="GET" action="{{ route('admin.recaps.index') }}" class="space-y-4">
             <input type="hidden" name="metric" id="metricInput" value="{{ $selectedMetric }}">
             <input type="hidden" name="group_by" id="groupByInput" value="{{ $selectedGroupBy }}">
 
             <!-- Row 1: Period Selection (Month, Year) -->
             <div class="flex flex-wrap items-center gap-4">
-                <div class="w-full sm:w-auto">
-                    <label for="month" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+                @php
+                    $months = [
+                        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+                    ];
+                @endphp
+                <div class="w-full sm:w-auto relative custom-dropdown" id="dropdown-month">
+                    <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1.5">
                         Bulan Kalender
                     </label>
-                    <select
-                        id="month"
-                        name="month"
-                        class="block w-full sm:w-52 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm shadow-sm outline-none transition focus:border-sky-600 focus:ring-4 focus:ring-sky-100"
-                        onchange="this.form.submit()"
-                    >
-                        @php
-                            $months = [
-                                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
-                            ];
-                        @endphp
+                    <input type="hidden" id="month" name="month" value="{{ $selectedMonth }}">
+                    <button type="button" onclick="toggleCustomDropdown('month')" id="monthTrigger"
+                            class="w-full sm:w-52 bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                        <span id="monthLabel">{{ $months[$selectedMonth] ?? 'Pilih Bulan' }}</span>
+                        <svg id="monthChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div id="monthMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 sm:right-auto sm:w-52 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                        <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                            <div class="relative">
+                                <input type="text" placeholder="Cari bulan..." 
+                                       id="search-month"
+                                       oninput="filterDropdownOptions(this, 'monthMenu')"
+                                       onclick="event.stopPropagation()"
+                                       class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                                <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
                         @foreach ($months as $num => $name)
-                            <option value="{{ $num }}" @selected($selectedMonth == $num)>
-                                {{ $name }}
-                            </option>
+                            <div onclick="selectCustomDropdown('month', '{{ $num }}', '{{ $name }}', () => document.getElementById('recapFilterForm').submit())" data-value="{{ $num }}" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $selectedMonth == $num ? 'bg-[#1f1f1f] text-white' : '' }}">
+                                <span>{{ $name }}</span>
+                                <span class="check-icon text-[#50e3c2] text-xs {{ $selectedMonth == $num ? '' : 'hidden' }}">✓</span>
+                            </div>
                         @endforeach
-                    </select>
+                    </div>
                 </div>
 
-                <div class="w-full sm:w-auto">
-                    <label for="year" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+                <div class="w-full sm:w-auto relative custom-dropdown" id="dropdown-year">
+                    <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium mb-1.5">
                         Tahun
                     </label>
-                    <select
-                        id="year"
-                        name="year"
-                        class="block w-full sm:w-36 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm shadow-sm outline-none transition focus:border-sky-600 focus:ring-4 focus:ring-sky-100"
-                        onchange="this.form.submit()"
-                    >
+                    <input type="hidden" id="year" name="year" value="{{ $selectedYear }}">
+                    <button type="button" onclick="toggleCustomDropdown('year')" id="yearTrigger"
+                            class="w-full sm:w-36 bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
+                        <span id="yearLabel">{{ $selectedYear }}</span>
+                        <svg id="yearChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div id="yearMenu" class="custom-dropdown-menu hidden absolute top-full left-0 right-0 sm:right-auto sm:w-36 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[6px] shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto">
+                        <div class="p-2 border-b border-[#222222] sticky top-0 bg-[#111111] z-10">
+                            <div class="relative">
+                                <input type="text" placeholder="Cari tahun..." 
+                                       id="search-year"
+                                       oninput="filterDropdownOptions(this, 'yearMenu')"
+                                       onclick="event.stopPropagation()"
+                                       class="w-full bg-[#0a0a0a] border border-[#333333] text-white text-[11px] rounded-[4px] pl-7 pr-2 py-1.5 focus:outline-none focus:border-white transition font-mono placeholder-[#666666]">
+                                <svg class="w-3.5 h-3.5 text-[#888888] absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
                         @for ($y = (int) now()->year + 1; $y >= 2024; $y--)
-                            <option value="{{ $y }}" @selected($selectedYear == $y)>
-                                {{ $y }}
-                            </option>
+                            <div onclick="selectCustomDropdown('year', '{{ $y }}', '{{ $y }}', () => document.getElementById('recapFilterForm').submit())" data-value="{{ $y }}" class="dropdown-item px-3 py-2 text-xs font-mono text-[#cccccc] hover:bg-[#1f1f1f] hover:text-white cursor-pointer flex items-center justify-between {{ $selectedYear == $y ? 'bg-[#1f1f1f] text-white' : '' }}">
+                                <span>{{ $y }}</span>
+                                <span class="check-icon text-[#50e3c2] text-xs {{ $selectedYear == $y ? '' : 'hidden' }}">✓</span>
+                            </div>
                         @endfor
-                    </select>
+                    </div>
                 </div>
             </div>
 
             <!-- Row 2: Segmented Controls (Metric & Grouping) -->
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-3 border-t border-slate-100">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-4 border-t border-[#222222]">
                 <!-- Metric Toggle -->
-                <div class="flex items-center gap-1 rounded-xl bg-slate-100 p-1.5 border border-slate-200">
+                <div class="flex items-center gap-1 rounded-[6px] bg-[#0a0a0a] p-1 border border-[#333333]">
                     <button
                         type="button"
                         onclick="setMetric('occupancy')"
-                        class="rounded-lg px-4 py-2 text-xs font-bold transition {{ $selectedMetric === 'occupancy' ? 'bg-white text-sky-700 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}"
+                        class="rounded-[4px] px-3.5 py-1.5 text-xs font-medium transition {{ $selectedMetric === 'occupancy' ? 'bg-white text-black font-semibold shadow-none' : 'text-[#888888] hover:text-white' }}"
                     >
                         📊 Tingkat Okupansi
                     </button>
                     <button
                         type="button"
                         onclick="setMetric('damage_frequency')"
-                        class="rounded-lg px-4 py-2 text-xs font-bold transition {{ $selectedMetric === 'damage_frequency' ? 'bg-white text-rose-700 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}"
+                        class="rounded-[4px] px-3.5 py-1.5 text-xs font-medium transition {{ $selectedMetric === 'damage_frequency' ? 'bg-white text-black font-semibold shadow-none' : 'text-[#888888] hover:text-white' }}"
                     >
                         🔧 Frekuensi Kerusakan
                     </button>
                 </div>
 
                 <!-- Grouping Toggle -->
-                <div class="flex items-center gap-1 rounded-xl bg-slate-100 p-1.5 border border-slate-200">
+                <div class="flex items-center gap-1 rounded-[6px] bg-[#0a0a0a] p-1 border border-[#333333]">
                     <button
                         type="button"
                         onclick="setGroupBy('facility')"
-                        class="rounded-lg px-4 py-2 text-xs font-bold transition {{ $selectedGroupBy === 'facility' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}"
+                        class="rounded-[4px] px-3.5 py-1.5 text-xs font-medium transition {{ $selectedGroupBy === 'facility' ? 'bg-white text-black font-semibold shadow-none' : 'text-[#888888] hover:text-white' }}"
                     >
                         🏢 Per Fasilitas
                     </button>
                     <button
                         type="button"
                         onclick="setGroupBy('location')"
-                        class="rounded-lg px-4 py-2 text-xs font-bold transition {{ $selectedGroupBy === 'location' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}"
+                        class="rounded-[4px] px-3.5 py-1.5 text-xs font-medium transition {{ $selectedGroupBy === 'location' ? 'bg-white text-black font-semibold shadow-none' : 'text-[#888888] hover:text-white' }}"
                     >
-                        📍 Per Lokasi / Gedung
+                        📍 Per Lokasi Gedung
                     </button>
                 </div>
             </div>
@@ -173,175 +209,173 @@
     <!-- Executive Summary Cards -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <!-- Card 1: Periode -->
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500">Periode Kalender</div>
-            <div class="mt-2 text-xl font-bold tracking-tight text-slate-900">
-                {{ $recapData['period']['month_name'] }} {{ $recapData['period']['year'] }}
+        <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-5">
+            <div class="text-[10px] font-mono uppercase tracking-wider text-[#888888]">Periode Kalender</div>
+            <div class="mt-2 text-xl font-semibold text-white tracking-tight">
+                {{ $recapData['period']['month_name'] ?? DateTime::createFromFormat('!m', $selectedMonth)->format('F') }} {{ $recapData['period']['year'] ?? $selectedYear }}
             </div>
-            <div class="mt-1 text-xs text-slate-500">
-                {{ $recapData['period']['days_in_month'] }} Hari Kalender (07.00–20.00 WIB)
+            <div class="mt-1 text-[11px] text-[#888888]">
+                {{ $recapData['period']['days_in_month'] ?? 30 }} Hari Kalender (07.00–20.00 WIB)
             </div>
         </div>
 
         <!-- Card 2: Volume Penggunaan / Insiden -->
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-5">
+            <div class="text-[10px] font-mono uppercase tracking-wider text-[#888888]">
                 {{ $selectedMetric === 'occupancy' ? 'Total Durasi Selesai' : 'Total Insiden Kerusakan' }}
             </div>
-            <div class="mt-2 text-xl font-bold tracking-tight text-slate-900">
+            <div class="mt-2 text-xl font-semibold text-white tracking-tight">
                 @if ($selectedMetric === 'occupancy')
-                    {{ number_format($recapData['summary']['total_completed_hours'], 2, ',', '.') }} <span class="text-sm font-semibold text-slate-600">Jam</span>
+                    {{ number_format($recapData['summary']['total_completed_hours'] ?? 0, 2, ',', '.') }} <span class="text-xs font-normal text-[#888888]">Jam</span>
                 @else
-                    {{ $recapData['summary']['total_damage_incidents'] }} <span class="text-sm font-semibold text-slate-600">Insiden</span>
+                    {{ $recapData['summary']['total_damage_incidents'] ?? 0 }} <span class="text-xs font-normal text-[#888888]">Insiden</span>
                 @endif
             </div>
-            <div class="mt-1 text-xs text-slate-500">
+            <div class="mt-1 text-[11px] text-[#888888]">
                 {{ $selectedMetric === 'occupancy' ? 'Murni dari reservasi berstatus selesai' : 'Transisi status dapat digunakan → perbaikan' }}
             </div>
         </div>
 
         <!-- Card 3: Rata-Rata Okupansi / Terdampak -->
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-5">
+            <div class="text-[10px] font-mono uppercase tracking-wider text-[#888888]">
                 {{ $selectedMetric === 'occupancy' ? 'Okupansi Agregat Kampus' : 'Fasilitas Terdampak' }}
             </div>
-            <div class="mt-2 text-xl font-bold tracking-tight {{ $selectedMetric === 'occupancy' ? 'text-sky-700' : 'text-rose-700' }}">
+            <div class="mt-2 text-xl font-semibold tracking-tight text-white">
                 @if ($selectedMetric === 'occupancy')
-                    @if ($recapData['summary']['overall_occupancy_rate'] !== null)
-                        {{ number_format($recapData['summary']['overall_occupancy_rate'], 2, ',', '.') }}%
+                    @if (($recapData['summary']['overall_occupancy_rate'] ?? null) !== null)
+                        <span class="text-[#50e3c2]">{{ number_format($recapData['summary']['overall_occupancy_rate'], 2, ',', '.') }}%</span>
                     @else
-                        <span class="text-sm font-normal text-slate-400">Tidak dapat dihitung</span>
+                        <span class="text-xs font-normal text-[#888888]">Tidak dapat dihitung</span>
                     @endif
                 @else
-                    {{ $recapData['rows']->where('incident_count', '>', 0)->count() }} <span class="text-sm font-semibold text-slate-600">Entitas</span>
+                    <span class="text-[#ff453a]">{{ collect($recapData['rows'] ?? [])->where('incident_count', '>', 0)->count() }}</span> <span class="text-xs font-normal text-[#888888]">Entitas</span>
                 @endif
             </div>
-            <div class="mt-1 text-xs text-slate-500">
+            <div class="mt-1 text-[11px] text-[#888888]">
                 {{ $selectedMetric === 'occupancy' ? 'Rasio total selesai dibagi total kapasitas aktif' : 'Entitas yang mengalami minimal 1 insiden' }}
             </div>
         </div>
 
         <!-- Card 4: Total Inventaris -->
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-5">
+            <div class="text-[10px] font-mono uppercase tracking-wider text-[#888888]">
                 {{ $selectedGroupBy === 'facility' ? 'Total Fasilitas Terdata' : 'Total Lokasi / Gedung' }}
             </div>
-            <div class="mt-2 text-xl font-bold tracking-tight text-slate-900">
-                {{ $recapData['summary']['total_items'] }} <span class="text-sm font-semibold text-slate-600">{{ $selectedGroupBy === 'facility' ? 'Objek' : 'Area' }}</span>
+            <div class="mt-2 text-xl font-semibold text-white tracking-tight">
+                {{ $recapData['summary']['total_items'] ?? count($recapData['rows'] ?? []) }} <span class="text-xs font-normal text-[#888888]">{{ $selectedGroupBy === 'facility' ? 'Objek' : 'Area' }}</span>
             </div>
-            <div class="mt-1 text-xs text-slate-500">
+            <div class="mt-1 text-[11px] text-[#888888]">
                 Termasuk fasilitas berstatus aktif & nonaktif
             </div>
         </div>
     </div>
 
     <!-- Data Table Container -->
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm text-slate-600">
-                <thead class="border-b border-slate-200 bg-slate-50/75 text-xs font-semibold uppercase tracking-wider text-slate-700">
+            <table class="w-full text-left text-sm text-[#ededed]">
+                <thead class="bg-[#161616] border-b border-[#333333] text-[10px] font-mono uppercase text-[#888888] tracking-wider">
                     @if ($selectedMetric === 'occupancy')
                         @if ($selectedGroupBy === 'facility')
                             <tr>
-                                <th class="px-6 py-4 text-center w-12">No</th>
-                                <th class="px-6 py-4">Fasilitas</th>
-                                <th class="px-6 py-4">Tipe</th>
-                                <th class="px-6 py-4">Lokasi</th>
-                                <th class="px-6 py-4 text-right">Durasi Selesai</th>
-                                <th class="px-6 py-4 text-right">Kapasitas Slot Aktif</th>
-                                <th class="px-6 py-4 text-center">Tingkat Okupansi</th>
+                                <th class="py-3 px-5 text-center w-12 font-medium">No</th>
+                                <th class="py-3 px-5 font-medium">Fasilitas</th>
+                                <th class="py-3 px-5 font-medium">Tipe</th>
+                                <th class="py-3 px-5 font-medium">Lokasi</th>
+                                <th class="py-3 px-5 text-right font-medium">Durasi Selesai</th>
+                                <th class="py-3 px-5 text-right font-medium">Kapasitas Slot Aktif</th>
+                                <th class="py-3 px-5 text-center font-medium">Tingkat Okupansi</th>
                             </tr>
                         @else
                             <tr>
-                                <th class="px-6 py-4 text-center w-12">No</th>
-                                <th class="px-6 py-4">Lokasi / Gedung</th>
-                                <th class="px-6 py-4 text-center">Jumlah Fasilitas</th>
-                                <th class="px-6 py-4 text-right">Total Durasi Selesai</th>
-                                <th class="px-6 py-4 text-right">Total Kapasitas Aktif</th>
-                                <th class="px-6 py-4 text-center">Tingkat Okupansi Agregat</th>
+                                <th class="py-3 px-5 text-center w-12 font-medium">No</th>
+                                <th class="py-3 px-5 font-medium">Lokasi / Gedung</th>
+                                <th class="py-3 px-5 text-center font-medium">Jumlah Fasilitas</th>
+                                <th class="py-3 px-5 text-right font-medium">Total Durasi Selesai</th>
+                                <th class="py-3 px-5 text-right font-medium">Total Kapasitas Aktif</th>
+                                <th class="py-3 px-5 text-center font-medium">Tingkat Okupansi Agregat</th>
                             </tr>
                         @endif
                     @else
                         @if ($selectedGroupBy === 'facility')
                             <tr>
-                                <th class="px-6 py-4 text-center w-12">No</th>
-                                <th class="px-6 py-4">Fasilitas</th>
-                                <th class="px-6 py-4">Tipe</th>
-                                <th class="px-6 py-4">Lokasi</th>
-                                <th class="px-6 py-4 text-center">Jumlah Insiden Perbaikan</th>
-                                <th class="px-6 py-4 text-center">Insiden Terakhir</th>
+                                <th class="py-3 px-5 text-center w-12 font-medium">No</th>
+                                <th class="py-3 px-5 font-medium">Fasilitas</th>
+                                <th class="py-3 px-5 font-medium">Tipe</th>
+                                <th class="py-3 px-5 font-medium">Lokasi</th>
+                                <th class="py-3 px-5 text-center font-medium">Jumlah Insiden Perbaikan</th>
+                                <th class="py-3 px-5 text-center font-medium">Insiden Terakhir</th>
                             </tr>
                         @else
                             <tr>
-                                <th class="px-6 py-4 text-center w-12">No</th>
-                                <th class="px-6 py-4">Lokasi / Gedung</th>
-                                <th class="px-6 py-4 text-center">Jumlah Fasilitas</th>
-                                <th class="px-6 py-4 text-center">Total Insiden Perbaikan</th>
-                                <th class="px-6 py-4 text-center">Insiden Terakhir</th>
+                                <th class="py-3 px-5 text-center w-12 font-medium">No</th>
+                                <th class="py-3 px-5 font-medium">Lokasi / Gedung</th>
+                                <th class="py-3 px-5 text-center font-medium">Jumlah Fasilitas</th>
+                                <th class="py-3 px-5 text-center font-medium">Total Insiden Perbaikan</th>
+                                <th class="py-3 px-5 text-center font-medium">Insiden Terakhir</th>
                             </tr>
                         @endif
                     @endif
                 </thead>
-                <tbody class="divide-y divide-slate-200">
-                    @forelse ($recapData['rows'] as $index => $row)
+                <tbody class="divide-y divide-[#222222] text-xs">
+                    @forelse ($recapData['rows'] ?? [] as $index => $row)
                         @if ($selectedMetric === 'occupancy')
                             @if ($selectedGroupBy === 'facility')
-                                <tr class="transition hover:bg-slate-50/60">
-                                    <td class="px-6 py-4 text-center text-xs text-slate-400 font-medium">{{ $index + 1 }}</td>
-                                    <td class="px-6 py-4">
-                                        <div class="font-bold text-slate-900">{{ $row['name'] }}</div>
-                                        <div class="text-xs text-slate-400">
+                                <tr class="hover:bg-[#161616] transition-colors">
+                                    <td class="py-3.5 px-5 text-center font-mono text-[11px] text-[#666666]">{{ $index + 1 }}</td>
+                                    <td class="py-3.5 px-5">
+                                        <div class="font-medium text-white">{{ $row['name'] }}</div>
+                                        <div class="text-[11px] text-[#666666] mt-0.5">
                                             Status Master: {{ $row['is_active'] ? 'Aktif' : 'Nonaktif' }} &bull; {{ $row['active_days'] }} Hari Aktif
                                         </div>
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4">
-                                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                                            {{ ucfirst($row['type'] instanceof \BackedEnum ? $row['type']->value : (string) $row['type']) }}
-                                        </span>
+                                    <td class="whitespace-nowrap py-3.5 px-5 font-mono text-[11px] text-[#a1a1a1]">
+                                        {{ ucfirst($row['type'] instanceof \BackedEnum ? $row['type']->value : (string) $row['type']) }}
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 font-medium text-slate-700">
+                                    <td class="whitespace-nowrap py-3.5 px-5 text-[#a1a1a1]">
                                         {{ $row['location'] }}
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-slate-900">
+                                    <td class="whitespace-nowrap py-3.5 px-5 text-right font-mono text-white">
                                         {{ number_format($row['used_hours'], 2, ',', '.') }} Jam
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-right text-slate-600">
+                                    <td class="whitespace-nowrap py-3.5 px-5 text-right font-mono text-[#888888]">
                                         {{ number_format($row['operational_hours'], 2, ',', '.') }} Jam
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-center">
+                                    <td class="whitespace-nowrap py-3.5 px-5 text-center">
                                         @if ($row['is_calculable'])
-                                            <span class="inline-flex items-center rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700 ring-1 ring-inset ring-sky-700/15">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
                                                 {{ number_format($row['occupancy_rate'], 2, ',', '.') }}%
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500 italic">
+                                            <span class="text-[#666666] italic text-[11px]">
                                                 Tidak dapat dihitung
                                             </span>
                                         @endif
                                     </td>
                                 </tr>
                             @else
-                                <tr class="transition hover:bg-slate-50/60">
-                                    <td class="px-6 py-4 text-center text-xs text-slate-400 font-medium">{{ $index + 1 }}</td>
-                                    <td class="px-6 py-4 font-bold text-slate-900">
+                                <tr class="hover:bg-[#161616] transition-colors">
+                                    <td class="py-3.5 px-5 text-center font-mono text-[11px] text-[#666666]">{{ $index + 1 }}</td>
+                                    <td class="py-3.5 px-5 font-medium text-white">
                                         📍 {{ $row['location'] }}
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-center font-medium text-slate-700">
+                                    <td class="whitespace-nowrap py-3.5 px-5 text-center font-mono text-[11px] text-[#a1a1a1]">
                                         {{ $row['facility_count'] }} Fasilitas
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-slate-900">
+                                    <td class="whitespace-nowrap py-3.5 px-5 text-right font-mono text-white">
                                         {{ number_format($row['used_hours'], 2, ',', '.') }} Jam
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-right text-slate-600">
+                                    <td class="whitespace-nowrap py-3.5 px-5 text-right font-mono text-[#888888]">
                                         {{ number_format($row['operational_hours'], 2, ',', '.') }} Jam
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-center">
+                                    <td class="whitespace-nowrap py-3.5 px-5 text-center">
                                         @if ($row['is_calculable'])
-                                            <span class="inline-flex items-center rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700 ring-1 ring-inset ring-sky-700/15">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
                                                 {{ number_format($row['occupancy_rate'], 2, ',', '.') }}%
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500 italic">
+                                            <span class="text-[#666666] italic text-[11px]">
                                                 Tidak dapat dihitung
                                             </span>
                                         @endif
@@ -350,57 +384,55 @@
                             @endif
                         @else
                             @if ($selectedGroupBy === 'facility')
-                                <tr class="transition hover:bg-slate-50/60">
-                                    <td class="px-6 py-4 text-center text-xs text-slate-400 font-medium">{{ $index + 1 }}</td>
-                                    <td class="px-6 py-4">
-                                        <div class="font-bold text-slate-900">{{ $row['name'] }}</div>
+                                <tr class="hover:bg-[#161616] transition-colors">
+                                    <td class="py-3.5 px-5 text-center font-mono text-[11px] text-[#666666]">{{ $index + 1 }}</td>
+                                    <td class="py-3.5 px-5 font-medium text-white">
+                                        {{ $row['name'] }}
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4">
-                                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                                            {{ ucfirst($row['type'] instanceof \BackedEnum ? $row['type']->value : (string) $row['type']) }}
-                                        </span>
+                                    <td class="whitespace-nowrap py-3.5 px-5 font-mono text-[11px] text-[#a1a1a1]">
+                                        {{ ucfirst($row['type'] instanceof \BackedEnum ? $row['type']->value : (string) $row['type']) }}
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 font-medium text-slate-700">
+                                    <td class="whitespace-nowrap py-3.5 px-5 text-[#a1a1a1]">
                                         {{ $row['location'] }}
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-center">
+                                    <td class="whitespace-nowrap py-3.5 px-5 text-center">
                                         @if ($row['incident_count'] > 0)
-                                            <span class="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-rose-700 ring-1 ring-inset ring-rose-700/15">
-                                                <span class="h-1.5 w-1.5 rounded-full bg-rose-600"></span>
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#ff453a] bg-[#2b0000] border border-[#550000]">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-[#ff453a]"></span>
                                                 {{ $row['incident_count'] }} Kali
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-700/15">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
                                                 0 Kali (Stabil)
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-center text-xs text-slate-500">
+                                    <td class="whitespace-nowrap py-3.5 px-5 text-center font-mono text-[11px] text-[#888888]">
                                         {{ $row['latest_incident_at'] ? \Carbon\Carbon::parse($row['latest_incident_at'])->translatedFormat('d M Y H:i') : '—' }}
                                     </td>
                                 </tr>
                             @else
-                                <tr class="transition hover:bg-slate-50/60">
-                                    <td class="px-6 py-4 text-center text-xs text-slate-400 font-medium">{{ $index + 1 }}</td>
-                                    <td class="px-6 py-4 font-bold text-slate-900">
+                                <tr class="hover:bg-[#161616] transition-colors">
+                                    <td class="py-3.5 px-5 text-center font-mono text-[11px] text-[#666666]">{{ $index + 1 }}</td>
+                                    <td class="py-3.5 px-5 font-medium text-white">
                                         📍 {{ $row['location'] }}
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-center font-medium text-slate-700">
+                                    <td class="whitespace-nowrap py-3.5 px-5 text-center font-mono text-[11px] text-[#a1a1a1]">
                                         {{ $row['facility_count'] }} Fasilitas
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-center">
+                                    <td class="whitespace-nowrap py-3.5 px-5 text-center">
                                         @if ($row['incident_count'] > 0)
-                                            <span class="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-rose-700 ring-1 ring-inset ring-rose-700/15">
-                                                <span class="h-1.5 w-1.5 rounded-full bg-rose-600"></span>
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#ff453a] bg-[#2b0000] border border-[#550000]">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-[#ff453a]"></span>
                                                 {{ $row['incident_count'] }} Kali
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-700/15">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
                                                 0 Kali (Stabil)
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-center text-xs text-slate-500">
+                                    <td class="whitespace-nowrap py-3.5 px-5 text-center font-mono text-[11px] text-[#888888]">
                                         {{ $row['latest_incident_at'] ? \Carbon\Carbon::parse($row['latest_incident_at'])->translatedFormat('d M Y H:i') : '—' }}
                                     </td>
                                 </tr>
@@ -408,9 +440,9 @@
                         @endif
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center text-slate-500">
-                                <div class="text-sm font-semibold text-slate-700">Tidak ada data rekapitulasi</div>
-                                <div class="mt-1 text-xs text-slate-400">Belum ada fasilitas yang terdata di dalam sistem.</div>
+                            <td colspan="7" class="py-12 text-center text-[#888888]">
+                                <div class="text-xs font-semibold text-white">Tidak ada data rekapitulasi</div>
+                                <div class="mt-1 text-[11px] text-[#666666]">Belum ada fasilitas yang terdata di dalam sistem.</div>
                             </td>
                         </tr>
                     @endforelse
@@ -420,24 +452,19 @@
     </div>
 </div>
 
-<!-- Pure Vanilla JS for Segmented Controls & Dropdown (Zero node_modules) -->
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Export Dropdown
-        const exportBtn = document.getElementById('exportButton');
-        const exportMenu = document.getElementById('exportMenu');
+    function toggleExportMenu() {
+        const menu = document.getElementById('exportMenu');
+        if (menu) {
+            menu.classList.toggle('hidden');
+        }
+    }
 
-        if (exportBtn && exportMenu) {
-            exportBtn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                exportMenu.classList.toggle('hidden');
-            });
-
-            document.addEventListener('click', function (e) {
-                if (!exportMenu.contains(e.target) && !exportBtn.contains(e.target)) {
-                    exportMenu.classList.add('hidden');
-                }
-            });
+    document.addEventListener('click', function (e) {
+        const container = document.getElementById('exportDropdownContainer');
+        const menu = document.getElementById('exportMenu');
+        if (container && menu && !container.contains(e.target)) {
+            menu.classList.add('hidden');
         }
     });
 
