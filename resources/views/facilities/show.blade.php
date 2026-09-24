@@ -15,7 +15,7 @@
         $photos = [];
     } else {
         $primaryPhoto = $facility->photos?->firstWhere('is_primary', true) ?? $facility->photos?->first();
-        $primaryPhotoUrl = $primaryPhoto ? asset('storage/' . $primaryPhoto->photo_path) : 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80';
+        $primaryPhotoUrl = $facility->primary_photo_url ?? ($primaryPhoto ? $primaryPhoto->url : 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80');
         $photos = $facility->photos ?? collect();
     }
 @endphp
@@ -44,6 +44,7 @@
                     src="{{ $primaryPhotoUrl }}" 
                     alt="{{ $fName }}" 
                     class="w-full h-full object-cover"
+                    onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80';"
                 />
 
                 <div class="absolute top-4 left-4 flex flex-wrap gap-2">

@@ -247,7 +247,33 @@
                     @endif
                 </div>
 
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-3">
+                    <!-- Grid / List View Toggle Switch -->
+                    <div class="flex items-center gap-1 rounded-[6px] bg-[#0a0a0a] p-1 border border-[#333333]" aria-label="Pilihan Tampilan">
+                        <button type="button" id="btnViewGrid" onclick="setCatalogView('grid')" title="Tampilan Grid"
+                                class="rounded-[4px] px-2.5 py-1 text-xs font-mono flex items-center gap-1.5 transition text-white bg-[#222222]">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                            <span class="hidden sm:inline">Grid</span>
+                        </button>
+                        <button type="button" id="btnViewList" onclick="setCatalogView('list')" title="Tampilan List"
+                                class="rounded-[4px] px-2.5 py-1 text-xs font-mono flex items-center gap-1.5 transition text-[#888888] hover:text-white">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="8" y1="6" x2="21" y2="6"></line>
+                                <line x1="8" y1="12" x2="21" y2="12"></line>
+                                <line x1="8" y1="18" x2="21" y2="18"></line>
+                                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                            </svg>
+                            <span class="hidden sm:inline">List</span>
+                        </button>
+                    </div>
+
                     <button type="submit" class="bg-white hover:bg-[#e6e6e6] text-black font-medium text-xs px-4 py-1.5 rounded-[6px] transition">
                         Terapkan Filter
                     </button>
@@ -256,9 +282,9 @@
         </form>
     </section>
 
-    <!-- Catalog Grid -->
+    <!-- Catalog Grid / List Container -->
     <section aria-label="Daftar Fasilitas">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="facilityGrid">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-300" id="facilityGrid" data-view="grid">
             @forelse($facilities as $facility)
                 @php
                     $fId = is_array($facility) ? $facility['id'] : $facility->id;
@@ -274,26 +300,26 @@
                     if (is_array($facility)) {
                         $fPhoto = $facility['photo'] ?? 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80';
                     } else {
-                        $photo = $facility->photos?->firstWhere('is_primary', true) ?? $facility->photos?->first();
-                        $fPhoto = $photo ? asset('storage/' . $photo->photo_path) : 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80';
+                        $fPhoto = $facility->primary_photo_url;
                     }
                 @endphp
 
                 <a href="{{ route('facilities.show', array_merge(['facility' => $fId], request()->has('as_user') ? ['as_user' => 1] : [])) }}"
-                   class="bg-[#111111] border border-[#333333] hover:border-[#666666] rounded-[6px] p-5 flex flex-col justify-between transition-all duration-200 group block relative"
+                   class="facility-card bg-[#111111] border border-[#333333] hover:border-[#666666] rounded-[6px] p-5 flex flex-col justify-between transition-all duration-200 group block relative"
                    data-name="{{ strtolower($fName) }}"
                    data-type="{{ $fType }}"
                    data-location="{{ $fLocation }}"
                    data-capacity="{{ $fCapacity ?? 0 }}">
                     
-                    <div class="flex flex-col">
+                    <div class="facility-card-body flex flex-col">
                         <!-- Image Container -->
-                        <div class="relative h-44 w-full overflow-hidden rounded-[4px] bg-[#1a1a1a] border border-[#333333] mb-4 flex-shrink-0">
+                        <div class="facility-card-img relative h-44 w-full overflow-hidden rounded-[4px] bg-[#1a1a1a] border border-[#333333] mb-4 flex-shrink-0">
                             <img 
                                 src="{{ $fPhoto }}" 
                                 alt="{{ $fName }}" 
                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                 loading="lazy"
+                                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80';"
                             />
 
                             <!-- Type Tag -->
@@ -318,7 +344,7 @@
                         </div>
 
                         <!-- Content Area -->
-                        <div class="flex-1 min-w-0">
+                        <div class="facility-card-info flex-1 min-w-0">
                             <div class="flex items-center gap-1.5 text-[11px] text-[#888888] mb-1 font-mono">
                                 <span>{{ $fLocation }}</span>
                             </div>
@@ -334,7 +360,7 @@
                     </div>
 
                     <!-- Operational Status & Arrow Hint -->
-                    <div class="pt-4 border-t border-[#333333] flex items-center justify-between gap-2 mt-2">
+                    <div class="facility-card-footer pt-4 border-t border-[#333333] flex items-center justify-between gap-2 mt-2">
                         @if($fOperational === 'dapat_digunakan')
                             <span class="text-xs font-mono text-[#50e3c2] flex items-center gap-1.5 font-medium">
                                 <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>
@@ -493,7 +519,47 @@
         }
     }
 
+    function setCatalogView(mode) {
+        const grid = document.getElementById('facilityGrid');
+        const btnGrid = document.getElementById('btnViewGrid');
+        const btnList = document.getElementById('btnViewList');
+        if (!grid) return;
+
+        if (mode === 'list') {
+            grid.setAttribute('data-view', 'list');
+            grid.classList.remove('grid', 'grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3', 'gap-6');
+            grid.classList.add('flex', 'flex-col', 'gap-4');
+            if (btnGrid) {
+                btnGrid.classList.remove('bg-[#222222]', 'text-white');
+                btnGrid.classList.add('text-[#888888]');
+            }
+            if (btnList) {
+                btnList.classList.remove('text-[#888888]');
+                btnList.classList.add('bg-[#222222]', 'text-white');
+            }
+            localStorage.setItem('facility_view_mode', 'list');
+        } else {
+            grid.setAttribute('data-view', 'grid');
+            grid.classList.remove('flex', 'flex-col', 'gap-4');
+            grid.classList.add('grid', 'grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3', 'gap-6');
+            if (btnList) {
+                btnList.classList.remove('bg-[#222222]', 'text-white');
+                btnList.classList.add('text-[#888888]');
+            }
+            if (btnGrid) {
+                btnGrid.classList.remove('text-[#888888]');
+                btnGrid.classList.add('bg-[#222222]', 'text-white');
+            }
+            localStorage.setItem('facility_view_mode', 'grid');
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+        const savedView = localStorage.getItem('facility_view_mode');
+        if (savedView === 'list') {
+            setCatalogView('list');
+        }
+
         const slider = document.getElementById('capacitySlider');
         if (slider) {
             let isDragging = false;
@@ -538,4 +604,64 @@
         }
     });
 </script>
+
+<style>
+    /* List View Transformations for Facility Catalog */
+    #facilityGrid[data-view="list"] {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1rem !important;
+    }
+
+    @media (min-width: 640px) {
+        #facilityGrid[data-view="list"] .facility-card {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            padding: 1.25rem !important;
+            gap: 1.5rem !important;
+        }
+
+        #facilityGrid[data-view="list"] .facility-card-body {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            flex: 1 !important;
+            min-width: 0 !important;
+            gap: 1.5rem !important;
+        }
+
+        #facilityGrid[data-view="list"] .facility-card-img {
+            width: 14rem !important;
+            height: 9rem !important;
+            margin-bottom: 0 !important;
+            flex-shrink: 0 !important;
+        }
+
+        #facilityGrid[data-view="list"] .facility-card-info {
+            flex: 1 !important;
+            min-width: 0 !important;
+        }
+
+        #facilityGrid[data-view="list"] .facility-card-info p {
+            margin-bottom: 0 !important;
+            -webkit-line-clamp: 2 !important;
+        }
+
+        #facilityGrid[data-view="list"] .facility-card-footer {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-end !important;
+            justify-content: center !important;
+            border-top: none !important;
+            border-left: 1px solid #333333 !important;
+            padding-top: 0 !important;
+            padding-left: 1.5rem !important;
+            margin-top: 0 !important;
+            min-width: 150px !important;
+            gap: 1rem !important;
+            flex-shrink: 0 !important;
+        }
+    }
+</style>
 @endpush

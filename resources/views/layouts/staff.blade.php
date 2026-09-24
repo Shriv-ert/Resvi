@@ -71,31 +71,6 @@
     <!-- Decorative Top Mesh Accent Line -->
     <div class="h-[2px] w-full mesh-line sticky top-0 z-50"></div>
 
-    <!-- Demo Role Navigation Helper (Flush Bordered Bar) -->
-    <div class="bg-[#111111] border-b border-[#333333] text-xs py-2 px-4 sm:px-6 text-[#888888] z-40">
-        <div class="max-w-[1200px] mx-auto flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-                <span class="inline-block w-2 h-2 rounded-full bg-[#0070f3]"></span>
-                <span class="font-mono uppercase tracking-wider text-[11px] text-[#a1a1a1]">Role Simulator:</span>
-                <span class="text-white font-medium">Petugas Operasional (Sarpras)</span>
-            </div>
-            <div class="flex items-center gap-1 overflow-x-auto">
-                <span class="text-[#666666] text-[11px] hidden sm:inline mr-1">Switch:</span>
-                <a href="{{ route('facilities.index') }}" class="px-2.5 py-1 rounded-[6px] text-xs text-[#a1a1a1] hover:text-white hover:bg-[#1f1f1f] transition">
-                    Pengunjung
-                </a>
-                <a href="{{ route('facilities.index', ['as_user' => 1]) }}" class="px-2.5 py-1 rounded-[6px] text-xs text-[#a1a1a1] hover:text-white hover:bg-[#1f1f1f] transition">
-                    Pengguna
-                </a>
-                <a href="{{ route('staff.reservations.index') }}" class="px-2.5 py-1 rounded-[6px] text-xs bg-white text-black font-medium transition">
-                    Petugas
-                </a>
-                <a href="{{ route('admin.facilities.index') }}" class="px-2.5 py-1 rounded-[6px] text-xs text-[#a1a1a1] hover:text-white hover:bg-[#1f1f1f] transition">
-                    Admin
-                </a>
-            </div>
-        </div>
-    </div>
 
     <!-- Staff Header: Fixed 64px, 1px bottom border, backdrop blur -->
     <header class="sticky top-[2px] z-30 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-[#333333] h-16">

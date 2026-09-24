@@ -15,7 +15,7 @@
         $statusLogs = [];
     } else {
         $primaryPhoto = $facility->photos?->firstWhere('is_primary', true) ?? $facility->photos?->first();
-        $photoUrl = $primaryPhoto ? asset('storage/' . $primaryPhoto->photo_path) : null;
+        $photoUrl = $facility->primary_photo_url ?? ($primaryPhoto ? $primaryPhoto->url : null);
         $statusLogs = $facility->statusLogs ?? collect();
     }
 @endphp
@@ -75,7 +75,7 @@
     <div class="bg-[#111111] border border-[#333333] rounded-[6px] p-6 space-y-6">
         @if(!empty($photoUrl))
             <div class="h-64 rounded-[6px] overflow-hidden border border-[#333333] bg-[#161616]">
-                <img src="{{ $photoUrl }}" alt="{{ $fName }}" class="w-full h-full object-cover">
+                <img src="{{ $photoUrl }}" alt="{{ $fName }}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80';">
             </div>
         @endif
 
