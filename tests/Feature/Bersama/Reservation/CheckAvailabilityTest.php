@@ -161,7 +161,9 @@ class CheckAvailabilityTest extends TestCase
 
     public function test_validation_rejects_past_time_when_date_is_today(): void
     {
-        $today = CarbonImmutable::now('Asia/Jakarta')->toDateString();
+        $this->travelTo(now()->setTime(10, 0));
+
+        $today = now()->toDateString();
 
         $response = $this->post('/reservations/check-availability', [
             'facility_id' => $this->facility->id,
@@ -170,7 +172,6 @@ class CheckAvailabilityTest extends TestCase
             'end_time' => '08:00',
         ]);
 
-        // Karena waktu saat ini sudah malam (> 07:00 WIB), slot pagi di hari ini wajib ditolak
         $response->assertSessionHasErrors(['start_time']);
     }
 
@@ -178,7 +179,7 @@ class CheckAvailabilityTest extends TestCase
     {
         $response = $this->post('/reservations/check-availability', [
             'facility_id' => $this->facility->id,
-            'date' => CarbonImmutable::now('Asia/Jakarta')->subDay()->toDateString(),
+            'date' => now()->subDay()->toDateString(),
             'start_time' => '08:00',
             'end_time' => '10:00',
         ]);

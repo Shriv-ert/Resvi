@@ -50,20 +50,27 @@ class CheckAvailabilityRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
+            if ($validator->errors()->has('date')) {
+                return;
+            }
+
             if ($this->filled(['date', 'start_time'])) {
                 try {
-                    $now = CarbonImmutable::now('Asia/Jakarta');
-                    $startDateTime = CarbonImmutable::createFromFormat(
-                        'Y-m-d H:i',
-                        "{$this->date} {$this->start_time}",
-                        'Asia/Jakarta'
-                    );
+                    $now = CarbonImmutable::now();
+                    $today = $now->toDateString();
 
-                    if ($startDateTime && $startDateTime->lessThanOrEqualTo($now)) {
-                        $validator->errors()->add(
-                            'start_time',
-                            'Waktu mulai harus lebih besar dari waktu saat ini.'
+                    if ($this->date === $today) {
+                        $startDateTime = CarbonImmutable::createFromFormat(
+                            'Y-m-d H:i',
+                            "{$this->date} {$this->start_time}"
                         );
+
+                        if ($startDateTime && $startDateTime->lessThanOrEqualTo($now)) {
+                            $validator->errors()->add(
+                                'start_time',
+                                'Waktu mulai harus lebih besar dari waktu saat ini.'
+                            );
+                        }
                     }
                 } catch (\Throwable) {
                     // Penanganan error format ditangani oleh rule validasi date_format

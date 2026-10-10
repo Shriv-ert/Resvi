@@ -10,6 +10,8 @@ services:
     container_name: ppk_app
     restart: unless-stopped
     working_dir: /var/www
+    environment:
+      TZ: ${APP_TIMEZONE:-Asia/Jakarta}
     ports:
       - "${APP_PORT:-8000}:8000"
     volumes:
@@ -26,6 +28,7 @@ services:
     container_name: ppk_db
     restart: unless-stopped
     environment:
+      TZ: ${APP_TIMEZONE:-Asia/Jakarta}
       MYSQL_DATABASE: ${DB_DATABASE:-ppk_room_reservation}
       MYSQL_USER: ${DB_USERNAME:-laravel_user}
       MYSQL_PASSWORD: ${DB_PASSWORD:-laravel_password}

@@ -31,7 +31,7 @@ class ReservationFlowController extends Controller
 
         $facility = $detailService->getFacility($facilityId);
 
-        $now = CarbonImmutable::now('Asia/Jakarta');
+        $now = CarbonImmutable::now();
         $defaultDate = $now->toDateString();
         if ($now->hour >= 19) {
             $defaultDate = $now->addDay()->toDateString();
