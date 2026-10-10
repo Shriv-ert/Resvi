@@ -45,10 +45,28 @@ COPY docker/php/custom.ini /usr/local/etc/php/conf.d/custom.ini
 # Set working directory
 WORKDIR /var/www
 
+# Copy composer files first for optimal Docker layer caching
+COPY composer.json composer.lock ./
+
+# Install Composer production dependencies without running scripts
+RUN composer install --no-dev --no-interaction --no-scripts --prefer-dist --optimize-autoloader
+
+# Copy application source code
+COPY --chown=${USER}:${USER} . /var/www
+
+# Run composer dump-autoload (executes package:discover since app files now exist)
+RUN composer dump-autoload --optimize
+
+# Ensure correct permissions for storage, cache, and entrypoint
+RUN chown -R ${USER}:${USER} /var/www \
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache \
+    && chmod +x /var/www/docker/entrypoint.sh
+
 # Switch to non-root user
 USER ${USER}
 
 # Expose port for "php artisan serve"
 EXPOSE 8000
 
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+# Run container via entrypoint script
+CMD ["/var/www/docker/entrypoint.sh"]

@@ -6,6 +6,7 @@
 node_modules
 npm-debug.log
 yarn-error.log
+vendor
 storage/logs/*
 !storage/logs/.gitignore
 storage/framework/cache/*
