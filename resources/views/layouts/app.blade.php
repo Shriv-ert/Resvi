@@ -120,11 +120,8 @@
     <!-- Navigation Header -->
     <header class="sticky top-[2px] z-30 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-[#333333] h-16">
         <div class="max-w-[1200px] mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
-            <!-- Brand Logo -->
-            <a href="{{ route('facilities.index') }}" class="flex items-center gap-2.5 group">
-                <div class="w-7 h-7 rounded-[4px] bg-white text-black flex items-center justify-center font-bold text-xs">
-                    ▲
-                </div>
+            <!-- Brand Header -->
+            <a href="{{ route('facilities.index') }}" class="flex items-center group">
                 <div class="flex flex-col">
                     <span class="font-semibold text-sm text-white tracking-tight leading-tight">PPK <span class="text-[#888888]">Reservation</span></span>
                     <span class="font-mono text-[9px] text-[#888888] tracking-wider uppercase">Sistem Fasilitas Kampus</span>
@@ -229,44 +226,6 @@
     <main class="flex-grow w-full">
         @yield('content')
     </main>
-
-    <!-- Footer -->
-    <footer class="border-t border-[#333333] bg-[#0a0a0a] mt-24">
-        <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="space-y-2 md:col-span-2">
-                    <div class="flex items-center gap-2">
-                        <div class="w-5 h-5 rounded-[4px] bg-white text-black flex items-center justify-center font-bold text-[10px]">▲</div>
-                        <span class="font-semibold text-xs text-white">PPK Room Reservation System</span>
-                    </div>
-                    <p class="text-xs text-[#888888] leading-relaxed max-w-md">
-                        Sistem manajemen dan peminjaman fasilitas kampus terintegrasi. Menghubungkan seluruh civitas akademika dengan transparansi jadwal slot 30 menit.
-                    </p>
-                </div>
-                <div>
-                    <h4 class="font-mono text-[10px] uppercase tracking-wider text-[#888888] mb-3">Aturan Operasional</h4>
-                    <ul class="text-xs text-[#a1a1a1] space-y-1.5 font-mono">
-                        <li>Jam: 07.00 – 20.00 WIB</li>
-                        <li>Slot: 30 Menit / interval</li>
-                        <li>Verifikasi: Petugas Sarpras</li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-mono text-[10px] uppercase tracking-wider text-[#888888] mb-3">Pusat Bantuan</h4>
-                    <ul class="text-xs text-[#a1a1a1] space-y-1.5">
-                        <li>Gedung Rektorat Lt. 1</li>
-                        <li>sarpras@kampus.ac.id</li>
-                        <li>Internal ext. 104</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="mt-12 pt-6 border-t border-[#333333] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#888888]">
-                <div>© 2026 PPK Sarpras Kampus. Hak cipta dilindungi.</div>
-                <div class="font-mono text-[11px] text-[#888888]">PPK Room Reservation System</div>
-            </div>
-        </div>
-    </footer>
 
     @stack('scripts')
 </body>

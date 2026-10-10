@@ -77,10 +77,7 @@
         <div class="max-w-[1200px] mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
             <!-- Brand & Badge -->
             <div class="flex items-center gap-3">
-                <a href="{{ route('staff.reservations.index') }}" class="flex items-center gap-2.5">
-                    <div class="w-7 h-7 rounded-[4px] bg-white text-black flex items-center justify-center font-bold text-xs">
-                        ▲
-                    </div>
+                <a href="{{ route('staff.reservations.index') }}" class="flex items-center">
                     <div class="flex flex-col">
                         <span class="font-semibold text-sm text-white tracking-tight leading-tight">PPK <span class="text-[#888888]">Staff Portal</span></span>
                         <span class="font-mono text-[9px] text-[#888888] tracking-wider uppercase">Operasional & Sarana</span>
@@ -180,20 +177,6 @@
 
         @yield('content')
     </main>
-
-    <!-- Full-bleed Content Block Footer -->
-    <footer class="border-t border-[#333333] bg-[#0a0a0a] mt-24">
-        <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#888888]">
-            <div>
-                © 2026 PPK Sarpras Kampus · Konsol Kerja Petugas Operasional
-            </div>
-            <div class="flex items-center gap-4 font-mono text-[11px]">
-                <span>Prioritas Antrian: FIFO Menunggu</span>
-                <span>•</span>
-                <span>Jam Operasional: 07.00 – 20.00 WIB</span>
-            </div>
-        </div>
-    </footer>
 
     @stack('scripts')
 </body>

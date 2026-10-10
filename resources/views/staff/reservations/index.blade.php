@@ -20,7 +20,7 @@
             <a href="{{ route('staff.reservations.history') }}" 
                class="bg-[#171717] hover:bg-[#222222] text-white border border-[#333333] text-xs font-medium px-4 py-2 rounded-full transition flex items-center gap-1.5 shadow-none">
                 <svg class="w-3.5 h-3.5 text-[#888888]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Buka Riwayat Reservasi Final →
+                Buka Riwayat Reservasi Final
             </a>
         </div>
     </div>
@@ -117,15 +117,15 @@
     <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-[#ededed]" id="queueTable">
-                <thead class="bg-[#161616] border-b border-[#333333] text-[10px] font-mono uppercase text-[#888888] tracking-wider">
+                <thead class="bg-[#161616] border-b border-[#333333] text-[10px] font-mono uppercase text-[#888888] tracking-wider text-center">
                     <tr>
-                        <th class="py-3 px-5 font-medium">No. Reservasi</th>
-                        <th class="py-3 px-5 font-medium">Nama Pemohon</th>
-                        <th class="py-3 px-5 font-medium">Fasilitas</th>
-                        <th class="py-3 px-5 font-medium">Jadwal Pinjam</th>
-                        <th class="py-3 px-5 font-medium">Status</th>
-                        <th class="py-3 px-5 font-medium">Diajukan</th>
-                        <th class="py-3 px-5 text-right font-medium">Aksi</th>
+                        <th class="py-3 px-5 text-center font-medium">No. Reservasi</th>
+                        <th class="py-3 px-5 text-center font-medium">Nama Pemohon</th>
+                        <th class="py-3 px-5 text-center font-medium">Fasilitas</th>
+                        <th class="py-3 px-5 text-center font-medium">Jadwal Pinjam</th>
+                        <th class="py-3 px-5 text-center font-medium">Status</th>
+                        <th class="py-3 px-5 text-center font-medium">Diajukan</th>
+                        <th class="py-3 px-5 text-center font-medium">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#333333] text-xs">
@@ -162,7 +162,7 @@
                             </td>
 
                             <!-- Status Badge -->
-                            <td class="py-3.5 px-5">
+                            <td class="py-3.5 px-5 text-center whitespace-nowrap">
                                 @if($statusVal === 'menunggu')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#f5a623] bg-[#2b1e00] border border-[#553c00]">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#f5a623] animate-pulse"></span>
@@ -187,10 +187,10 @@
                             </td>
 
                             <!-- Action Button -->
-                            <td class="py-3.5 px-5 text-right">
+                            <td class="py-3.5 px-5 text-center whitespace-nowrap">
                                 <a href="{{ route('staff.reservations.show', ['reservation' => $res['id']]) }}" 
                                    class="text-[#a1a1a1] hover:text-white font-medium transition inline-flex items-center gap-1 text-xs">
-                                    Verifikasi →
+                                    Verifikasi
                                 </a>
                             </td>
                         </tr>

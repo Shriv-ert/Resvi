@@ -19,7 +19,7 @@
         <div>
             <a href="{{ route('staff.reservations.index') }}" 
                class="bg-[#171717] hover:bg-[#222222] text-white border border-[#333333] text-xs font-medium px-4 py-2 rounded-full transition flex items-center gap-1.5 shadow-none">
-                ← Kembali ke Antrean Aktif
+                Kembali ke Antrean Aktif
             </a>
         </div>
     </div>
@@ -121,15 +121,15 @@
     <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-[#ededed]" id="historyTable">
-                <thead class="bg-[#161616] border-b border-[#333333] text-[10px] font-mono uppercase text-[#888888] tracking-wider">
+                <thead class="bg-[#161616] border-b border-[#333333] text-[10px] font-mono uppercase text-[#888888] tracking-wider text-center">
                     <tr>
-                        <th class="py-3 px-5 font-medium">No. Reservasi</th>
-                        <th class="py-3 px-5 font-medium">Nama Pemohon</th>
-                        <th class="py-3 px-5 font-medium">Fasilitas</th>
-                        <th class="py-3 px-5 font-medium">Jadwal Pinjam</th>
-                        <th class="py-3 px-5 font-medium">Status Final</th>
-                        <th class="py-3 px-5 font-medium">Waktu Pengajuan</th>
-                        <th class="py-3 px-5 text-right font-medium">Aksi</th>
+                        <th class="py-3 px-5 text-center font-medium">No. Reservasi</th>
+                        <th class="py-3 px-5 text-center font-medium">Nama Pemohon</th>
+                        <th class="py-3 px-5 text-center font-medium">Fasilitas</th>
+                        <th class="py-3 px-5 text-center font-medium">Jadwal Pinjam</th>
+                        <th class="py-3 px-5 text-center font-medium">Status Final</th>
+                        <th class="py-3 px-5 text-center font-medium">Waktu Pengajuan</th>
+                        <th class="py-3 px-5 text-center font-medium">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#333333] text-xs">
@@ -162,7 +162,7 @@
                                 <span class="text-[#888888] text-[11px]">{{ $res['start_time'] }} – {{ $res['end_time'] }} WIB</span>
                             </td>
 
-                            <td class="py-3.5 px-5">
+                            <td class="py-3.5 px-5 text-center whitespace-nowrap">
                                 @if($statusVal === 'selesai')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#a1a1a1] bg-[#161616] border border-[#333333]">
                                         Selesai
@@ -190,10 +190,10 @@
                                 {{ $res['created_at'] }}
                             </td>
 
-                            <td class="py-3.5 px-5 text-right">
+                            <td class="py-3.5 px-5 text-center whitespace-nowrap">
                                 <a href="{{ route('staff.reservations.show', ['reservation' => $res['id']]) }}" 
                                    class="text-[#a1a1a1] hover:text-white font-medium transition inline-flex items-center gap-1 text-xs">
-                                    Detail →
+                                    Detail
                                 </a>
                             </td>
                         </tr>

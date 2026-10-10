@@ -23,7 +23,7 @@
         <div>
             <a href="{{ route('staff.facilities.index') }}" 
                class="bg-[#171717] hover:bg-[#222222] text-white border border-[#333333] text-xs font-medium px-4 py-2 rounded-full transition flex items-center gap-1.5 shadow-none">
-                ← Kembali ke Semua Fasilitas
+                Kembali ke Semua Fasilitas
             </a>
         </div>
     </div>
@@ -86,14 +86,14 @@
     <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden shadow-none">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-[#ededed]" id="maintenanceTable">
-                <thead class="bg-[#161616] border-b border-[#333333] text-[11px] font-mono uppercase text-[#888888] tracking-wider">
+                <thead class="bg-[#161616] border-b border-[#333333] text-[11px] font-mono uppercase text-[#888888] tracking-wider text-center">
                     <tr>
-                        <th class="py-3 px-5 font-medium">Nama Fasilitas</th>
-                        <th class="py-3 px-5 font-medium">Tipe</th>
-                        <th class="py-3 px-5 font-medium">Lokasi</th>
-                        <th class="py-3 px-5 font-medium">Status Operasional</th>
-                        <th class="py-3 px-5 font-medium">Catatan Pemeliharaan</th>
-                        <th class="py-3 px-5 text-right font-medium">Aksi</th>
+                        <th class="py-3 px-5 text-center font-medium">Nama Fasilitas</th>
+                        <th class="py-3 px-5 text-center font-medium">Tipe</th>
+                        <th class="py-3 px-5 text-center font-medium">Lokasi</th>
+                        <th class="py-3 px-5 text-center font-medium">Status Operasional</th>
+                        <th class="py-3 px-5 text-center font-medium">Catatan Pemeliharaan</th>
+                        <th class="py-3 px-5 text-center font-medium">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#333333] text-xs">
@@ -119,8 +119,8 @@
                                 {{ $f['location'] }}
                             </td>
 
-                            <td class="py-3.5 px-5">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[6px] text-[11px] font-mono text-[#ff453a] bg-[#2b0000] border border-[#550000]">
+                            <td class="py-3.5 px-5 whitespace-nowrap text-center">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[6px] text-[11px] font-mono text-[#ff453a] bg-[#2b0000] border border-[#550000] whitespace-nowrap">
                                     <span class="w-1.5 h-1.5 rounded-full bg-[#ff453a] animate-pulse"></span>
                                     Dalam Perbaikan
                                 </span>
@@ -130,11 +130,10 @@
                                 {{ $logReason }}
                             </td>
 
-                            <td class="py-3.5 px-5 text-right">
+                            <td class="py-3.5 px-5 text-center whitespace-nowrap">
                                 <a href="{{ route('staff.facilities.show', ['facility' => $f['id']]) }}" 
                                    class="inline-flex items-center gap-1 bg-[#171717] hover:bg-[#222222] text-white border border-[#333333] text-xs font-medium px-3 py-1 rounded-[6px] transition shadow-none">
                                     Kelola
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                                 </a>
                             </td>
                         </tr>

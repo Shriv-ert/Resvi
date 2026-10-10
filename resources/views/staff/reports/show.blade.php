@@ -18,7 +18,7 @@
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
-            Kembali ke Antrean Laporan
+            Antrean Laporan
         </a>
 
         <!-- Status Badge -->
@@ -86,15 +86,21 @@
             </div>
         </div>
 
-        <!-- Photo Evidence if attached -->
-        @if(!empty($photoUrl))
-            <div>
-                <h4 class="font-mono text-[11px] uppercase tracking-wider text-[#888888] font-medium mb-2">Foto Lampiran Bukti</h4>
-                <div class="max-w-md rounded-[6px] overflow-hidden border border-[#333333] bg-[#161616]">
-                    <img src="{{ $photoUrl }}" alt="Foto Bukti Masalah" class="w-full h-auto object-cover">
+        <!-- Photo Evidence -->
+        <div>
+            <h4 class="font-mono text-[11px] uppercase tracking-wider text-[#888888] font-medium mb-2">Foto Lampiran Bukti</h4>
+            @if(!empty($photoUrl))
+                <div class="max-w-md rounded-[6px] overflow-hidden border border-[#333333] bg-[#161616] group">
+                    <a href="{{ $photoUrl }}" target="_blank" rel="noopener noreferrer" class="block cursor-zoom-in" title="Klik untuk membuka ukuran penuh">
+                        <img src="{{ $photoUrl }}" alt="Foto Bukti Masalah" class="w-full h-auto object-cover group-hover:opacity-90 transition">
+                    </a>
                 </div>
-            </div>
-        @endif
+            @else
+                <div class="p-3.5 rounded-[6px] bg-[#161616] border border-[#333333] text-xs text-[#888888] font-mono">
+                    Tidak ada lampiran foto bukti pada laporan ini.
+                </div>
+            @endif
+        </div>
 
         <!-- Resolution Notes if Completed -->
         @if(!empty($report['resolution_notes']))

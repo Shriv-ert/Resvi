@@ -152,14 +152,14 @@
     <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-[#ededed]" id="accountsTable">
-                <thead class="bg-[#161616] border-b border-[#333333] text-[10px] font-mono uppercase text-[#888888] tracking-wider">
+                <thead class="bg-[#161616] border-b border-[#333333] text-[10px] font-mono uppercase text-[#888888] tracking-wider text-center">
                     <tr>
-                        <th class="py-3 px-5 font-medium">Nama Lengkap</th>
-                        <th class="py-3 px-5 font-medium">Alamat Email</th>
-                        <th class="py-3 px-5 font-medium">Peran Akun</th>
-                        <th class="py-3 px-5 font-medium">Kategori Pengguna</th>
-                        <th class="py-3 px-5 font-medium">Waktu Pendaftaran</th>
-                        <th class="py-3 px-5 text-right font-medium">Aksi</th>
+                        <th class="py-3 px-5 text-center font-medium">Nama Lengkap</th>
+                        <th class="py-3 px-5 text-center font-medium">Alamat Email</th>
+                        <th class="py-3 px-5 text-center font-medium">Peran Akun</th>
+                        <th class="py-3 px-5 text-center font-medium">Kategori Pengguna</th>
+                        <th class="py-3 px-5 text-center font-medium">Waktu Pendaftaran</th>
+                        <th class="py-3 px-5 text-center font-medium">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#222222] text-xs">
@@ -227,10 +227,10 @@
                                 {{ $uCreated }}
                             </td>
 
-                            <td class="py-3.5 px-5 text-right">
+                            <td class="py-3.5 px-5 text-center whitespace-nowrap">
                                 <a href="{{ route('admin.accounts.show', is_array($u) ? ['user' => $uId] : $u) }}" 
                                    class="text-white hover:text-[#0070f3] font-medium transition inline-flex items-center gap-1 text-xs">
-                                    Detail & Reset →
+                                    Detail & Reset
                                 </a>
                             </td>
                         </tr>

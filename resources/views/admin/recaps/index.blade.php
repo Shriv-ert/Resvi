@@ -174,14 +174,14 @@
                         onclick="setMetric('occupancy')"
                         class="rounded-[4px] px-3.5 py-1.5 text-xs font-medium transition {{ $selectedMetric === 'occupancy' ? 'bg-white text-black font-semibold shadow-none' : 'text-[#888888] hover:text-white' }}"
                     >
-                        📊 Tingkat Okupansi
+                        Tingkat Okupansi
                     </button>
                     <button
                         type="button"
                         onclick="setMetric('damage_frequency')"
                         class="rounded-[4px] px-3.5 py-1.5 text-xs font-medium transition {{ $selectedMetric === 'damage_frequency' ? 'bg-white text-black font-semibold shadow-none' : 'text-[#888888] hover:text-white' }}"
                     >
-                        🔧 Frekuensi Kerusakan
+                        Frekuensi Kerusakan
                     </button>
                 </div>
 
@@ -192,14 +192,14 @@
                         onclick="setGroupBy('facility')"
                         class="rounded-[4px] px-3.5 py-1.5 text-xs font-medium transition {{ $selectedGroupBy === 'facility' ? 'bg-white text-black font-semibold shadow-none' : 'text-[#888888] hover:text-white' }}"
                     >
-                        🏢 Per Fasilitas
+                        Per Fasilitas
                     </button>
                     <button
                         type="button"
                         onclick="setGroupBy('location')"
                         class="rounded-[4px] px-3.5 py-1.5 text-xs font-medium transition {{ $selectedGroupBy === 'location' ? 'bg-white text-black font-semibold shadow-none' : 'text-[#888888] hover:text-white' }}"
                     >
-                        📍 Per Lokasi Gedung
+                        Per Lokasi Gedung
                     </button>
                 </div>
             </div>
@@ -275,25 +275,25 @@
     <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-[#ededed]">
-                <thead class="bg-[#161616] border-b border-[#333333] text-[10px] font-mono uppercase text-[#888888] tracking-wider">
+                <thead class="bg-[#161616] border-b border-[#333333] text-[10px] font-mono uppercase text-[#888888] tracking-wider text-center">
                     @if ($selectedMetric === 'occupancy')
                         @if ($selectedGroupBy === 'facility')
                             <tr>
                                 <th class="py-3 px-5 text-center w-12 font-medium">No</th>
-                                <th class="py-3 px-5 font-medium">Fasilitas</th>
-                                <th class="py-3 px-5 font-medium">Tipe</th>
-                                <th class="py-3 px-5 font-medium">Lokasi</th>
-                                <th class="py-3 px-5 text-right font-medium">Durasi Selesai</th>
-                                <th class="py-3 px-5 text-right font-medium">Kapasitas Slot Aktif</th>
+                                <th class="py-3 px-5 text-center font-medium">Fasilitas</th>
+                                <th class="py-3 px-5 text-center font-medium">Tipe</th>
+                                <th class="py-3 px-5 text-center font-medium">Lokasi</th>
+                                <th class="py-3 px-5 text-center font-medium">Durasi Selesai</th>
+                                <th class="py-3 px-5 text-center font-medium">Kapasitas Slot Aktif</th>
                                 <th class="py-3 px-5 text-center font-medium">Tingkat Okupansi</th>
                             </tr>
                         @else
                             <tr>
                                 <th class="py-3 px-5 text-center w-12 font-medium">No</th>
-                                <th class="py-3 px-5 font-medium">Lokasi / Gedung</th>
+                                <th class="py-3 px-5 text-center font-medium">Lokasi / Gedung</th>
                                 <th class="py-3 px-5 text-center font-medium">Jumlah Fasilitas</th>
-                                <th class="py-3 px-5 text-right font-medium">Total Durasi Selesai</th>
-                                <th class="py-3 px-5 text-right font-medium">Total Kapasitas Aktif</th>
+                                <th class="py-3 px-5 text-center font-medium">Total Durasi Selesai</th>
+                                <th class="py-3 px-5 text-center font-medium">Total Kapasitas Aktif</th>
                                 <th class="py-3 px-5 text-center font-medium">Tingkat Okupansi Agregat</th>
                             </tr>
                         @endif
@@ -301,16 +301,16 @@
                         @if ($selectedGroupBy === 'facility')
                             <tr>
                                 <th class="py-3 px-5 text-center w-12 font-medium">No</th>
-                                <th class="py-3 px-5 font-medium">Fasilitas</th>
-                                <th class="py-3 px-5 font-medium">Tipe</th>
-                                <th class="py-3 px-5 font-medium">Lokasi</th>
+                                <th class="py-3 px-5 text-center font-medium">Fasilitas</th>
+                                <th class="py-3 px-5 text-center font-medium">Tipe</th>
+                                <th class="py-3 px-5 text-center font-medium">Lokasi</th>
                                 <th class="py-3 px-5 text-center font-medium">Jumlah Insiden Perbaikan</th>
                                 <th class="py-3 px-5 text-center font-medium">Insiden Terakhir</th>
                             </tr>
                         @else
                             <tr>
                                 <th class="py-3 px-5 text-center w-12 font-medium">No</th>
-                                <th class="py-3 px-5 font-medium">Lokasi / Gedung</th>
+                                <th class="py-3 px-5 text-center font-medium">Lokasi / Gedung</th>
                                 <th class="py-3 px-5 text-center font-medium">Jumlah Fasilitas</th>
                                 <th class="py-3 px-5 text-center font-medium">Total Insiden Perbaikan</th>
                                 <th class="py-3 px-5 text-center font-medium">Insiden Terakhir</th>

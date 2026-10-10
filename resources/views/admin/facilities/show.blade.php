@@ -125,13 +125,13 @@
 
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs text-[#ededed]">
-                <thead class="border-b border-[#333333] bg-[#111111] text-[#888888] font-mono uppercase text-[10px]">
+                <thead class="border-b border-[#333333] bg-[#111111] text-[#888888] font-mono uppercase text-[10px] text-center">
                     <tr>
-                        <th class="px-5 py-3">Waktu Mutasi</th>
-                        <th class="px-5 py-3">Jenis Perubahan</th>
-                        <th class="px-5 py-3">Transisi Nilai</th>
-                        <th class="px-5 py-3">Alasan / Catatan</th>
-                        <th class="px-5 py-3">Pelaku</th>
+                        <th class="px-5 py-3 text-center">Waktu Mutasi</th>
+                        <th class="px-5 py-3 text-center">Jenis Perubahan</th>
+                        <th class="px-5 py-3 text-center">Transisi Nilai</th>
+                        <th class="px-5 py-3 text-center">Alasan / Catatan</th>
+                        <th class="px-5 py-3 text-center">Pelaku</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#222222]">

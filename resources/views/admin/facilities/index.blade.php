@@ -198,15 +198,15 @@
     <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-[#ededed]">
-                <thead class="bg-[#161616] border-b border-[#333333] text-[10px] font-mono uppercase text-[#888888] tracking-wider">
+                <thead class="bg-[#161616] border-b border-[#333333] text-[10px] font-mono uppercase text-[#888888] tracking-wider text-center">
                     <tr>
-                        <th class="py-3 px-5 font-medium">Nama Fasilitas</th>
-                        <th class="py-3 px-5 font-medium">Tipe</th>
-                        <th class="py-3 px-5 font-medium">Lokasi Gedung</th>
-                        <th class="py-3 px-5 font-medium">Kapasitas</th>
-                        <th class="py-3 px-5 font-medium">Status Data Master</th>
-                        <th class="py-3 px-5 font-medium">Status Operasional</th>
-                        <th class="py-3 px-5 text-right font-medium">Aksi</th>
+                        <th class="py-3 px-5 text-center font-medium">Nama Fasilitas</th>
+                        <th class="py-3 px-5 text-center font-medium">Tipe</th>
+                        <th class="py-3 px-5 text-center font-medium">Lokasi Gedung</th>
+                        <th class="py-3 px-5 text-center font-medium">Kapasitas</th>
+                        <th class="py-3 px-5 text-center font-medium">Status Data Master</th>
+                        <th class="py-3 px-5 text-center font-medium">Status Operasional</th>
+                        <th class="py-3 px-5 text-center font-medium">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#333333] text-xs">
@@ -240,7 +240,7 @@
                             </td>
 
                             <!-- Master Status -->
-                            <td class="py-3.5 px-5">
+                            <td class="py-3.5 px-5 text-center">
                                 @if($fIsActive)
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>
@@ -255,22 +255,22 @@
                             </td>
 
                             <!-- Operational Status -->
-                            <td class="py-3.5 px-5">
+                            <td class="py-3.5 px-5 text-center whitespace-nowrap">
                                 @if($fOperational === 'dapat_digunakan')
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522]">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#50e3c2] bg-[#002b11] border border-[#005522] whitespace-nowrap">
                                         Dapat digunakan
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#ff453a] bg-[#2b0000] border border-[#550000]">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#ff453a] bg-[#2b0000] border border-[#550000] whitespace-nowrap">
                                         Dalam perbaikan
                                     </span>
                                 @endif
                             </td>
 
-                            <td class="py-3.5 px-5 text-right space-x-2">
+                            <td class="py-3.5 px-5 text-center space-x-2 whitespace-nowrap">
                                 <a href="{{ route('admin.facilities.show', $facility) }}" 
                                    class="text-[#a1a1a1] hover:text-white font-medium transition inline-flex items-center gap-1 text-xs font-mono">
-                                    Detail & Kelola →
+                                    Detail & Kelola
                                 </a>
                             </td>
                         </tr>

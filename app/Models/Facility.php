@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'description',
     'is_active',
     'operational_status',
+    'created_at',
 ])]
 class Facility extends Model
 {
