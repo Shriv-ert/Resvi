@@ -38,7 +38,7 @@ class StoreReportRequest extends FormRequest
                 'nullable',
                 'image',
                 'mimes:jpeg,png,jpg,webp',
-                'max:5120',
+                'max:2048',
             ],
         ];
     }
@@ -57,7 +57,7 @@ class StoreReportRequest extends FormRequest
             'description.min' => 'Deskripsi masalah minimal berisi 5 karakter.',
             'photo.image' => 'File lampiran harus berupa gambar.',
             'photo.mimes' => 'Format gambar harus JPEG, PNG, JPG, atau WEBP.',
-            'photo.max' => 'Ukuran gambar maksimal 5MB.',
+            'photo.max' => 'Ukuran gambar maksimal 2MB.',
         ];
     }
 }

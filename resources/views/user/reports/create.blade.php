@@ -135,7 +135,7 @@
             </div>
 
             <!-- Photo Upload (Optional) -->
-            <div class="space-y-1.5">
+            <div class="space-y-1.5" id="photo-upload-wrapper">
                 <label for="photo" class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">
                     Foto Bukti Kerusakan (Opsional)
                 </label>
@@ -146,6 +146,13 @@
                     accept="image/*"
                     class="w-full bg-[#161616] border border-[#333333] text-[#a1a1a1] text-xs rounded-[6px] file:mr-4 file:py-2 file:px-3 file:rounded-[4px] file:border-0 file:text-xs file:font-medium file:bg-white file:text-black hover:file:bg-[#e6e6e6] cursor-pointer"
                 />
+                <!-- Preview -->
+                <div id="photo-preview-wrap" class="hidden mt-2">
+                    <p class="text-[10px] text-[#888888] font-mono mb-1.5">Preview (setelah diproses · 4:3):</p>
+                    <img id="photo-preview" src="" alt="Preview"
+                         class="w-full max-w-xs rounded-[4px] border border-[#333333] object-cover bg-[#0a0a0a]" style="aspect-ratio:4/3" />
+                    <p id="photo-info" class="text-[10px] text-[#666666] font-mono mt-1"></p>
+                </div>
             </div>
 
             <div class="pt-4 border-t border-[#333333] flex items-center justify-end gap-3">
@@ -209,5 +216,40 @@
             document.querySelectorAll('.custom-dropdown-chevron').forEach(c => c.classList.remove('rotate-180'));
         }
     });
+</script>
+<script type="module">
+    import { preprocessImage, attachImagePreprocessor } from '/js/image-upload.js';
+
+    const form        = document.querySelector('form[enctype="multipart/form-data"]');
+    const fileInput   = document.getElementById('photo');
+    const previewWrap = document.getElementById('photo-preview-wrap');
+    const previewImg  = document.getElementById('photo-preview');
+    const previewInfo = document.getElementById('photo-info');
+
+    const OPTS = {
+        aspectRatio: 4 / 3,
+        maxWidth: 1280,
+        maxHeight: 960,
+        quality: 0.82,
+    };
+
+    fileInput?.addEventListener('change', async () => {
+        if (!fileInput.files?.length) {
+            previewWrap.classList.add('hidden');
+            return;
+        }
+        try {
+            const processed = await preprocessImage(fileInput.files[0], OPTS);
+            previewImg.src = URL.createObjectURL(processed);
+            const kb = (processed.size / 1024).toFixed(1);
+            previewInfo.textContent = `${processed.name} · ${kb} KB`;
+            previewWrap.classList.remove('hidden');
+        } catch (err) {
+            previewWrap.classList.add('hidden');
+            console.warn('[image-upload] Preview failed:', err?.message);
+        }
+    });
+
+    attachImagePreprocessor(form, fileInput, OPTS);
 </script>
 @endpush

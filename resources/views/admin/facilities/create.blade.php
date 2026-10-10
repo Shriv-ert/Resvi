@@ -154,17 +154,24 @@
             </div>
 
             <!-- Photo Upload -->
-            <div class="space-y-1.5">
+            <div class="space-y-1.5" id="photo-upload-wrapper">
                 <label for="photo" class="block text-xs font-medium text-[#a1a1a1]">
-                    Foto Utama Fasilitas <span class="text-[#666666] font-normal">(opsional, maks 2MB)</span>
+                    Foto Utama Fasilitas <span class="text-[#666666] font-normal">(opsional)</span>
                 </label>
                 <input 
                     type="file" 
                     id="photo" 
                     name="photo" 
-                    accept="image/png,image/jpeg,image/jpg,image/webp"
+                    accept="image/png,image/jpeg,image/jpg,image/webp,image/*"
                     class="w-full bg-[#161616] border border-[#333333] text-[#a1a1a1] text-xs rounded-[6px] file:mr-4 file:py-2 file:px-3 file:rounded-[6px] file:border-0 file:text-xs file:font-medium file:bg-white file:text-black hover:file:bg-[#e6e6e6] cursor-pointer"
                 />
+                <!-- Preview -->
+                <div id="photo-preview-wrap" class="hidden mt-2">
+                    <p class="text-[10px] text-[#888888] font-mono mb-1.5">Preview (setelah diproses · 16:9):</p>
+                    <img id="photo-preview" src="" alt="Preview"
+                         class="w-full max-w-xs rounded-[4px] border border-[#333333] object-cover aspect-video bg-[#0a0a0a]" />
+                    <p id="photo-info" class="text-[10px] text-[#666666] font-mono mt-1"></p>
+                </div>
                 @error('photo')
                     <p class="text-[11px] text-[#ff453a] font-mono">{{ $message }}</p>
                 @enderror
@@ -191,3 +198,43 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script type="module">
+    import { preprocessImage, attachImagePreprocessor } from '/js/image-upload.js';
+
+    const form      = document.querySelector('form[action="{{ route('admin.facilities.store') }}"]');
+    const fileInput = document.getElementById('photo');
+    const previewWrap = document.getElementById('photo-preview-wrap');
+    const previewImg  = document.getElementById('photo-preview');
+    const previewInfo = document.getElementById('photo-info');
+
+    const OPTS = {
+        aspectRatio: 16 / 9,
+        maxWidth: 1280,
+        maxHeight: 720,
+        quality: 0.82,
+    };
+
+    // Live preview on file select
+    fileInput?.addEventListener('change', async () => {
+        if (!fileInput.files?.length) {
+            previewWrap.classList.add('hidden');
+            return;
+        }
+        try {
+            const processed = await preprocessImage(fileInput.files[0], OPTS);
+            previewImg.src = URL.createObjectURL(processed);
+            const kb = (processed.size / 1024).toFixed(1);
+            previewInfo.textContent = `${processed.name} · ${kb} KB`;
+            previewWrap.classList.remove('hidden');
+        } catch (err) {
+            previewWrap.classList.add('hidden');
+            // Error will surface again on submit via showUploadError — no double message needed here
+            console.warn('[image-upload] Preview failed:', err?.message);
+        }
+    });
+
+    attachImagePreprocessor(form, fileInput, OPTS);
+</script>
+@endpush

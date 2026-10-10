@@ -41,7 +41,7 @@ class UpdateFacilityRequest extends FormRequest
             'location' => ['required', 'string', 'max:255'],
             'capacity' => ['nullable', 'integer', 'min:1'],
             'description' => ['required', 'string', 'max:5000'],
-            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:1024'],
         ];
     }
 
@@ -65,7 +65,7 @@ class UpdateFacilityRequest extends FormRequest
             'description.max' => 'Deskripsi fasilitas maksimal 5000 karakter.',
             'photo.image' => 'Berkas foto harus berupa gambar.',
             'photo.mimes' => 'Format foto harus berupa JPG, JPEG, PNG, atau WEBP.',
-            'photo.max' => 'Ukuran foto maksimal 2 MB.',
+            'photo.max' => 'Ukuran foto maksimal 1 MB.',
         ];
     }
 }
