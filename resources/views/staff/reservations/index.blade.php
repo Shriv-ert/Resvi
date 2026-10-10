@@ -46,9 +46,9 @@
             <!-- Filter Type -->
             <div class="relative custom-dropdown min-w-[170px]" id="dropdown-filterType">
                 <input type="hidden" id="filterType" value="">
-                <button type="button" onclick="toggleCustomDropdown('filterType')" id="filterTypeTrigger"
-                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                    <span id="filterTypeLabel">Semua Tipe Fasilitas</span>
+                <button type="button" onclick="toggleCustomDropdown('filterType')" id="filterTypeTrigger" title="Semua Tipe Fasilitas"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                    <span id="filterTypeLabel" class="truncate text-left flex-1" title="Semua Tipe Fasilitas">Semua Tipe Fasilitas</span>
                     <svg id="filterTypeChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
@@ -84,9 +84,9 @@
             <!-- Filter Status -->
             <div class="relative custom-dropdown min-w-[170px]" id="dropdown-filterStatus">
                 <input type="hidden" id="filterStatus" value="">
-                <button type="button" onclick="toggleCustomDropdown('filterStatus')" id="filterStatusTrigger"
-                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                    <span id="filterStatusLabel">Semua Status Aktif</span>
+                <button type="button" onclick="toggleCustomDropdown('filterStatus')" id="filterStatusTrigger" title="Semua Status Aktif"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                    <span id="filterStatusLabel" class="truncate text-left flex-1" title="Semua Status Aktif">Semua Status Aktif</span>
                     <svg id="filterStatusChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
@@ -246,24 +246,34 @@
     }
 
     function selectCustomDropdown(name, value, label) {
-        document.getElementById(name).value = value;
-        document.getElementById(name + 'Label').textContent = label;
+        const input = document.getElementById(name);
+        const labelEl = document.getElementById(name + 'Label');
+        const trigger = document.getElementById(name + 'Trigger');
+
+        if (input) input.value = value;
+        if (labelEl) {
+            labelEl.textContent = label;
+            labelEl.title = label;
+        }
+        if (trigger) trigger.title = label;
         
         const menu = document.getElementById(name + 'Menu');
-        menu.querySelectorAll('.dropdown-item').forEach(item => {
-            const check = item.querySelector('.check-icon');
-            if (item.getAttribute('data-value') === value) {
-                item.classList.add('bg-[#1f1f1f]', 'text-white');
-                item.classList.remove('text-[#cccccc]');
-                if (check) check.classList.remove('hidden');
-            } else {
-                item.classList.remove('bg-[#1f1f1f]', 'text-white');
-                item.classList.add('text-[#cccccc]');
-                if (check) check.classList.add('hidden');
-            }
-        });
+        if (menu) {
+            menu.querySelectorAll('.dropdown-item').forEach(item => {
+                const check = item.querySelector('.check-icon');
+                if (item.getAttribute('data-value') === value) {
+                    item.classList.add('bg-[#1f1f1f]', 'text-white');
+                    item.classList.remove('text-[#cccccc]');
+                    if (check) check.classList.remove('hidden');
+                } else {
+                    item.classList.remove('bg-[#1f1f1f]', 'text-white');
+                    item.classList.add('text-[#cccccc]');
+                    if (check) check.classList.add('hidden');
+                }
+            });
+            menu.classList.add('hidden');
+        }
 
-        menu.classList.add('hidden');
         const chevron = document.getElementById(name + 'Chevron');
         if (chevron) chevron.classList.remove('rotate-180');
 

@@ -58,9 +58,9 @@
                     Fasilitas yang Dilaporkan <span class="text-[#ff453a]">*</span>
                 </label>
                 <input type="hidden" id="facility_id" name="facility_id" value="{{ $preselectedFacilityId }}" required>
-                <button type="button" onclick="toggleCustomDropdown('facility_id')" id="facility_idTrigger"
-                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2.5 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                    <span id="facility_idLabel" class="truncate pr-2">{{ $facilityLabel }}</span>
+                <button type="button" onclick="toggleCustomDropdown('facility_id')" id="facility_idTrigger" title="{{ $facilityLabel }}"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2.5 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                    <span id="facility_idLabel" class="truncate text-left flex-1" title="{{ $facilityLabel }}">{{ $facilityLabel }}</span>
                     <svg id="facility_idChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
@@ -95,15 +95,16 @@
                     'keamanan' => 'Keamanan / Kehilangan Fasilitas',
                     'lainnya' => 'Lainnya (Tuliskan detail pada deskripsi)'
                 ];
+                $initCategoryLabel = $categories[$preselectedCat] ?? 'Pilih Kategori';
             @endphp
             <div class="space-y-1.5 relative custom-dropdown" id="dropdown-category">
                 <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">
                     Kategori Masalah <span class="text-[#ff453a]">*</span>
                 </label>
                 <input type="hidden" id="category" name="category" value="{{ $preselectedCat }}" required>
-                <button type="button" onclick="toggleCustomDropdown('category')" id="categoryTrigger"
-                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2.5 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                    <span id="categoryLabel">{{ $categories[$preselectedCat] ?? 'Pilih Kategori' }}</span>
+                <button type="button" onclick="toggleCustomDropdown('category')" id="categoryTrigger" title="{{ $initCategoryLabel }}"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2.5 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                    <span id="categoryLabel" class="truncate text-left flex-1" title="{{ $initCategoryLabel }}">{{ $initCategoryLabel }}</span>
                     <svg id="categoryChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
@@ -181,24 +182,34 @@
     }
 
     function selectCustomDropdown(name, value, label) {
-        document.getElementById(name).value = value;
-        document.getElementById(name + 'Label').textContent = label;
+        const input = document.getElementById(name);
+        const labelEl = document.getElementById(name + 'Label');
+        const trigger = document.getElementById(name + 'Trigger');
+
+        if (input) input.value = value;
+        if (labelEl) {
+            labelEl.textContent = label;
+            labelEl.title = label;
+        }
+        if (trigger) trigger.title = label;
         
         const menu = document.getElementById(name + 'Menu');
-        menu.querySelectorAll('.dropdown-item').forEach(item => {
-            const check = item.querySelector('.check-icon');
-            if (item.getAttribute('data-value') === value) {
-                item.classList.add('bg-[#1f1f1f]', 'text-white');
-                item.classList.remove('text-[#cccccc]');
-                if (check) check.classList.remove('hidden');
-            } else {
-                item.classList.remove('bg-[#1f1f1f]', 'text-white');
-                item.classList.add('text-[#cccccc]');
-                if (check) check.classList.add('hidden');
-            }
-        });
+        if (menu) {
+            menu.querySelectorAll('.dropdown-item').forEach(item => {
+                const check = item.querySelector('.check-icon');
+                if (item.getAttribute('data-value') === value) {
+                    item.classList.add('bg-[#1f1f1f]', 'text-white');
+                    item.classList.remove('text-[#cccccc]');
+                    if (check) check.classList.remove('hidden');
+                } else {
+                    item.classList.remove('bg-[#1f1f1f]', 'text-white');
+                    item.classList.add('text-[#cccccc]');
+                    if (check) check.classList.add('hidden');
+                }
+            });
+            menu.classList.add('hidden');
+        }
 
-        menu.classList.add('hidden');
         const chevron = document.getElementById(name + 'Chevron');
         if (chevron) chevron.classList.remove('rotate-180');
     }

@@ -48,17 +48,17 @@
                 />
 
                 <div class="absolute top-4 left-4 flex flex-wrap gap-2">
-                    <span class="bg-black/80 backdrop-blur-md text-white text-[11px] font-mono uppercase tracking-wider px-3 py-1 rounded-[4px] border border-[#333333] font-medium">
+                    <span class="bg-white/90 text-[#0f172a] border border-black/10 dark:bg-black/80 dark:text-white dark:border-[#333333] backdrop-blur-md text-[11px] font-mono uppercase tracking-wider px-3 py-1 rounded-[4px] font-medium shadow-sm">
                         {{ $fTypeLabel }}
                     </span>
                     @if($fOperational === 'dapat_digunakan')
-                        <span class="bg-[#002b11]/90 backdrop-blur-md text-[#50e3c2] border border-[#005522] text-[11px] font-mono px-3 py-1 rounded-[4px] flex items-center gap-1.5 font-medium">
-                            <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>
+                        <span class="bg-white/95 text-[#059669] border border-[#a7f3d0] dark:bg-[#002b11]/90 dark:text-[#50e3c2] dark:border-[#005522] backdrop-blur-md text-[11px] font-mono px-3 py-1 rounded-[4px] flex items-center gap-1.5 font-medium shadow-sm">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#10b981] dark:bg-[#50e3c2]"></span>
                             Dapat digunakan
                         </span>
                     @else
-                        <span class="bg-[#2b0000]/90 backdrop-blur-md text-[#ff453a] border border-[#550000] text-[11px] font-mono px-3 py-1 rounded-[4px] flex items-center gap-1.5 font-medium">
-                            <span class="w-1.5 h-1.5 rounded-full bg-[#ff453a]"></span>
+                        <span class="bg-white/95 text-[#dc2626] border border-[#fecaca] dark:bg-[#2b0000]/90 dark:text-[#ff453a] dark:border-[#550000] backdrop-blur-md text-[11px] font-mono px-3 py-1 rounded-[4px] flex items-center gap-1.5 font-medium shadow-sm">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#ef4444] dark:bg-[#ff453a]"></span>
                             Dalam perbaikan
                         </span>
                     @endif

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Admin Master Control') · {{ config('app.name', 'Resvi') }}</title>
 
+    @include('partials.theme-head')
+
     <!-- Google Fonts: Geist & Geist Mono & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -93,6 +95,8 @@
 
             <!-- Admin Profile Info -->
             <div class="flex items-center gap-3">
+                @include('partials.theme-toggle')
+
                 <div class="hidden sm:flex flex-col text-right">
                     <span class="text-xs font-medium text-white">{{ auth()->check() ? auth()->user()->name : 'Admin Pusat' }}</span>
                     <span class="font-mono text-[10px] text-[#888888]">{{ auth()->check() ? auth()->user()->email : 'administrator@kampus.ac.id' }}</span>
@@ -208,11 +212,16 @@
         function selectCustomDropdown(id, val, label, onSelectCallback) {
             const input = document.getElementById(id);
             const labelEl = document.getElementById(id + 'Label');
+            const trigger = document.getElementById(id + 'Trigger');
             const menu = document.getElementById(id + 'Menu');
             const chevron = document.getElementById(id + 'Chevron');
 
             if (input) input.value = val;
-            if (labelEl) labelEl.innerText = label;
+            if (labelEl) {
+                labelEl.innerText = label;
+                labelEl.title = label;
+            }
+            if (trigger) trigger.title = label;
 
             if (menu) {
                 menu.querySelectorAll('.dropdown-item').forEach(item => {

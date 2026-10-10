@@ -101,10 +101,13 @@
                         Bulan Kalender
                     </label>
                     <input type="hidden" id="month" name="month" value="{{ $selectedMonth }}">
-                    <button type="button" onclick="toggleCustomDropdown('month')" id="monthTrigger"
-                            class="w-full sm:w-52 bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                        <span id="monthLabel">{{ $months[$selectedMonth] ?? 'Pilih Bulan' }}</span>
-                        <svg id="monthChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    @php
+                        $initMonthLabel = $months[$selectedMonth] ?? 'Pilih Bulan';
+                    @endphp
+                    <button type="button" onclick="toggleCustomDropdown('month')" id="monthTrigger" title="{{ $initMonthLabel }}"
+                            class="w-full sm:w-52 bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                        <span id="monthLabel" class="truncate text-left flex-1" title="{{ $initMonthLabel }}">{{ $initMonthLabel }}</span>
+                        <svg id="monthChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                     </button>
@@ -135,10 +138,13 @@
                         Tahun
                     </label>
                     <input type="hidden" id="year" name="year" value="{{ $selectedYear }}">
-                    <button type="button" onclick="toggleCustomDropdown('year')" id="yearTrigger"
-                            class="w-full sm:w-36 bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                        <span id="yearLabel">{{ $selectedYear }}</span>
-                        <svg id="yearChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    @php
+                        $initYearLabel = (string)$selectedYear;
+                    @endphp
+                    <button type="button" onclick="toggleCustomDropdown('year')" id="yearTrigger" title="{{ $initYearLabel }}"
+                            class="w-full sm:w-36 bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                        <span id="yearLabel" class="truncate text-left flex-1" title="{{ $initYearLabel }}">{{ $initYearLabel }}</span>
+                        <svg id="yearChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                     </button>

@@ -72,10 +72,10 @@
                             if ($t->value === $curEditType) $curEditTypeLabel = $t->label();
                         }
                     @endphp
-                    <button type="button" onclick="toggleCustomDropdown('type')" id="typeTrigger"
-                            class="w-full bg-[#0a0a0a] border @error('type') border-[#ff453a] @else border-[#333333] @enderror hover:border-[#555555] text-white text-xs rounded-[6px] px-3.5 py-2.5 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                        <span id="typeLabel">{{ $curEditTypeLabel }}</span>
-                        <svg id="typeChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <button type="button" onclick="toggleCustomDropdown('type')" id="typeTrigger" title="{{ $curEditTypeLabel }}"
+                            class="w-full bg-[#0a0a0a] border @error('type') border-[#ff453a] @else border-[#333333] @enderror hover:border-[#555555] text-white text-xs rounded-[6px] px-3.5 py-2.5 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                        <span id="typeLabel" class="truncate text-left flex-1" title="{{ $curEditTypeLabel }}">{{ $curEditTypeLabel }}</span>
+                        <svg id="typeChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                     </button>

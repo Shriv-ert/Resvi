@@ -58,10 +58,10 @@
                         if ($t->value === $curTypeVal) $curTypeLabel = $t->label();
                     }
                 @endphp
-                <button type="button" onclick="toggleCustomDropdown('type')" id="typeTrigger"
-                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                    <span id="typeLabel">{{ $curTypeLabel }}</span>
-                    <svg id="typeChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button type="button" onclick="toggleCustomDropdown('type')" id="typeTrigger" title="{{ $curTypeLabel }}"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                    <span id="typeLabel" class="truncate text-left flex-1" title="{{ $curTypeLabel }}">{{ $curTypeLabel }}</span>
+                    <svg id="typeChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                 </button>
@@ -99,10 +99,10 @@
                     $curMasterVal = $selectedMasterStatus ?? request('master_status', '');
                     $curMasterLabel = $curMasterVal === 'active' ? 'Aktif' : ($curMasterVal === 'inactive' ? 'Nonaktif' : 'Semua Status Master');
                 @endphp
-                <button type="button" onclick="toggleCustomDropdown('master_status')" id="master_statusTrigger"
-                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                    <span id="master_statusLabel">{{ $curMasterLabel }}</span>
-                    <svg id="master_statusChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button type="button" onclick="toggleCustomDropdown('master_status')" id="master_statusTrigger" title="{{ $curMasterLabel }}"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                    <span id="master_statusLabel" class="truncate text-left flex-1" title="{{ $curMasterLabel }}">{{ $curMasterLabel }}</span>
+                    <svg id="master_statusChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                 </button>
@@ -145,10 +145,10 @@
                         if ($op->value === $curOpVal) $curOpLabel = $op->label();
                     }
                 @endphp
-                <button type="button" onclick="toggleCustomDropdown('operational_status')" id="operational_statusTrigger"
-                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                    <span id="operational_statusLabel">{{ $curOpLabel }}</span>
-                    <svg id="operational_statusChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button type="button" onclick="toggleCustomDropdown('operational_status')" id="operational_statusTrigger" title="{{ $curOpLabel }}"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                    <span id="operational_statusLabel" class="truncate text-left flex-1" title="{{ $curOpLabel }}">{{ $curOpLabel }}</span>
+                    <svg id="operational_statusChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                 </button>

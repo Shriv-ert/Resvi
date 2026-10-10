@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Masuk · Resvi</title>
 
+    @include('partials.theme-head')
+
     <!-- Google Fonts: Geist & Geist Mono & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -52,14 +54,15 @@
 
     <main class="w-full max-w-md mx-auto p-4 my-auto relative z-10">
         
-        <!-- Back Link -->
-        <div class="mb-4">
+        <!-- Back Link & Theme Toggle -->
+        <div class="mb-4 flex items-center justify-between">
             <a href="{{ route('facilities.index') }}" class="inline-flex items-center gap-1.5 text-xs font-medium text-[#a1a1a1] hover:text-white transition-colors">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
                 Kembali ke Katalog Fasilitas
             </a>
+            @include('partials.theme-toggle')
         </div>
 
         <!-- Clean Vercel Auth Card: Crisp border, micro 6px radius, NO soft shadows -->

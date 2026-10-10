@@ -46,9 +46,12 @@
             <div class="space-y-1.5 relative custom-dropdown" id="dropdown-operational_status">
                 <label class="block font-mono text-[11px] uppercase tracking-wider text-[#888888] font-medium">Status Operasional Baru</label>
                 <input type="hidden" id="operational_status" name="operational_status" value="{{ $initOpStatus }}">
-                <button type="button" onclick="toggleCustomDropdown('operational_status')" id="operational_statusTrigger"
-                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                    <span id="operational_statusLabel">{{ $initOpStatus === 'dalam_perbaikan' ? 'Dalam Perbaikan (Nonaktifkan Reservasi)' : 'Dapat Digunakan (Tersedia Kembali)' }}</span>
+                @php
+                    $initOpStatusLabel = $initOpStatus === 'dalam_perbaikan' ? 'Dalam Perbaikan (Nonaktifkan Reservasi)' : 'Dapat Digunakan (Tersedia Kembali)';
+                @endphp
+                <button type="button" onclick="toggleCustomDropdown('operational_status')" id="operational_statusTrigger" title="{{ $initOpStatusLabel }}"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                    <span id="operational_statusLabel" class="truncate text-left flex-1" title="{{ $initOpStatusLabel }}">{{ $initOpStatusLabel }}</span>
                     <svg id="operational_statusChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
@@ -125,9 +128,15 @@
     if (typeof window.selectCustomDropdown !== 'function') {
         window.selectCustomDropdown = function(name, value, label) {
             const input = document.getElementById(name);
-            if (input) input.value = value;
             const labelEl = document.getElementById(name + 'Label');
-            if (labelEl) labelEl.textContent = label;
+            const trigger = document.getElementById(name + 'Trigger');
+
+            if (input) input.value = value;
+            if (labelEl) {
+                labelEl.textContent = label;
+                labelEl.title = label;
+            }
+            if (trigger) trigger.title = label;
             
             const menu = document.getElementById(name + 'Menu');
             if (menu) {

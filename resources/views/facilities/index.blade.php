@@ -45,18 +45,20 @@
                 <div class="space-y-1.5 relative custom-dropdown" id="dropdown-type">
                     <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Tipe Fasilitas</label>
                     <input type="hidden" id="type" name="type" value="{{ request('type', '') }}">
-                    <button type="button" onclick="toggleCustomDropdown('type')" id="typeTrigger"
-                            class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                        <span id="typeLabel">
-                            @if(request('type') == 'kelas') Ruang Kelas
-                            @elseif(request('type') == 'laboratorium') Laboratorium
-                            @elseif(request('type') == 'aula') Aula
-                            @elseif(request('type') == 'alat') Alat Khusus
-                            @elseif(request('type') == 'lapangan') Lapangan
-                            @else Semua Tipe
-                            @endif
-                        </span>
-                        <svg id="typeChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    @php
+                        $initTypeLabel = match(request('type')) {
+                            'kelas' => 'Ruang Kelas',
+                            'laboratorium' => 'Laboratorium',
+                            'aula' => 'Aula',
+                            'alat' => 'Alat Khusus',
+                            'lapangan' => 'Lapangan',
+                            default => 'Semua Tipe',
+                        };
+                    @endphp
+                    <button type="button" onclick="toggleCustomDropdown('type')" id="typeTrigger" title="{{ $initTypeLabel }}"
+                            class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                        <span id="typeLabel" class="truncate text-left flex-1" title="{{ $initTypeLabel }}">{{ $initTypeLabel }}</span>
+                        <svg id="typeChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                     </button>
@@ -105,14 +107,13 @@
                 <div class="space-y-1.5 relative custom-dropdown" id="dropdown-location">
                     <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Lokasi Gedung</label>
                     <input type="hidden" id="location" name="location" value="{{ request('location', '') }}">
-                    <button type="button" onclick="toggleCustomDropdown('location')" id="locationTrigger"
-                            class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                        <span id="locationLabel">
-                            @if(request('location')) {{ request('location') }}
-                            @else Semua Lokasi
-                            @endif
-                        </span>
-                        <svg id="locationChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    @php
+                        $initLocationLabel = request('location') ?: 'Semua Lokasi';
+                    @endphp
+                    <button type="button" onclick="toggleCustomDropdown('location')" id="locationTrigger" title="{{ $initLocationLabel }}"
+                            class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                        <span id="locationLabel" class="truncate text-left flex-1" title="{{ $initLocationLabel }}">{{ $initLocationLabel }}</span>
+                        <svg id="locationChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                     </button>
@@ -185,7 +186,7 @@
                     <div id="capacityPopup" class="hidden absolute top-full left-0 right-0 sm:right-auto sm:w-80 mt-1.5 z-50 bg-[#111111] border border-[#333333] rounded-[8px] p-4 shadow-2xl backdrop-blur-md space-y-4">
                         <div class="flex items-center justify-between border-b border-[#222222] pb-2.5">
                             <span class="text-xs font-semibold text-white">Range Kapasitas</span>
-                            <span class="font-mono text-xs px-2 py-0.5 rounded-[4px] bg-[#1a1a1a] text-[#50e3c2] border border-[#333333]" id="sliderCapDisplay">
+                            <span class="font-mono text-xs px-2 py-0.5 rounded-[4px] bg-[#ecfdf5] text-[#059669] border border-[#a7f3d0] dark:bg-[#1a1a1a] dark:text-[#50e3c2] dark:border-[#333333]" id="sliderCapDisplay">
                                 @if(request('capacity') > 0)
                                     ≥ {{ request('capacity') }} Orang
                                 @else
@@ -318,7 +319,7 @@
 
                             <!-- Type Tag -->
                             <div class="absolute top-2.5 left-2.5">
-                                <span class="bg-black/80 text-white text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-[4px] border border-[#333333] font-medium">
+                                <span class="bg-white/90 text-[#0f172a] border border-black/10 dark:bg-black/80 dark:text-white dark:border-[#333333] text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-[4px] font-medium backdrop-blur-sm shadow-sm">
                                     {{ $fTypeLabel }}
                                 </span>
                             </div>
@@ -326,11 +327,11 @@
                             <!-- Capacity Badge -->
                             <div class="absolute top-2.5 right-2.5">
                                 @if(!empty($fCapacity))
-                                    <span class="bg-black/80 text-[#a1a1a1] text-[10px] font-mono px-2 py-0.5 rounded-[4px] border border-[#333333]">
+                                    <span class="bg-white/90 text-[#334155] border border-black/10 dark:bg-black/80 dark:text-[#a1a1a1] dark:border-[#333333] text-[10px] font-mono px-2 py-0.5 rounded-[4px] backdrop-blur-sm shadow-sm">
                                         {{ $fCapacity }} Org
                                     </span>
                                 @else
-                                    <span class="bg-black/80 text-[#888888] text-[10px] font-mono px-2 py-0.5 rounded-[4px] border border-[#333333]">
+                                    <span class="bg-white/90 text-[#475569] border border-black/10 dark:bg-black/80 dark:text-[#888888] dark:border-[#333333] text-[10px] font-mono px-2 py-0.5 rounded-[4px] backdrop-blur-sm shadow-sm">
                                         Unit Alat
                                     </span>
                                 @endif
@@ -429,11 +430,16 @@
     function selectCustomDropdown(id, val, label) {
         const input = document.getElementById(id);
         const labelEl = document.getElementById(id + 'Label');
+        const trigger = document.getElementById(id + 'Trigger');
         const menu = document.getElementById(id + 'Menu');
         const chevron = document.getElementById(id + 'Chevron');
 
         if (input) input.value = val;
-        if (labelEl) labelEl.innerText = label;
+        if (labelEl) {
+            labelEl.innerText = label;
+            labelEl.title = label;
+        }
+        if (trigger) trigger.title = label;
 
         if (menu) {
             menu.querySelectorAll('.dropdown-item').forEach(item => {

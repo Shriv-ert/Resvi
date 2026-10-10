@@ -51,10 +51,10 @@
                 $curRoleVal = request('role', $selectedRole ?? '');
                 $curRoleLabel = $curRoleVal === 'petugas' ? 'Petugas' : ($curRoleVal === 'pengguna' ? 'Pengguna' : 'Semua Peran');
             @endphp
-            <button type="button" onclick="toggleCustomDropdown('roleSelect')" id="roleSelectTrigger"
-                    class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                <span id="roleSelectLabel">{{ $curRoleLabel }}</span>
-                <svg id="roleSelectChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button type="button" onclick="toggleCustomDropdown('roleSelect')" id="roleSelectTrigger" title="{{ $curRoleLabel }}"
+                    class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                <span id="roleSelectLabel" class="truncate text-left flex-1" title="{{ $curRoleLabel }}">{{ $curRoleLabel }}</span>
+                <svg id="roleSelectChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
             </button>
@@ -93,10 +93,10 @@
                 $curCatVal = request('category', $selectedCategory ?? '');
                 $curCatLabel = $curCatVal === 'mahasiswa' ? 'Mahasiswa' : ($curCatVal === 'dosen' ? 'Dosen' : ($curCatVal === 'staf' ? 'Staf' : 'Semua Kategori'));
             @endphp
-            <button type="button" onclick="toggleCustomDropdown('categorySelect')" id="categorySelectTrigger"
-                    class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                <span id="categorySelectLabel">{{ $curCatLabel }}</span>
-                <svg id="categorySelectChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button type="button" onclick="toggleCustomDropdown('categorySelect')" id="categorySelectTrigger" title="{{ $curCatLabel }}"
+                    class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                <span id="categorySelectLabel" class="truncate text-left flex-1" title="{{ $curCatLabel }}">{{ $curCatLabel }}</span>
+                <svg id="categorySelectChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
             </button>

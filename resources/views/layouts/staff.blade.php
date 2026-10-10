@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Panel Petugas') · {{ config('app.name', 'Resvi') }}</title>
 
+    @include('partials.theme-head')
+
     <!-- Google Fonts: Geist & Geist Mono & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -91,12 +93,14 @@
 
             <!-- Staff User Info -->
             <div class="flex items-center gap-3">
+                @include('partials.theme-toggle')
+
                 <div class="hidden sm:flex flex-col text-right">
-                    <span class="text-xs font-medium text-white">{{ auth()->user()->name ?? 'Petugas Sarpras' }}</span>
-                    <span class="font-mono text-[10px] text-[#888888]">{{ auth()->user()->role ? ucfirst(auth()->user()->role->value) : 'Petugas' }} Sarpras Kampus</span>
+                    <span class="text-xs font-medium text-white">{{ auth()->user()?->name ?? 'Petugas Sarpras' }}</span>
+                    <span class="font-mono text-[10px] text-[#888888]">{{ auth()->user()?->role ? ucfirst(auth()->user()->role->value) : 'Petugas' }} Sarpras Kampus</span>
                 </div>
                 <div class="w-7 h-7 rounded-[4px] bg-[#1a1a1a] border border-[#333333] text-white font-mono font-medium text-xs flex items-center justify-center">
-                    {{ strtoupper(substr(auth()->user()->name ?? 'PT', 0, 2)) }}
+                    {{ strtoupper(substr(auth()->user()?->name ?? 'PT', 0, 2)) }}
                 </div>
                 <form method="POST" action="{{ route('logout') }}" class="inline">
                     @csrf
