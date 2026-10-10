@@ -73,7 +73,16 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
-        // 6. Fasilitas Awal
+        // 6. Akun Pengguna Tambahan untuk Simulasi
+        $this->call(UserSeeder::class);
+
+        // 7. Fasilitas Awal
         $this->call(FacilitySeeder::class);
+
+        // 8. Reservasi Simulasi
+        $this->call(ReservationSeeder::class);
+
+        // 9. Laporan Kerusakan Simulasi
+        $this->call(ReportSeeder::class);
     }
 }
