@@ -446,12 +446,12 @@ final readonly class RecapService
 
             // Header Kop
             $sheet->setCellValue('A1', 'RESVI — LAPORAN REKAPITULASI');
-            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14)->getColor()->setRGB('000000');
 
             $sheet->setCellValue('A2', sprintf('Periode: %s %d', $data['period']['month_name'], $data['period']['year']));
             $sheet->setCellValue('A3', sprintf('Metrik: %s | Pengelompokan: %s', $data['metric'] === 'occupancy' ? 'Tingkat Okupansi' : 'Frekuensi Kerusakan', $data['group_by'] === 'facility' ? 'Per Fasilitas' : 'Per Lokasi'));
             $sheet->setCellValue('A4', sprintf('Waktu Ekspor: %s', now()->format('d/m/Y H:i:s')));
-            $sheet->getStyle('A2:A4')->getFont()->setSize(10)->setItalic(true);
+            $sheet->getStyle('A2:A4')->getFont()->setSize(10)->setItalic(true)->getColor()->setRGB('555555');
 
             $startRow = 6;
 
@@ -479,7 +479,7 @@ final readonly class RecapService
             $lastCol = chr(ord('A') + count($tableHeaders) - 1);
             $headerRange = "A{$startRow}:{$lastCol}{$startRow}";
             $sheet->getStyle($headerRange)->getFont()->setBold(true)->getColor()->setRGB('FFFFFF');
-            $sheet->getStyle($headerRange)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('0369A1'); // sky-700
+            $sheet->getStyle($headerRange)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('222222');
             $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
             // Write Rows
@@ -528,19 +528,36 @@ final readonly class RecapService
             if ($lastDataRow >= $startRow + 1) {
                 // Formatting borders
                 $tableRange = "A{$startRow}:{$lastCol}{$lastDataRow}";
-                $sheet->getStyle($tableRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN)->getColor()->setRGB('CBD5E1');
+                $sheet->getStyle($tableRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN)->getColor()->setRGB('D1D5DB');
+
+                // Data rows: explicit dark text, alternating white and subtle low-opacity gray background
+                for ($r = $startRow + 1; $r <= $lastDataRow; $r++) {
+                    $rowRange = "A{$r}:{$lastCol}{$r}";
+                    $sheet->getStyle($rowRange)->getFont()->getColor()->setRGB('111111');
+
+                    $bgColor = ($r % 2 === 0) ? 'F8F9FA' : 'FFFFFF';
+                    $sheet->getStyle($rowRange)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($bgColor);
+                }
 
                 // Center align No column
                 $sheet->getStyle('A'.($startRow + 1).":A{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                // Format numbers & percentages for occupancy
+                // Format numbers & percentages for occupancy (clean percentage, no highlight fill)
                 if ($data['metric'] === 'occupancy') {
                     if ($data['group_by'] === 'facility') {
                         $sheet->getStyle('E'.($startRow + 1).":F{$lastDataRow}")->getNumberFormat()->setFormatCode('#,##0.00');
                         $sheet->getStyle('G'.($startRow + 1).":G{$lastDataRow}")->getNumberFormat()->setFormatCode('0.00%');
+                        $sheet->getStyle('G'.($startRow + 1).":G{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                     } else {
                         $sheet->getStyle('D'.($startRow + 1).":E{$lastDataRow}")->getNumberFormat()->setFormatCode('#,##0.00');
                         $sheet->getStyle('F'.($startRow + 1).":F{$lastDataRow}")->getNumberFormat()->setFormatCode('0.00%');
+                        $sheet->getStyle('F'.($startRow + 1).":F{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    }
+                } else {
+                    if ($data['group_by'] === 'facility') {
+                        $sheet->getStyle('E'.($startRow + 1).":F{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    } else {
+                        $sheet->getStyle('C'.($startRow + 1).":E{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                     }
                 }
             }

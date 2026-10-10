@@ -13,14 +13,14 @@
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             font-size: 11px;
             line-height: 1.4;
-            color: #1e293b;
+            color: #111111;
             margin: 0;
             padding: 0;
         }
 
         .header-table {
             width: 100%;
-            border-bottom: 2px solid #0369a1;
+            border-bottom: 2px solid #111111;
             padding-bottom: 12px;
             margin-bottom: 16px;
         }
@@ -28,21 +28,21 @@
         .header-title {
             font-size: 16px;
             font-weight: bold;
-            color: #0f172a;
+            color: #000000;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .header-subtitle {
             font-size: 11px;
-            color: #64748b;
+            color: #555555;
             margin-top: 3px;
         }
 
         .meta-box {
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
+            background-color: #f8f9fa;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
             padding: 10px 14px;
             margin-bottom: 18px;
         }
@@ -58,13 +58,13 @@
         }
 
         .meta-label {
-            color: #64748b;
+            color: #555555;
             font-weight: 600;
             width: 130px;
         }
 
         .meta-value {
-            color: #0f172a;
+            color: #000000;
             font-weight: bold;
         }
 
@@ -75,25 +75,26 @@
         }
 
         table.data-table th {
-            background-color: #0369a1;
+            background-color: #222222;
             color: #ffffff;
             font-size: 10px;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             padding: 8px 10px;
-            border: 1px solid #0284c7;
+            border: 1px solid #222222;
             text-align: center;
         }
 
         table.data-table td {
             padding: 7px 10px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #d1d5db;
             font-size: 10.5px;
+            color: #111111;
         }
 
         table.data-table tr:nth-child(even) td {
-            background-color: #f8fafc;
+            background-color: #f8f9fa;
         }
 
         .text-center {
@@ -104,38 +105,20 @@
             text-align: right;
         }
 
-        .badge-calculable {
-            display: inline-block;
-            background-color: #e0f2fe;
-            color: #0369a1;
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-
-        .badge-uncalculable {
-            display: inline-block;
-            background-color: #f1f5f9;
-            color: #64748b;
-            font-weight: 600;
-            font-style: italic;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-
         .summary-box {
             margin-top: 16px;
             width: 100%;
         }
 
         .summary-card {
-            border: 1px solid #cbd5e1;
-            background-color: #f1f5f9;
+            border: 1px solid #d1d5db;
+            background-color: #f8f9fa;
             padding: 8px 12px;
-            border-radius: 6px;
+            border-radius: 4px;
             display: inline-block;
             margin-right: 12px;
             font-size: 10px;
+            color: #111111;
         }
 
         .footer {
@@ -144,9 +127,9 @@
             left: 0;
             right: 0;
             font-size: 9px;
-            color: #94a3b8;
+            color: #666666;
             text-align: right;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid #d1d5db;
             padding-top: 6px;
         }
     </style>
@@ -162,10 +145,10 @@
                 </div>
             </td>
             <td style="text-align: right; vertical-align: middle;">
-                <div style="font-size: 12px; font-weight: bold; color: #0369a1;">
+                <div style="font-size: 12px; font-weight: bold; color: #000000;">
                     {{ $data['metric'] === 'occupancy' ? 'REKAPITULASI TINGKAT OKUPANSI' : 'REKAPITULASI FREKUENSI KERUSAKAN' }}
                 </div>
-                <div style="font-size: 10px; color: #64748b;">
+                <div style="font-size: 10px; color: #555555;">
                     Pengelompokan: {{ $data['group_by'] === 'facility' ? 'Per Fasilitas' : 'Per Lokasi' }}
                 </div>
             </td>
@@ -255,31 +238,31 @@
                     @if ($data['group_by'] === 'facility')
                         <tr>
                             <td class="text-center">{{ $index + 1 }}</td>
-                            <td style="font-weight: bold; color: #0f172a;">{{ $row['name'] }}</td>
+                            <td style="font-weight: bold; color: #111111;">{{ $row['name'] }}</td>
                             <td>{{ ucfirst($row['type'] instanceof \BackedEnum ? $row['type']->value : (string) $row['type']) }}</td>
                             <td>{{ $row['location'] }}</td>
                             <td class="text-right">{{ number_format($row['used_hours'], 2, ',', '.') }} Jam</td>
                             <td class="text-right">{{ number_format($row['operational_hours'], 2, ',', '.') }} Jam</td>
                             <td class="text-center">
                                 @if ($row['is_calculable'])
-                                    <span class="badge-calculable">{{ number_format($row['occupancy_rate'], 2, ',', '.') }}%</span>
+                                    {{ number_format($row['occupancy_rate'], 2, ',', '.') }}%
                                 @else
-                                    <span class="badge-uncalculable">Tidak dapat dihitung</span>
+                                    <span style="color: #666666; font-style: italic;">Tidak dapat dihitung</span>
                                 @endif
                             </td>
                         </tr>
                     @else
                         <tr>
                             <td class="text-center">{{ $index + 1 }}</td>
-                            <td style="font-weight: bold; color: #0f172a;">{{ $row['location'] }}</td>
+                            <td style="font-weight: bold; color: #111111;">{{ $row['location'] }}</td>
                             <td class="text-center">{{ $row['facility_count'] }} Fasilitas</td>
                             <td class="text-right">{{ number_format($row['used_hours'], 2, ',', '.') }} Jam</td>
                             <td class="text-right">{{ number_format($row['operational_hours'], 2, ',', '.') }} Jam</td>
                             <td class="text-center">
                                 @if ($row['is_calculable'])
-                                    <span class="badge-calculable">{{ number_format($row['occupancy_rate'], 2, ',', '.') }}%</span>
+                                    {{ number_format($row['occupancy_rate'], 2, ',', '.') }}%
                                 @else
-                                    <span class="badge-uncalculable">Tidak dapat dihitung</span>
+                                    <span style="color: #666666; font-style: italic;">Tidak dapat dihitung</span>
                                 @endif
                             </td>
                         </tr>
@@ -288,10 +271,10 @@
                     @if ($data['group_by'] === 'facility')
                         <tr>
                             <td class="text-center">{{ $index + 1 }}</td>
-                            <td style="font-weight: bold; color: #0f172a;">{{ $row['name'] }}</td>
+                            <td style="font-weight: bold; color: #111111;">{{ $row['name'] }}</td>
                             <td>{{ ucfirst($row['type'] instanceof \BackedEnum ? $row['type']->value : (string) $row['type']) }}</td>
                             <td>{{ $row['location'] }}</td>
-                            <td class="text-center" style="font-weight: bold; color: {{ $row['incident_count'] > 0 ? '#b91c1c' : '#15803d' }};">
+                            <td class="text-center" style="font-weight: bold; color: #111111;">
                                 {{ $row['incident_count'] }} Kali
                             </td>
                             <td class="text-center">
@@ -301,9 +284,9 @@
                     @else
                         <tr>
                             <td class="text-center">{{ $index + 1 }}</td>
-                            <td style="font-weight: bold; color: #0f172a;">{{ $row['location'] }}</td>
+                            <td style="font-weight: bold; color: #111111;">{{ $row['location'] }}</td>
                             <td class="text-center">{{ $row['facility_count'] }} Fasilitas</td>
-                            <td class="text-center" style="font-weight: bold; color: {{ $row['incident_count'] > 0 ? '#b91c1c' : '#15803d' }};">
+                            <td class="text-center" style="font-weight: bold; color: #111111;">
                                 {{ $row['incident_count'] }} Kali
                             </td>
                             <td class="text-center">
@@ -314,7 +297,7 @@
                 @endif
             @empty
                 <tr>
-                    <td colspan="7" class="text-center" style="padding: 20px; color: #64748b;">
+                    <td colspan="7" class="text-center" style="padding: 20px; color: #666666;">
                         Tidak ada data yang ditemukan untuk periode ini.
                     </td>
                 </tr>
