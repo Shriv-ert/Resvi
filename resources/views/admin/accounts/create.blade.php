@@ -126,10 +126,10 @@
                     $curUserCat = old('user_category', '');
                     $curUserCatLabel = $curUserCat === 'mahasiswa' ? 'Mahasiswa' : ($curUserCat === 'dosen' ? 'Dosen' : ($curUserCat === 'staf' ? 'Staf' : 'Pilih Kategori Civitas...'));
                 @endphp
-                <button type="button" onclick="toggleCustomDropdown('user_category')" id="user_categoryTrigger"
-                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3.5 py-2.5 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                    <span id="user_categoryLabel">{{ $curUserCatLabel }}</span>
-                    <svg id="user_categoryChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button type="button" onclick="toggleCustomDropdown('user_category')" id="user_categoryTrigger" title="{{ $curUserCatLabel }}"
+                        class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3.5 py-2.5 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                    <span id="user_categoryLabel" class="truncate text-left flex-1" title="{{ $curUserCatLabel }}">{{ $curUserCatLabel }}</span>
+                    <svg id="user_categoryChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                 </button>

@@ -113,20 +113,23 @@
                     <div class="space-y-1.5 relative custom-datepicker" id="datepicker-container">
                         <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Tanggal Pemakaian</label>
                         <input type="hidden" id="date" name="date" value="{{ $selectedDate }}">
-                        <button type="button" onclick="toggleDatePicker()" id="datePickerTrigger"
-                                class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2.5 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                            <span id="datePickerDisplay" class="flex items-center gap-2">
-                                <svg class="w-3.5 h-3.5 text-[#888888]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        @php
+                            $initDateText = \Carbon\Carbon::parse($selectedDate)->translatedFormat('d M Y');
+                        @endphp
+                        <button type="button" onclick="toggleDatePicker()" id="datePickerTrigger" title="{{ $initDateText }}"
+                                class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2.5 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                            <span id="datePickerDisplay" class="flex items-center gap-2 min-w-0 truncate text-left flex-1" title="{{ $initDateText }}">
+                                <svg class="w-3.5 h-3.5 text-[#888888] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                                     <line x1="16" y1="2" x2="16" y2="6"></line>
                                     <line x1="8" y1="2" x2="8" y2="6"></line>
                                     <line x1="3" y1="10" x2="21" y2="10"></line>
                                 </svg>
-                                <span id="datePickerSelectedText">
-                                    {{ \Carbon\Carbon::parse($selectedDate)->translatedFormat('d M Y') }}
+                                <span id="datePickerSelectedText" class="truncate">
+                                    {{ $initDateText }}
                                 </span>
                             </span>
-                            <svg class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="6 9 12 15 18 9"></polyline>
                             </svg>
                         </button>
@@ -159,10 +162,13 @@
                         <div class="space-y-1.5 relative custom-dropdown" id="dropdown-start_time">
                             <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Waktu Mulai (07.00 - 19.30)</label>
                             <input type="hidden" id="start_time" name="start_time" value="{{ $selectedStart }}">
-                            <button type="button" onclick="toggleCustomDropdown('start_time')" id="start_timeTrigger"
-                                    class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2.5 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                                <span id="start_timeLabel">{{ $selectedStart }} WIB</span>
-                                <svg id="start_timeChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            @php
+                                $initStartLabel = $selectedStart ? $selectedStart . ' WIB' : 'Pilih Waktu Mulai';
+                            @endphp
+                            <button type="button" onclick="toggleCustomDropdown('start_time')" id="start_timeTrigger" title="{{ $initStartLabel }}"
+                                    class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2.5 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                                <span id="start_timeLabel" class="truncate text-left flex-1" title="{{ $initStartLabel }}">{{ $initStartLabel }}</span>
+                                <svg id="start_timeChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="6 9 12 15 18 9"></polyline>
                                 </svg>
                             </button>
@@ -193,10 +199,13 @@
                         <div class="space-y-1.5 relative custom-dropdown" id="dropdown-end_time">
                             <label class="block font-mono text-[10px] uppercase tracking-wider text-[#888888] font-medium">Waktu Selesai (07.30 - 20.00)</label>
                             <input type="hidden" id="end_time" name="end_time" value="{{ $selectedEnd }}">
-                            <button type="button" onclick="toggleCustomDropdown('end_time')" id="end_timeTrigger"
-                                    class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2.5 flex items-center justify-between focus:outline-none focus:border-white transition font-mono">
-                                <span id="end_timeLabel">{{ $selectedEnd }} WIB</span>
-                                <svg id="end_timeChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            @php
+                                $initEndLabel = $selectedEnd ? $selectedEnd . ' WIB' : 'Pilih Waktu Selesai';
+                            @endphp
+                            <button type="button" onclick="toggleCustomDropdown('end_time')" id="end_timeTrigger" title="{{ $initEndLabel }}"
+                                    class="w-full bg-[#0a0a0a] border border-[#333333] hover:border-[#555555] text-white text-xs rounded-[6px] px-3 py-2.5 flex items-center justify-between min-w-0 gap-2 focus:outline-none focus:border-white transition font-mono">
+                                <span id="end_timeLabel" class="truncate text-left flex-1" title="{{ $initEndLabel }}">{{ $initEndLabel }}</span>
+                                <svg id="end_timeChevron" class="custom-dropdown-chevron w-3.5 h-3.5 text-[#888888] transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="6 9 12 15 18 9"></polyline>
                                 </svg>
                             </button>
@@ -419,8 +428,16 @@
         const dateInput = document.getElementById('date');
         if (dateInput) dateInput.value = dateStr;
 
+        const dateText = formatDisplayDate(dateStr);
         const disp = document.getElementById('datePickerSelectedText');
-        if (disp) disp.innerText = formatDisplayDate(dateStr);
+        if (disp) {
+            disp.innerText = dateText;
+            disp.title = dateText;
+        }
+        const dispWrapper = document.getElementById('datePickerDisplay');
+        if (dispWrapper) dispWrapper.title = dateText;
+        const trigger = document.getElementById('datePickerTrigger');
+        if (trigger) trigger.title = dateText;
 
         const guestDate = document.getElementById('guest_date');
         if (guestDate) guestDate.value = dateStr;
@@ -512,11 +529,16 @@
     function selectCustomDropdown(id, val, label) {
         const input = document.getElementById(id);
         const labelEl = document.getElementById(id + 'Label');
+        const trigger = document.getElementById(id + 'Trigger');
         const menu = document.getElementById(id + 'Menu');
         const chevron = document.getElementById(id + 'Chevron');
 
         if (input) input.value = val;
-        if (labelEl) labelEl.innerText = label;
+        if (labelEl) {
+            labelEl.innerText = label;
+            labelEl.title = label;
+        }
+        if (trigger) trigger.title = label;
 
         if (menu) {
             menu.querySelectorAll('.dropdown-item').forEach(item => {

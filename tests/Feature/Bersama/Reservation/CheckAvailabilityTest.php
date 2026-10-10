@@ -165,12 +165,12 @@ class CheckAvailabilityTest extends TestCase
 
         $today = now()->toDateString();
 
-        $response = $this->post('/reservations/check-availability', [
-            'facility_id' => $this->facility->id,
-            'date' => $today,
-            'start_time' => '07:00',
-            'end_time' => '08:00',
-        ]);
+            $response = $this->post('/reservations/check-availability', [
+                'facility_id' => $this->facility->id,
+                'date' => $today,
+                'start_time' => '07:00',
+                'end_time' => '08:00',
+            ]);
 
         $response->assertSessionHasErrors(['start_time']);
     }

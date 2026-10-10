@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Katalog Fasilitas') · {{ config('app.name', 'Resvi') }}</title>
 
+    @include('partials.theme-head')
+
     <!-- Google Fonts: Geist & Geist Mono & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -149,6 +151,8 @@
 
             <!-- User Action -->
             <div class="flex items-center gap-3">
+                @include('partials.theme-toggle')
+
                 @auth
                     <div class="flex items-center gap-2.5 pl-3 border-l border-[#333333]">
                         <div class="hidden sm:flex flex-col text-right">
