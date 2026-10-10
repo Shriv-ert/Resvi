@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Staff;
+namespace Tests\Feature\Petugas;
 
 use App\Enums\OperationalStatus;
 use App\Enums\ReportStatus;
@@ -39,6 +39,28 @@ class FacilityTest extends TestCase
             ->assertSee('Lab Multimedia 201');
     }
 
+    public function test_petugas_can_search_and_filter_facilities_work_list(): void
+    {
+        $petugas = User::factory()->petugas()->create();
+        Facility::factory()->create([
+            'name' => 'Laboratorium Target Petugas',
+            'type' => \App\Enums\FacilityType::Laboratorium,
+        ]);
+        $other = Facility::factory()->create([
+            'name' => 'Aula Bukan Target',
+            'type' => \App\Enums\FacilityType::Aula,
+        ]);
+
+        $response = $this->actingAs($petugas)->get(route('staff.facilities.index', [
+            'search' => 'Target',
+            'type' => 'laboratorium',
+        ]));
+
+        $response->assertOk()
+            ->assertSee('Laboratorium Target Petugas')
+            ->assertDontSee($other->name);
+    }
+
     public function test_petugas_can_view_facilities_under_maintenance(): void
     {
         $petugas = User::factory()->petugas()->create();
@@ -58,6 +80,36 @@ class FacilityTest extends TestCase
             ->assertViewIs('staff.facilities.maintenance')
             ->assertSee('Ruang Teori Rusak')
             ->assertDontSee('Ruang Teori Normal');
+    }
+
+    public function test_maintenance_list_shows_latest_reason_and_change_audit(): void
+    {
+        $this->travelTo(now()->setTime(10, 0));
+        $petugas = User::factory()->petugas()->create(['name' => 'Petugas Audit']);
+        $facility = Facility::factory()->create([
+            'name' => 'Laboratorium Audit Perbaikan',
+            'type' => \App\Enums\FacilityType::Laboratorium,
+            'location' => 'Gedung Audit Lantai 2',
+            'operational_status' => OperationalStatus::DapatDigunakan,
+        ]);
+
+        $this->actingAs($petugas)
+            ->post(route('staff.facilities.update-status', $facility), [
+                'operational_status' => OperationalStatus::DalamPerbaikan->value,
+                'reason' => 'Sensor suhu sedang diperiksa.',
+            ])
+            ->assertRedirect(route('staff.facilities.maintenance'));
+
+        $this->get(route('staff.facilities.maintenance'))
+            ->assertOk()
+            ->assertSeeInOrder([
+                'Laboratorium Audit Perbaikan',
+                'laboratorium',
+                'Gedung Audit Lantai 2',
+                'Sensor suhu sedang diperiksa.',
+                now()->format('d/m/Y H:i'),
+                'Petugas Audit',
+            ]);
     }
 
     public function test_petugas_can_change_facility_to_maintenance_with_cascading_reservation_effects(): void
@@ -119,6 +171,69 @@ class FacilityTest extends TestCase
             'old_value' => 'dapat_digunakan',
             'new_value' => 'dalam_perbaikan',
         ]);
+    }
+
+    public function test_changing_to_maintenance_preserves_ongoing_reservation(): void
+    {
+        $petugas = User::factory()->petugas()->create();
+        $facility = Facility::factory()->create([
+            'operational_status' => OperationalStatus::DapatDigunakan,
+        ]);
+        $ongoing = Reservation::factory()->create([
+            'facility_id' => $facility->id,
+            'status' => ReservationStatus::Berlangsung,
+            'date' => now()->toDateString(),
+            'start_time' => '14:00:00',
+            'end_time' => '16:00:00',
+        ]);
+
+        $this->actingAs($petugas)->post(route('staff.facilities.update-status', $facility), [
+            'operational_status' => OperationalStatus::DalamPerbaikan->value,
+            'reason' => 'Perbaikan darurat tanpa menghentikan kegiatan berjalan.',
+        ])->assertRedirect(route('staff.facilities.maintenance'));
+
+        $this->assertEquals(ReservationStatus::Berlangsung, $ongoing->fresh()->status);
+    }
+
+    public function test_status_change_requires_reason(): void
+    {
+        $petugas = User::factory()->petugas()->create();
+        $facility = Facility::factory()->create([
+            'operational_status' => OperationalStatus::DapatDigunakan,
+        ]);
+
+        $this->actingAs($petugas)
+            ->post(route('staff.facilities.update-status', $facility), [
+                'operational_status' => OperationalStatus::DalamPerbaikan->value,
+                'reason' => '',
+            ])
+            ->assertSessionHasErrors('reason');
+
+        $this->assertEquals(OperationalStatus::DapatDigunakan, $facility->fresh()->operational_status);
+    }
+
+    public function test_report_link_must_be_processing_before_status_change(): void
+    {
+        $petugas = User::factory()->petugas()->create();
+        $facility = Facility::factory()->create([
+            'operational_status' => OperationalStatus::DapatDigunakan,
+        ]);
+        $report = Report::factory()->create([
+            'facility_id' => $facility->id,
+            'status' => ReportStatus::Baru,
+        ]);
+
+        $this->actingAs($petugas)
+            ->from(route('staff.facilities.show', $facility))
+            ->post(route('staff.facilities.update-status', $facility), [
+                'operational_status' => OperationalStatus::DalamPerbaikan->value,
+                'reason' => 'Menunggu pemeriksaan lanjutan.',
+                'report_id' => $report->id,
+            ])
+            ->assertRedirect(route('staff.facilities.show', $facility))
+            ->assertSessionHasErrors('report_id');
+
+        $this->assertEquals(OperationalStatus::DapatDigunakan, $facility->fresh()->operational_status);
     }
 
     public function test_petugas_can_restore_facility_to_available_status_with_notes(): void

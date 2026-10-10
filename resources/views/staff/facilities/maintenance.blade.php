@@ -93,6 +93,8 @@
                         <th class="py-3 px-5 text-center font-medium">Lokasi</th>
                         <th class="py-3 px-5 text-center font-medium">Status Operasional</th>
                         <th class="py-3 px-5 text-center font-medium">Catatan Pemeliharaan</th>
+                        <th class="py-3 px-5 text-center font-medium">Waktu Perubahan</th>
+                        <th class="py-3 px-5 text-center font-medium">Petugas</th>
                         <th class="py-3 px-5 text-center font-medium">Aksi</th>
                     </tr>
                 </thead>
@@ -102,6 +104,8 @@
                             $typeVal = $f['type'] instanceof \BackedEnum ? $f['type']->value : (string) $f['type'];
                             $latestLog = $f->statusLogs?->first();
                             $logReason = $latestLog?->reason ?? ($f['maintenance_notes'] ?? 'Sedang dalam penanganan perbaikan petugas');
+                            $logChangedAt = $latestLog?->changed_at?->format('d/m/Y H:i') ?? '—';
+                            $logChangedBy = $latestLog?->changedBy?->name ?? '—';
                         @endphp
                         <tr class="hover:bg-[#161616] transition-colors"
                             data-search="{{ strtolower($f['name']) }}"
@@ -130,6 +134,14 @@
                                 {{ $logReason }}
                             </td>
 
+                            <td class="py-3.5 px-5 text-center text-[#888888] whitespace-nowrap">
+                                {{ $logChangedAt }}
+                            </td>
+
+                            <td class="py-3.5 px-5 text-center text-[#888888]">
+                                {{ $logChangedBy }}
+                            </td>
+
                             <td class="py-3.5 px-5 text-center whitespace-nowrap">
                                 <a href="{{ route('staff.facilities.show', ['facility' => $f['id']]) }}" 
                                    class="inline-flex items-center gap-1 bg-[#171717] hover:bg-[#222222] text-white border border-[#333333] text-xs font-medium px-3 py-1 rounded-[6px] transition shadow-none">
@@ -139,7 +151,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-12 text-center text-[#888888]">
+                            <td colspan="8" class="py-12 text-center text-[#888888]">
                                 Tidak ada fasilitas yang sedang dalam perbaikan.
                             </td>
                         </tr>
