@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Staff;
+namespace Tests\Feature\Petugas;
 
 use App\Enums\ReportCategory;
 use App\Enums\ReportStatus;
@@ -59,6 +59,42 @@ class ReportTest extends TestCase
             ->assertDontSee($finishedReport->report_number);
     }
 
+    public function test_petugas_can_search_and_filter_active_reports_together(): void
+    {
+        $petugas = User::factory()->petugas()->create();
+        $targetUser = User::factory()->create(['name' => 'Pelapor Target']);
+        $otherUser = User::factory()->create(['name' => 'Pelapor Lain']);
+        $targetFacility = Facility::factory()->create([
+            'name' => 'Laboratorium Target',
+            'type' => \App\Enums\FacilityType::Laboratorium,
+        ]);
+        $otherFacility = Facility::factory()->create([
+            'name' => 'Lapangan Lain',
+            'type' => \App\Enums\FacilityType::Lapangan,
+        ]);
+
+        $target = Report::factory()->create([
+            'reporter_id' => $targetUser->id,
+            'facility_id' => $targetFacility->id,
+            'status' => ReportStatus::Baru,
+        ]);
+        $other = Report::factory()->create([
+            'reporter_id' => $otherUser->id,
+            'facility_id' => $otherFacility->id,
+            'status' => ReportStatus::Diproses,
+        ]);
+
+        $response = $this->actingAs($petugas)->get(route('staff.reports.index', [
+            'search' => 'Target',
+            'type' => 'laboratorium',
+            'status' => ReportStatus::Baru->value,
+        ]));
+
+        $response->assertOk()
+            ->assertSee($target->report_number)
+            ->assertDontSee($other->report_number);
+    }
+
     public function test_petugas_can_view_final_reports_history(): void
     {
         $petugas = User::factory()->petugas()->create();
@@ -74,6 +110,70 @@ class ReportTest extends TestCase
             ->assertViewIs('staff.reports.history')
             ->assertSee($resolvedReport->report_number)
             ->assertDontSee($activeReport->report_number);
+    }
+
+    public function test_report_history_search_and_filters_work_together(): void
+    {
+        $petugas = User::factory()->petugas()->create();
+        $targetReporter = User::factory()->create(['name' => 'Pelapor Target Riwayat']);
+        $targetFacility = Facility::factory()->create([
+            'name' => 'Laboratorium Target Riwayat',
+            'type' => \App\Enums\FacilityType::Laboratorium,
+        ]);
+        $otherFacility = Facility::factory()->create([
+            'name' => 'Aula Riwayat Lain',
+            'type' => \App\Enums\FacilityType::Aula,
+        ]);
+        $target = Report::factory()->create([
+            'reporter_id' => $targetReporter->id,
+            'facility_id' => $targetFacility->id,
+            'status' => ReportStatus::Selesai,
+            'resolution_notes' => 'Sudah diperbaiki.',
+        ]);
+        $other = Report::factory()->create([
+            'facility_id' => $otherFacility->id,
+            'status' => ReportStatus::Selesai,
+            'resolution_notes' => 'Sudah diperbaiki.',
+        ]);
+
+        $this->actingAs($petugas)->get(route('staff.reports.history', [
+            'search' => 'Target Riwayat',
+            'type' => 'laboratorium',
+            'status' => ReportStatus::Selesai->value,
+        ]))
+            ->assertOk()
+            ->assertSee($target->report_number)
+            ->assertDontSee($other->report_number);
+    }
+
+    public function test_active_reports_are_ordered_by_status_then_oldest_submission(): void
+    {
+        $petugas = User::factory()->petugas()->create();
+        $facility = Facility::factory()->create();
+
+        $processing = Report::factory()->create(['status' => ReportStatus::Diproses]);
+        $newReport = Report::factory()->create([
+            'facility_id' => $facility->id,
+            'status' => ReportStatus::Baru,
+        ]);
+        $oldReport = Report::factory()->create([
+            'facility_id' => $facility->id,
+            'status' => ReportStatus::Baru,
+        ]);
+
+        $oldReport->created_at = now()->subHours(3);
+        $oldReport->saveQuietly();
+        $newReport->created_at = now()->subHour();
+        $newReport->saveQuietly();
+
+        $this->actingAs($petugas)
+            ->get(route('staff.reports.index'))
+            ->assertOk()
+            ->assertSeeInOrder([
+                $oldReport->report_number,
+                $newReport->report_number,
+                $processing->report_number,
+            ]);
     }
 
     public function test_petugas_can_view_report_detail(): void

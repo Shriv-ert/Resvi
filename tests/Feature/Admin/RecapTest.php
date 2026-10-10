@@ -165,8 +165,10 @@ class RecapTest extends TestCase
             'description' => 'Lab fisika',
             'is_active' => true,
             'operational_status' => OperationalStatus::DapatDigunakan,
-            'created_at' => Carbon::parse('2026-01-01 00:00:00'),
         ]);
+
+        $facility->created_at = Carbon::parse('2026-01-01 00:00:00');
+        $facility->saveQuietly();
 
         $user = User::query()->create([
             'name' => 'Mahasiswa Fisika',
@@ -223,8 +225,10 @@ class RecapTest extends TestCase
             'description' => 'Aula pertemuan',
             'is_active' => true,
             'operational_status' => OperationalStatus::DapatDigunakan,
-            'created_at' => Carbon::parse('2026-01-01 00:00:00'),
         ]);
+
+        $facility->created_at = Carbon::parse('2026-01-01 00:00:00');
+        $facility->saveQuietly();
 
         $user = User::query()->create([
             'name' => 'Dosen Pemohon',

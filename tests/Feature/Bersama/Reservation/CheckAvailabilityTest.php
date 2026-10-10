@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Reservation;
+namespace Tests\Feature\Bersama\Reservation;
 
 use App\Enums\FacilityType;
 use App\Enums\OperationalStatus;
@@ -46,6 +46,20 @@ class CheckAvailabilityTest extends TestCase
         $response->assertSee('Aula Serbaguna Utama');
     }
 
+    public function test_available_response_accepts_operational_boundary_times(): void
+    {
+        $response = $this->post('/reservations/check-availability', [
+            'facility_id' => $this->facility->id,
+            'date' => $this->tomorrowDate,
+            'start_time' => '07:00',
+            'end_time' => '20:00',
+        ]);
+
+        $response->assertOk()
+            ->assertSee('Jadwal Tersedia!')
+            ->assertSee('07:00 - 20:00 WIB');
+    }
+
     public function test_conflict_returns_unavailable_response(): void
     {
         Reservation::factory()->approved()->create([
@@ -64,6 +78,38 @@ class CheckAvailabilityTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Jadwal Tidak Tersedia');
+    }
+
+    public function test_facility_in_repair_returns_unavailable_response(): void
+    {
+        $repairFacility = Facility::factory()->inRepair()->create([
+            'name' => 'Aula Sedang Diperbaiki',
+            'is_active' => true,
+        ]);
+
+        $response = $this->post('/reservations/check-availability', [
+            'facility_id' => $repairFacility->id,
+            'date' => $this->tomorrowDate,
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+        ]);
+
+        $response->assertOk()
+            ->assertSee('Jadwal Tidak Tersedia');
+    }
+
+    public function test_inactive_facility_is_rejected_before_availability_check(): void
+    {
+        $inactiveFacility = Facility::factory()->inactive()->create();
+
+        $response = $this->post('/reservations/check-availability', [
+            'facility_id' => $inactiveFacility->id,
+            'date' => $this->tomorrowDate,
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+        ]);
+
+        $response->assertSessionHasErrors('facility_id');
     }
 
     public function test_validation_rejects_times_outside_operational_hours(): void
@@ -126,5 +172,24 @@ class CheckAvailabilityTest extends TestCase
 
         // Karena waktu saat ini sudah malam (> 07:00 WIB), slot pagi di hari ini wajib ditolak
         $response->assertSessionHasErrors(['start_time']);
+    }
+
+    public function test_validation_rejects_date_in_the_past(): void
+    {
+        $response = $this->post('/reservations/check-availability', [
+            'facility_id' => $this->facility->id,
+            'date' => CarbonImmutable::now('Asia/Jakarta')->subDay()->toDateString(),
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+        ]);
+
+        $response->assertSessionHasErrors('date');
+    }
+
+    public function test_validation_requires_all_schedule_fields(): void
+    {
+        $response = $this->post('/reservations/check-availability', []);
+
+        $response->assertSessionHasErrors(['facility_id', 'date', 'start_time', 'end_time']);
     }
 }

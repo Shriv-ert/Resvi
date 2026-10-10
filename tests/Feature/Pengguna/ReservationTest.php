@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\User;
+namespace Tests\Feature\Pengguna;
 
 use App\Enums\OperationalStatus;
 use App\Enums\ReservationStatus;
@@ -101,6 +101,38 @@ class ReservationTest extends TestCase
         ]);
     }
 
+    public function test_submission_revalidates_schedule_rules_on_server(): void
+    {
+        $futureDate = now()->addDays(2)->toDateString();
+
+        $nonSlotResponse = $this->actingAs($this->user)->post(route('user.reservations.store'), [
+            'facility_id' => $this->facility->id,
+            'date' => $futureDate,
+            'start_time' => '08:15',
+            'end_time' => '10:00',
+            'purpose' => 'Jadwal dengan menit tidak valid',
+        ]);
+
+        $nonSlotResponse->assertSessionHasErrors('start_time');
+
+        $pastDateResponse = $this->actingAs($this->user)->post(route('user.reservations.store'), [
+            'facility_id' => $this->facility->id,
+            'date' => now()->subDay()->toDateString(),
+            'start_time' => '08:00',
+            'end_time' => '10:00',
+            'purpose' => 'Tanggal reservasi sudah lewat',
+        ]);
+
+        $pastDateResponse->assertSessionHasErrors('date');
+
+        $this->assertDatabaseMissing('reservations', [
+            'purpose' => 'Jadwal dengan menit tidak valid',
+        ]);
+        $this->assertDatabaseMissing('reservations', [
+            'purpose' => 'Tanggal reservasi sudah lewat',
+        ]);
+    }
+
     public function test_submission_fails_with_conflicting_approved_reservation(): void
     {
         $futureDate = now()->addDays(2)->toDateString();
@@ -127,6 +159,40 @@ class ReservationTest extends TestCase
         ]);
     }
 
+    public function test_same_user_can_reserve_overlapping_times_at_different_facilities(): void
+    {
+        $otherFacility = Facility::factory()->create([
+            'is_active' => true,
+            'operational_status' => OperationalStatus::DapatDigunakan,
+        ]);
+        $date = now()->addDays(2)->toDateString();
+
+        Reservation::factory()->approved()->create([
+            'user_id' => $this->user->id,
+            'facility_id' => $this->facility->id,
+            'date' => $date,
+            'start_time' => '09:00:00',
+            'end_time' => '11:00:00',
+        ]);
+
+        $response = $this->actingAs($this->user)->post(route('user.reservations.store'), [
+            'facility_id' => $otherFacility->id,
+            'date' => $date,
+            'start_time' => '09:30',
+            'end_time' => '10:30',
+            'purpose' => 'Kegiatan di fasilitas berbeda',
+        ]);
+
+        $response->assertRedirect(route('user.reservations.index', ['as_user' => 1]));
+        $this->assertDatabaseHas('reservations', [
+            'user_id' => $this->user->id,
+            'facility_id' => $otherFacility->id,
+            'date' => $date,
+            'status' => ReservationStatus::Menunggu->value,
+            'purpose' => 'Kegiatan di fasilitas berbeda',
+        ]);
+    }
+
     public function test_submission_fails_when_facility_is_in_repair(): void
     {
         $repairFacility = Facility::factory()->create([
@@ -145,6 +211,24 @@ class ReservationTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('facility_id');
+    }
+
+    public function test_submission_fails_when_facility_is_inactive(): void
+    {
+        $inactiveFacility = Facility::factory()->inactive()->create();
+
+        $response = $this->actingAs($this->user)->post(route('user.reservations.store'), [
+            'facility_id' => $inactiveFacility->id,
+            'date' => now()->addDays(2)->toDateString(),
+            'start_time' => '09:00',
+            'end_time' => '10:00',
+            'purpose' => 'Mencoba fasilitas nonaktif',
+        ]);
+
+        $response->assertSessionHasErrors('facility_id');
+        $this->assertDatabaseMissing('reservations', [
+            'purpose' => 'Mencoba fasilitas nonaktif',
+        ]);
     }
 
     public function test_duplicate_submission_by_same_user_is_rejected(): void
@@ -223,6 +307,95 @@ class ReservationTest extends TestCase
         $this->assertEquals(ReservationStatus::DibatalkanOlehPengguna, $reservation->status);
         $this->assertEquals('Dosen pengampu berhalangan hadir', $reservation->cancellation_reason);
         $this->assertEquals($this->user->id, $reservation->cancelled_by_id);
+    }
+
+    public function test_user_can_cancel_approved_reservation_before_start_time(): void
+    {
+        $reservation = Reservation::factory()->approved()->create([
+            'user_id' => $this->user->id,
+            'facility_id' => $this->facility->id,
+            'date' => now()->addDays(3)->toDateString(),
+            'start_time' => '09:00:00',
+            'end_time' => '11:00:00',
+        ]);
+
+        $this->actingAs($this->user)
+            ->post(route('user.reservations.cancel', $reservation), [
+                'cancellation_reason' => 'Kegiatan dipindahkan ke jadwal lain',
+            ])
+            ->assertRedirect(route('user.reservations.show', ['reservation' => $reservation->id, 'as_user' => 1]));
+
+        $reservation->refresh();
+        $this->assertEquals(ReservationStatus::DibatalkanOlehPengguna, $reservation->status);
+    }
+
+    public function test_cancellation_requires_a_reason(): void
+    {
+        $reservation = Reservation::factory()->create([
+            'user_id' => $this->user->id,
+            'facility_id' => $this->facility->id,
+            'date' => now()->addDays(3)->toDateString(),
+            'start_time' => '09:00:00',
+            'end_time' => '11:00:00',
+            'status' => ReservationStatus::Menunggu,
+        ]);
+
+        $response = $this->actingAs($this->user)->post(route('user.reservations.cancel', $reservation), [
+            'cancellation_reason' => '',
+        ]);
+
+        $response->assertSessionHasErrors('cancellation_reason');
+        $reservation->refresh();
+        $this->assertEquals(ReservationStatus::Menunggu, $reservation->status);
+    }
+
+    public function test_user_cannot_cancel_reservations_with_final_or_active_statuses(): void
+    {
+        $disallowedStatuses = [
+            ReservationStatus::Berlangsung,
+            ReservationStatus::Selesai,
+            ReservationStatus::Ditolak,
+            ReservationStatus::DibatalkanOlehPengguna,
+            ReservationStatus::DibatalkanOlehPetugas,
+            ReservationStatus::Kedaluwarsa,
+        ];
+
+        foreach ($disallowedStatuses as $index => $status) {
+            $reservation = Reservation::factory()->create([
+                'user_id' => $this->user->id,
+                'facility_id' => $this->facility->id,
+                'date' => now()->addDays(3)->toDateString(),
+                'start_time' => sprintf('%02d:00:00', 9 + $index),
+                'end_time' => sprintf('%02d:00:00', 10 + $index),
+                'status' => $status,
+            ]);
+
+            $response = $this->actingAs($this->user)->post(route('user.reservations.cancel', $reservation), [
+                'cancellation_reason' => 'Tidak boleh dibatalkan',
+            ]);
+
+            $response->assertSessionHasErrors('cancellation_reason');
+        }
+    }
+
+    public function test_user_cannot_cancel_another_users_reservation(): void
+    {
+        $otherUser = User::factory()->create([
+            'role' => UserRole::Pengguna,
+            'user_category' => UserCategory::Dosen,
+        ]);
+        $reservation = Reservation::factory()->create([
+            'user_id' => $otherUser->id,
+            'facility_id' => $this->facility->id,
+            'date' => now()->addDays(3)->toDateString(),
+            'status' => ReservationStatus::Menunggu,
+        ]);
+
+        $this->actingAs($this->user)
+            ->post(route('user.reservations.cancel', $reservation), [
+                'cancellation_reason' => 'Bukan reservasi saya',
+            ])
+            ->assertForbidden();
     }
 
     public function test_user_cannot_cancel_past_start_time_reservation(): void

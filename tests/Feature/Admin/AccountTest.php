@@ -98,6 +98,8 @@ class AccountTest extends TestCase
         $response->assertSee('Budi Petugas');
         $response->assertSee('Siti Mahasiswa');
         $response->assertDontSee('Other Admin');
+        $response->assertDontSee($petugas->password);
+        $response->assertDontSee($pengguna->password);
     }
 
     public function test_admin_can_create_petugas_account_with_null_category(): void
@@ -227,6 +229,30 @@ class AccountTest extends TestCase
         $response->assertSee('abc123XYZ!@#');
     }
 
+    public function test_created_account_password_is_not_available_on_a_second_page_visit(): void
+    {
+        $this->actingAs($this->admin)
+            ->post(route('admin.accounts.store'), [
+                'name' => 'Akun Satu Kali',
+                'email' => 'sekali.'.Str::uuid().'@ppk.test',
+                'role' => UserRole::Petugas->value,
+            ])
+            ->assertRedirect(route('admin.accounts.created'))
+            ->assertSessionHas('created_account');
+
+        // Capture the flashed credential before the first page visit consumes it.
+        $account = session('created_account');
+        $this->assertNotEmpty($account['plain_password']);
+
+        $firstVisit = $this->get(route('admin.accounts.created'));
+        $firstVisit->assertOk();
+        $firstVisit->assertSee($account['plain_password']);
+
+        $secondVisit = $this->get(route('admin.accounts.created'));
+        $secondVisit->assertRedirect(route('admin.accounts.index'));
+        $secondVisit->assertSessionHas('warning');
+    }
+
     public function test_admin_can_view_account_details(): void
     {
         $user = User::query()->create([
@@ -243,6 +269,8 @@ class AccountTest extends TestCase
         $response->assertSee('Rina Mahasiswa');
         $response->assertSee('rina@ppk.test');
         $response->assertSee('Mahasiswa');
+        $response->assertDontSee($user->password);
+        $response->assertDontSee('secret1234');
     }
 
     public function test_admin_can_reset_user_password_without_knowing_old_password(): void

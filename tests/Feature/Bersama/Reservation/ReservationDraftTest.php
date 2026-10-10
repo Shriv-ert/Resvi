@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Reservation;
+namespace Tests\Feature\Bersama\Reservation;
 
 use App\Enums\FacilityType;
 use App\Enums\OperationalStatus;
@@ -51,6 +51,24 @@ class ReservationDraftTest extends TestCase
             'start_time' => '10:00',
             'end_time' => '12:00',
         ]);
+    }
+
+    public function test_guest_can_open_reservation_form_for_an_active_facility(): void
+    {
+        $response = $this->get(route('reservations.create', ['facility_id' => $this->facility->id]));
+
+        $response->assertOk()
+            ->assertViewIs('reservations.create')
+            ->assertSee($this->facility->name)
+            ->assertSee('Cek Ketersediaan Server')
+            ->assertSee('Simpan Draft & Masuk / Login', false);
+    }
+
+    public function test_reservation_form_without_facility_redirects_to_catalog(): void
+    {
+        $this->get(route('reservations.create'))
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('warning');
     }
 
     public function test_user_role_pengguna_restores_draft_after_successful_login(): void
@@ -116,6 +134,31 @@ class ReservationDraftTest extends TestCase
 
         // Admin masuk ke entry point modul Admin dan draft pengunjung dibuang.
         $loginResponse->assertRedirect(route('admin.facilities.index'));
+        $this->assertFalse(session()->has(GuestReservationDraftService::SESSION_KEY));
+    }
+
+    public function test_petugas_login_clears_draft_and_redirects_to_reservation_queue(): void
+    {
+        $password = 'Petugas-Secret-123!';
+        $petugas = User::factory()->petugas()->create([
+            'password' => bcrypt($password),
+        ]);
+
+        $this->withSession([
+            GuestReservationDraftService::SESSION_KEY => [
+                'facility_id' => $this->facility->id,
+                'date' => $this->targetDate,
+                'start_time' => '09:00',
+                'end_time' => '11:00',
+            ],
+        ]);
+
+        $loginResponse = $this->post('/login', [
+            'email' => $petugas->email,
+            'password' => $password,
+        ]);
+
+        $loginResponse->assertRedirect(route('staff.reservations.index'));
         $this->assertFalse(session()->has(GuestReservationDraftService::SESSION_KEY));
     }
 }

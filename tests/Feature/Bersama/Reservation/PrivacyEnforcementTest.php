@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Reservation;
+namespace Tests\Feature\Bersama\Reservation;
 
 use App\Enums\FacilityType;
 use App\Enums\OperationalStatus;

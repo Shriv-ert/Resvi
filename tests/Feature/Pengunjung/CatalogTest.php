@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Facility;
+namespace Tests\Feature\Pengunjung;
 
 use App\Enums\FacilityType;
 use App\Enums\OperationalStatus;
@@ -194,5 +194,53 @@ class CatalogTest extends TestCase
         $response->assertOk();
         $response->assertSee('Tidak ada fasilitas yang ditemukan');
         $response->assertSee('Bersihkan Semua Filter');
+    }
+
+    public function test_search_and_multiple_filters_are_applied_together(): void
+    {
+        Facility::factory()->create([
+            'name' => 'Aula Teknologi Informasi',
+            'type' => FacilityType::Aula,
+            'location' => 'Gedung Teknologi',
+            'capacity' => 200,
+            'is_active' => true,
+        ]);
+
+        Facility::factory()->create([
+            'name' => 'Aula Teknologi Informasi Kecil',
+            'type' => FacilityType::Aula,
+            'location' => 'Gedung Teknologi',
+            'capacity' => 50,
+            'is_active' => true,
+        ]);
+
+        Facility::factory()->create([
+            'name' => 'Aula Teknologi Informasi Lapangan',
+            'type' => FacilityType::Lapangan,
+            'location' => 'Gedung Teknologi',
+            'capacity' => 200,
+            'is_active' => true,
+        ]);
+
+        $response = $this->get('/?q=Teknologi&type=aula&location='.urlencode('Gedung Teknologi').'&capacity=100');
+
+        $response->assertOk()
+            ->assertSee('Aula Teknologi Informasi')
+            ->assertDontSee('Aula Teknologi Informasi Kecil')
+            ->assertDontSee('Aula Teknologi Informasi Lapangan');
+    }
+
+    public function test_reset_filter_link_points_to_unfiltered_catalog(): void
+    {
+        Facility::factory()->create([
+            'name' => 'Fasilitas Hasil Filter',
+            'is_active' => true,
+        ]);
+
+        $response = $this->get('/?q=Hasil');
+
+        $response->assertOk()
+            ->assertSee('Reset Filter')
+            ->assertSee(route('facilities.index'));
     }
 }

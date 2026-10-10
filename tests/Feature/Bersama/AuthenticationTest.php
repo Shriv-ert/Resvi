@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Bersama;
 
 use App\Enums\UserCategory;
 use App\Enums\UserRole;
@@ -34,6 +34,21 @@ class AuthenticationTest extends TestCase
         ])->assertRedirect(route('home'));
 
         $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_admin_login_redirects_to_facility_management(): void
+    {
+        $admin = User::factory()->admin()->create([
+            'email' => 'admin@example.test',
+            'password' => Hash::make('admin-secret-password'),
+        ]);
+
+        $this->post('/login', [
+            'email' => 'admin@example.test',
+            'password' => 'admin-secret-password',
+        ])->assertRedirect(route('admin.facilities.index'));
+
+        $this->assertAuthenticatedAs($admin);
     }
 
     public function test_invalid_credentials_do_not_authenticate_a_guest(): void

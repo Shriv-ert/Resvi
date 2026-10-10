@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\User;
+namespace Tests\Feature\Pengguna;
 
 use App\Enums\ReportCategory;
 use App\Enums\ReportStatus;
@@ -83,6 +83,17 @@ class ReportTest extends TestCase
         $response->assertSee($this->facility->name);
     }
 
+    public function test_user_can_open_report_form_with_facility_preselected_from_detail_flow(): void
+    {
+        $response = $this->actingAs($this->user)->get(route('user.reports.create', [
+            'facility_id' => $this->facility->id,
+        ]));
+
+        $response->assertOk()
+            ->assertSee('name="facility_id" value="'.$this->facility->id.'"', false)
+            ->assertSee($this->facility->name);
+    }
+
     public function test_user_can_submit_valid_report_without_photo(): void
     {
         $response = $this->actingAs($this->user)->post(route('user.reports.store'), [
@@ -150,6 +161,31 @@ class ReportTest extends TestCase
         $response->assertOk();
         $response->assertSee($report->report_number);
         $response->assertSee('Detail masalah AC berisik');
+    }
+
+    public function test_user_report_details_show_resolution_or_rejection_reason(): void
+    {
+        $resolvedReport = Report::factory()->create([
+            'reporter_id' => $this->user->id,
+            'facility_id' => $this->facility->id,
+            'status' => ReportStatus::Selesai,
+            'resolution_notes' => 'Kabel daya telah diganti dan diuji.',
+        ]);
+        $rejectedReport = Report::factory()->create([
+            'reporter_id' => $this->user->id,
+            'facility_id' => $this->facility->id,
+            'status' => ReportStatus::Ditolak,
+            'rejection_reason' => 'Laporan tidak dapat diverifikasi di lokasi.',
+        ]);
+
+        $this->actingAs($this->user)
+            ->get(route('user.reports.show', $resolvedReport))
+            ->assertOk()
+            ->assertSee('Kabel daya telah diganti dan diuji.');
+
+        $this->get(route('user.reports.show', $rejectedReport))
+            ->assertOk()
+            ->assertSee('Laporan tidak dapat diverifikasi di lokasi.');
     }
 
     public function test_user_cannot_view_other_users_report_details(): void

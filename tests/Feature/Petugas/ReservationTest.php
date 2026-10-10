@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Staff;
+namespace Tests\Feature\Petugas;
 
 use App\Enums\FacilityType;
 use App\Enums\OperationalStatus;
@@ -71,6 +71,43 @@ class ReservationTest extends TestCase
             ->assertDontSee($finished->reservation_number);
     }
 
+    public function test_petugas_can_search_and_filter_active_reservations_together(): void
+    {
+        $petugas = User::factory()->petugas()->create();
+        $targetUser = User::factory()->create(['name' => 'Pemohon Target Antrian']);
+        $otherUser = User::factory()->create(['name' => 'Pemohon Lain']);
+        $targetFacility = Facility::factory()->create([
+            'name' => 'Ruang Target Antrian',
+            'type' => FacilityType::Kelas,
+        ]);
+        $otherFacility = Facility::factory()->create([
+            'name' => 'Aula Lain',
+            'type' => FacilityType::Aula,
+        ]);
+
+        $target = Reservation::factory()->create([
+            'user_id' => $targetUser->id,
+            'facility_id' => $targetFacility->id,
+            'status' => ReservationStatus::Menunggu,
+            'date' => now()->addDays(2)->toDateString(),
+        ]);
+        $other = Reservation::factory()->approved()->create([
+            'user_id' => $otherUser->id,
+            'facility_id' => $otherFacility->id,
+            'date' => now()->addDays(2)->toDateString(),
+        ]);
+
+        $response = $this->actingAs($petugas)->get(route('staff.reservations.index', [
+            'search' => 'Target',
+            'type' => FacilityType::Kelas->value,
+            'status' => ReservationStatus::Menunggu->value,
+        ]));
+
+        $response->assertOk()
+            ->assertSee($target->reservation_number)
+            ->assertDontSee($other->reservation_number);
+    }
+
     public function test_petugas_can_view_final_reservations_history(): void
     {
         $petugas = User::factory()->petugas()->create();
@@ -98,6 +135,81 @@ class ReservationTest extends TestCase
             ->assertViewIs('staff.reservations.history')
             ->assertSee($rejected->reservation_number)
             ->assertDontSee($pending->reservation_number);
+    }
+
+    public function test_reservation_history_search_and_filters_work_together(): void
+    {
+        $petugas = User::factory()->petugas()->create();
+        $targetUser = User::factory()->create(['name' => 'Pemohon Target Riwayat']);
+        $targetFacility = Facility::factory()->create([
+            'name' => 'Ruang Target Riwayat',
+            'type' => FacilityType::Kelas,
+        ]);
+        $otherFacility = Facility::factory()->create([
+            'name' => 'Aula Riwayat Lain',
+            'type' => FacilityType::Aula,
+        ]);
+        $target = Reservation::factory()->create([
+            'user_id' => $targetUser->id,
+            'facility_id' => $targetFacility->id,
+            'status' => ReservationStatus::Ditolak,
+            'date' => now()->addDays(2)->toDateString(),
+        ]);
+        $other = Reservation::factory()->create([
+            'facility_id' => $otherFacility->id,
+            'status' => ReservationStatus::Ditolak,
+            'date' => now()->addDays(2)->toDateString(),
+        ]);
+
+        $this->actingAs($petugas)->get(route('staff.reservations.history', [
+            'search' => 'Target Riwayat',
+            'type' => FacilityType::Kelas->value,
+            'status' => ReservationStatus::Ditolak->value,
+        ]))
+            ->assertOk()
+            ->assertSee($target->reservation_number)
+            ->assertDontSee($other->reservation_number);
+    }
+
+    public function test_active_reservations_are_ordered_by_status_then_oldest_submission(): void
+    {
+        $petugas = User::factory()->petugas()->create();
+        $facility = Facility::factory()->create();
+        $date = now()->addDays(3)->toDateString();
+
+        $ongoing = Reservation::factory()->inProgress()->create([
+            'facility_id' => $facility->id,
+            'date' => $date,
+        ]);
+        $approved = Reservation::factory()->approved()->create([
+            'facility_id' => $facility->id,
+            'date' => $date,
+        ]);
+        $pendingNew = Reservation::factory()->create([
+            'facility_id' => $facility->id,
+            'date' => $date,
+            'status' => ReservationStatus::Menunggu,
+        ]);
+        $pendingOld = Reservation::factory()->create([
+            'facility_id' => $facility->id,
+            'date' => $date,
+            'status' => ReservationStatus::Menunggu,
+        ]);
+
+        $pendingOld->created_at = now()->subHours(3);
+        $pendingOld->saveQuietly();
+        $pendingNew->created_at = now()->subHour();
+        $pendingNew->saveQuietly();
+
+        $this->actingAs($petugas)
+            ->get(route('staff.reservations.index'))
+            ->assertOk()
+            ->assertSeeInOrder([
+                $pendingOld->reservation_number,
+                $pendingNew->reservation_number,
+                $approved->reservation_number,
+                $ongoing->reservation_number,
+            ]);
     }
 
     public function test_petugas_can_view_reservation_details(): void
@@ -203,6 +315,53 @@ class ReservationTest extends TestCase
         $this->assertEquals(ReservationStatus::Menunggu, $res->fresh()->status);
     }
 
+    public function test_approval_expires_pending_reservation_that_has_reached_start_time(): void
+    {
+        $this->travelTo(now()->setTime(10, 0));
+        $petugas = User::factory()->petugas()->create();
+        $res = Reservation::factory()->create([
+            'date' => now()->toDateString(),
+            'start_time' => '10:00:00',
+            'end_time' => '12:00:00',
+            'status' => ReservationStatus::Menunggu,
+        ]);
+
+        $this->actingAs($petugas)
+            ->from(route('staff.reservations.show', $res))
+            ->post(route('staff.reservations.approve', $res))
+            ->assertRedirect(route('staff.reservations.show', $res))
+            ->assertSessionHasErrors('approve');
+
+        $res->refresh();
+        $this->assertEquals(ReservationStatus::Kedaluwarsa, $res->status);
+        $this->assertNotNull($res->expiration_reason);
+    }
+
+    public function test_rejection_expires_pending_reservation_that_has_reached_start_time(): void
+    {
+        $this->travelTo(now()->setTime(10, 0));
+        $petugas = User::factory()->petugas()->create();
+        $res = Reservation::factory()->create([
+            'date' => now()->toDateString(),
+            'start_time' => '10:00:00',
+            'end_time' => '12:00:00',
+            'status' => ReservationStatus::Menunggu,
+        ]);
+
+        $this->actingAs($petugas)
+            ->from(route('staff.reservations.show', $res))
+            ->post(route('staff.reservations.reject', $res), [
+                'rejection_reason' => 'Tidak dapat diproses setelah waktu mulai.',
+            ])
+            ->assertRedirect(route('staff.reservations.show', $res))
+            ->assertSessionHasErrors('reject');
+
+        $res->refresh();
+        $this->assertEquals(ReservationStatus::Kedaluwarsa, $res->status);
+        $this->assertNotNull($res->expiration_reason);
+        $this->assertNull($res->rejection_reason);
+    }
+
     public function test_petugas_can_reject_pending_reservation_with_reason(): void
     {
         $petugas = User::factory()->petugas()->create();
@@ -281,5 +440,23 @@ class ReservationTest extends TestCase
             ])
             ->assertRedirect(route('staff.reservations.show', $res))
             ->assertSessionHasErrors('cancel');
+    }
+
+    public function test_urgent_cancellation_requires_a_reason(): void
+    {
+        $petugas = User::factory()->petugas()->create();
+        $res = Reservation::factory()->approved()->create([
+            'date' => now()->addDays(2)->toDateString(),
+        ]);
+
+        $this->actingAs($petugas)
+            ->from(route('staff.reservations.show', $res))
+            ->post(route('staff.reservations.cancel', $res), [
+                'cancellation_reason' => '',
+            ])
+            ->assertRedirect(route('staff.reservations.show', $res))
+            ->assertSessionHasErrors('cancellation_reason');
+
+        $this->assertEquals(ReservationStatus::Disetujui, $res->fresh()->status);
     }
 }
