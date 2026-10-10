@@ -349,7 +349,7 @@ final readonly class RecapService
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
 
             // Metadata info
-            fputcsv($handle, ['LAPORAN REKAPITULASI — PPK ROOM RESERVATION']);
+            fputcsv($handle, ['LAPORAN REKAPITULASI — RESVI']);
             fputcsv($handle, ['Periode', sprintf('%s %d', $data['period']['month_name'], $data['period']['year'])]);
             fputcsv($handle, ['Metrik', $data['metric'] === 'occupancy' ? 'Tingkat Okupansi' : 'Frekuensi Kerusakan']);
             fputcsv($handle, ['Pengelompokan', $data['group_by'] === 'facility' ? 'Per Fasilitas' : 'Per Lokasi']);
@@ -445,7 +445,7 @@ final readonly class RecapService
             $sheet->setTitle('Rekapitulasi');
 
             // Header Kop
-            $sheet->setCellValue('A1', 'PPK ROOM RESERVATION — LAPORAN REKAPITULASI');
+            $sheet->setCellValue('A1', 'RESVI — LAPORAN REKAPITULASI');
             $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
 
             $sheet->setCellValue('A2', sprintf('Periode: %s %d', $data['period']['month_name'], $data['period']['year']));

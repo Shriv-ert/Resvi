@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Katalog Fasilitas') · {{ config('app.name', 'PPK Room Reservation') }}</title>
+    <title>@yield('title', 'Katalog Fasilitas') · {{ config('app.name', 'Resvi') }}</title>
 
     <!-- Google Fonts: Geist & Geist Mono & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -123,7 +123,7 @@
             <!-- Brand Header -->
             <a href="{{ route('facilities.index') }}" class="flex items-center group">
                 <div class="flex flex-col">
-                    <span class="font-semibold text-sm text-white tracking-tight leading-tight">PPK <span class="text-[#888888]">Reservation</span></span>
+                    <span class="font-semibold text-sm text-white tracking-tight leading-tight">Resvi</span>
                     <span class="font-mono text-[9px] text-[#888888] tracking-wider uppercase">Sistem Fasilitas Kampus</span>
                 </div>
             </a>

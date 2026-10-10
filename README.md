@@ -1,4 +1,4 @@
-# PPK Room Reservation
+# Resvi
 
 Aplikasi web untuk mengelola penggunaan fasilitas kampus (ruang kelas, aula, laboratorium, alat, dan lapangan). Pengguna dapat mengecek ketersediaan dan mengajukan reservasi, serta melaporkan kerusakan atau masalah pada fasilitas. Petugas dan admin memproses kedua alur (reservasi dan laporan) secara terpusat dalam satu sistem.
 

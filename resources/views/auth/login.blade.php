@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Masuk · PPK Room Reservation</title>
+    <title>Masuk · Resvi</title>
 
     <!-- Google Fonts: Geist & Geist Mono & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -68,7 +68,7 @@
             <!-- Card Header -->
             <div class="flex items-center">
                 <div>
-                    <h1 class="text-sm font-semibold text-white tracking-tight leading-tight">PPK Room Reservation</h1>
+                    <h1 class="text-sm font-semibold text-white tracking-tight leading-tight">Resvi</h1>
                     <p class="font-mono text-[9px] text-[#888888] uppercase tracking-wider">Campus Account Verification</p>
                 </div>
             </div>

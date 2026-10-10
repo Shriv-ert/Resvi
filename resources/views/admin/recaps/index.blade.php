@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Rekapitulasi Operasional & Okupansi — PPK Room Reservation')
+@section('title', 'Rekapitulasi Operasional & Okupansi — Resvi')
 
 @section('content')
 <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-8 space-y-6">

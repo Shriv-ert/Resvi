@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Panel Petugas') · PPK Room Reservation</title>
+    <title>@yield('title', 'Panel Petugas') · {{ config('app.name', 'Resvi') }}</title>
 
     <!-- Google Fonts: Geist & Geist Mono & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -79,7 +79,7 @@
             <div class="flex items-center gap-3">
                 <a href="{{ route('staff.reservations.index') }}" class="flex items-center">
                     <div class="flex flex-col">
-                        <span class="font-semibold text-sm text-white tracking-tight leading-tight">PPK <span class="text-[#888888]">Staff Portal</span></span>
+                        <span class="font-semibold text-sm text-white tracking-tight leading-tight">Resvi <span class="text-[#888888]">Staff Portal</span></span>
                         <span class="font-mono text-[9px] text-[#888888] tracking-wider uppercase">Operasional & Sarana</span>
                     </div>
                 </a>

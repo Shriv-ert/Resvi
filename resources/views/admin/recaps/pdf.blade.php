@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Laporan Rekapitulasi — PPK Room Reservation</title>
+    <title>Laporan Rekapitulasi — Resvi</title>
     <style>
         @page {
             margin: 15mm 15mm 20mm 15mm;
@@ -156,7 +156,7 @@
     <table class="header-table">
         <tr>
             <td style="vertical-align: middle;">
-                <div class="header-title">PPK Room Reservation — Laporan Eksekutif</div>
+                <div class="header-title">Resvi — Laporan Eksekutif</div>
                 <div class="header-subtitle">
                     Sistem Tata Kelola Fasilitas Kampus & Pelaporan Operasional Terpadu
                 </div>
@@ -323,7 +323,7 @@
     </table>
 
     <div class="footer">
-        Dicetak otomatis oleh Sistem PPK Room Reservation &bull; Dokumen Resmi Tata Kelola Fasilitas
+        Dicetak otomatis oleh Sistem Resvi &bull; Dokumen Resmi Tata Kelola Fasilitas
     </div>
 </body>
 </html>

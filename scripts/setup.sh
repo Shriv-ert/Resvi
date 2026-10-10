@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# PPK Room Reservation — Setup Script (Linux/macOS)
+# Resvi — Setup Script (Linux/macOS)
 # =============================================================================
 # Menjalankan seluruh langkah setup awal proyek menggunakan Docker.
 # Pastikan Docker dan Docker Compose sudah terinstal dan berjalan.
@@ -39,7 +39,7 @@ print_error() {
 cd "$(dirname "$0")/.."
 
 echo -e "${CYAN}========================================${NC}"
-echo -e "${CYAN}  PPK Room Reservation — Setup${NC}"
+echo -e "${CYAN}  Resvi — Setup${NC}"
 echo -e "${CYAN}========================================${NC}"
 
 # --- 1. Cek Docker ---

@@ -1,5 +1,5 @@
 # =============================================================================
-# PPK Room Reservation — Setup Script (Windows PowerShell)
+# Resvi — Setup Script (Windows PowerShell)
 # =============================================================================
 # Menjalankan seluruh langkah setup awal proyek menggunakan Docker.
 # Pastikan Docker Desktop sudah terinstal dan berjalan.
@@ -23,7 +23,7 @@ if (-not $PSScriptRoot) {
 }
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  PPK Room Reservation - Setup"          -ForegroundColor Cyan
+Write-Host "  Resvi - Setup"          -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 
 # --- 1. Cek Docker ---
