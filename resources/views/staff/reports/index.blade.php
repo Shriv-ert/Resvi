@@ -20,7 +20,7 @@
             <a href="{{ route('staff.reports.history') }}" 
                class="bg-[#171717] hover:bg-[#222222] text-white border border-[#333333] text-xs font-medium px-4 py-2 rounded-full transition flex items-center gap-1.5 shadow-none">
                 <svg class="w-3.5 h-3.5 text-[#888888]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Buka Riwayat Laporan Final →
+                Buka Riwayat
             </a>
         </div>
     </div>
@@ -113,15 +113,15 @@
     <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-[#ededed]" id="reportsQueueTable">
-                <thead class="bg-[#161616] border-b border-[#333333] text-[10px] font-mono uppercase text-[#888888] tracking-wider">
+                <thead class="bg-[#161616] border-b border-[#333333] text-[10px] font-mono uppercase text-[#888888] tracking-wider text-center">
                     <tr>
-                        <th class="py-3 px-5 font-medium">No. Laporan</th>
-                        <th class="py-3 px-5 font-medium">Nama Pelapor</th>
-                        <th class="py-3 px-5 font-medium">Fasilitas Sasaran</th>
-                        <th class="py-3 px-5 font-medium">Kategori</th>
-                        <th class="py-3 px-5 font-medium">Status Laporan</th>
-                        <th class="py-3 px-5 font-medium">Waktu Lapor</th>
-                        <th class="py-3 px-5 text-right font-medium">Aksi</th>
+                        <th class="py-3 px-5 text-center font-medium">No. Laporan</th>
+                        <th class="py-3 px-5 text-center font-medium">Nama Pelapor</th>
+                        <th class="py-3 px-5 text-center font-medium">Fasilitas Sasaran</th>
+                        <th class="py-3 px-5 text-center font-medium">Kategori</th>
+                        <th class="py-3 px-5 text-center font-medium">Status Laporan</th>
+                        <th class="py-3 px-5 text-center font-medium">Waktu Lapor</th>
+                        <th class="py-3 px-5 text-center font-medium">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#333333] text-xs">
@@ -136,7 +136,15 @@
                             data-status="{{ $statusVal }}">
                             
                             <td class="py-3.5 px-5 font-mono text-white font-medium">
-                                {{ $rep['report_number'] }}
+                                <div class="flex items-center gap-1.5">
+                                    <span>{{ $rep['report_number'] }}</span>
+                                    @if(!empty($rep['photo_path']))
+                                        <span class="inline-flex items-center gap-1 text-[9px] font-sans font-medium text-[#50e3c2] bg-[#002b11] border border-[#005522] px-1.5 py-0.5 rounded-[3px]" title="Lampiran foto tersedia">
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            Foto
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
 
                             <td class="py-3.5 px-5 font-medium text-white">
@@ -152,7 +160,7 @@
                                 {{ str_replace('_', ' ', $catVal) }}
                             </td>
 
-                            <td class="py-3.5 px-5">
+                            <td class="py-3.5 px-5 text-center">
                                 @if($statusVal === 'baru')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#f5a623] bg-[#2b1e00] border border-[#553c00]">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#f5a623] animate-pulse"></span>
@@ -170,10 +178,10 @@
                                 {{ $rep['created_at'] }}
                             </td>
 
-                            <td class="py-3.5 px-5 text-right">
+                            <td class="py-3.5 px-5 text-center">
                                 <a href="{{ route('staff.reports.show', ['report' => $rep['id']]) }}" 
                                    class="text-[#a1a1a1] hover:text-white font-medium transition inline-flex items-center gap-1 text-xs">
-                                    Tindak Lanjuti →
+                                    Tindak Lanjuti
                                 </a>
                             </td>
                         </tr>

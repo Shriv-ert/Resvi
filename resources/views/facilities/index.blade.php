@@ -7,12 +7,6 @@
 
     <!-- Hero / Header Section: Vercel Marketing Title Pattern -->
     <div class="space-y-2 mb-8">
-        <div class="flex items-center gap-2">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[11px] font-mono font-medium bg-[#111111] text-[#a1a1a1] border border-[#333333]">
-                <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>
-                Transparansi Sarpras Kampus
-            </span>
-        </div>
         <h1 class="text-3xl sm:text-4xl font-semibold text-white tracking-[-0.03em]">
             Katalog Fasilitas Kampus.
         </h1>
@@ -362,19 +356,19 @@
                     <!-- Operational Status & Arrow Hint -->
                     <div class="facility-card-footer pt-4 border-t border-[#333333] flex items-center justify-between gap-2 mt-2">
                         @if($fOperational === 'dapat_digunakan')
-                            <span class="text-xs font-mono text-[#50e3c2] flex items-center gap-1.5 font-medium">
+                            <span class="text-xs font-mono text-[#50e3c2] flex items-center gap-1.5 font-medium whitespace-nowrap">
                                 <span class="w-1.5 h-1.5 rounded-full bg-[#50e3c2]"></span>
                                 Dapat digunakan
                             </span>
                         @else
-                            <span class="text-xs font-mono text-[#ff453a] flex items-center gap-1.5 font-medium">
+                            <span class="text-xs font-mono text-[#ff453a] flex items-center gap-1.5 font-medium whitespace-nowrap">
                                 <span class="w-1.5 h-1.5 rounded-full bg-[#ff453a]"></span>
                                 Dalam perbaikan
                             </span>
                         @endif
 
-                        <span class="text-xs text-[#888888] group-hover:text-white transition-colors font-mono font-medium flex items-center gap-1">
-                            Detail →
+                        <span class="text-xs text-[#888888] group-hover:text-white transition-colors font-mono font-medium flex items-center gap-1 whitespace-nowrap">
+                            Detail
                         </span>
                     </div>
                 </a>

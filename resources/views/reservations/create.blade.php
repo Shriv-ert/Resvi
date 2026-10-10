@@ -302,20 +302,20 @@
                 <span class="font-mono text-[10px] text-[#888888] uppercase tracking-wider block">Fasilitas Terpilih</span>
                 <h3 class="text-base font-semibold text-white tracking-tight">{{ $fName }}</h3>
                 
-                <dl class="space-y-2.5 text-xs border-t border-[#333333] pt-4 font-mono">
-                    <div class="flex justify-between">
-                        <dt class="text-[#888888]">Tipe:</dt>
-                        <dd class="text-white capitalize">{{ $fTypeLabel }}</dd>
+                <div class="border-t border-[#333333] pt-4 space-y-3 text-xs font-mono">
+                    <div class="grid grid-cols-[80px_1fr] items-start gap-2">
+                        <span class="text-[#888888]">Tipe</span>
+                        <span class="text-white capitalize font-medium">{{ $fTypeLabel }}</span>
                     </div>
-                    <div class="flex justify-between">
-                        <dt class="text-[#888888]">Lokasi:</dt>
-                        <dd class="text-white">{{ $fLocation }}</dd>
+                    <div class="grid grid-cols-[80px_1fr] items-start gap-2">
+                        <span class="text-[#888888]">Lokasi</span>
+                        <span class="text-white font-medium leading-relaxed">{{ $fLocation }}</span>
                     </div>
-                    <div class="flex justify-between">
-                        <dt class="text-[#888888]">Kapasitas:</dt>
-                        <dd class="text-white">{{ !empty($fCapacity) ? $fCapacity . ' Org' : 'Unit Alat' }}</dd>
+                    <div class="grid grid-cols-[80px_1fr] items-start gap-2">
+                        <span class="text-[#888888]">Kapasitas</span>
+                        <span class="text-white font-medium">{{ !empty($fCapacity) ? $fCapacity . ' Orang' : 'Unit Alat' }}</span>
                     </div>
-                </dl>
+                </div>
             </div>
 
             <div class="border border-[#333333] rounded-[6px] bg-[#111111] p-5 font-mono text-[11px] text-[#a1a1a1] space-y-2">

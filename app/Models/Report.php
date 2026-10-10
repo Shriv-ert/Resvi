@@ -124,6 +124,6 @@ class Report extends Model
             return $this->photo_path;
         }
 
-        return asset('storage/' . $this->photo_path);
+        return asset('storage/' . ltrim($this->photo_path, '/'));
     }
 }

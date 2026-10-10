@@ -51,14 +51,14 @@
     <div class="bg-[#111111] border border-[#333333] rounded-[6px] overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-[#a1a1a1]">
-                <thead class="bg-[#161616] border-b border-[#333333] text-[10px] font-mono uppercase text-[#888888] tracking-wider">
+                <thead class="bg-[#161616] border-b border-[#333333] text-[10px] font-mono uppercase text-[#888888] tracking-wider text-center">
                     <tr>
-                        <th class="py-3 px-5 font-medium">No. Laporan</th>
-                        <th class="py-3 px-5 font-medium">Fasilitas</th>
-                        <th class="py-3 px-5 font-medium">Kategori</th>
-                        <th class="py-3 px-5 font-medium">Tanggal Lapor</th>
-                        <th class="py-3 px-5 font-medium">Status Penanganan</th>
-                        <th class="py-3 px-5 text-right font-medium">Aksi</th>
+                        <th class="py-3 px-5 text-center font-medium">No. Laporan</th>
+                        <th class="py-3 px-5 text-center font-medium">Fasilitas</th>
+                        <th class="py-3 px-5 text-center font-medium">Kategori</th>
+                        <th class="py-3 px-5 text-center font-medium">Tanggal Lapor</th>
+                        <th class="py-3 px-5 text-center font-medium">Status Penanganan</th>
+                        <th class="py-3 px-5 text-center font-medium">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#333333] text-xs">
@@ -81,7 +81,7 @@
                             <td class="py-3.5 px-5 text-[#888888] font-mono text-[11px]">
                                 {{ $repCreated }}
                             </td>
-                            <td class="py-3.5 px-5">
+                            <td class="py-3.5 px-5 text-center whitespace-nowrap">
                                 @if($statusVal === 'baru')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[10px] font-mono text-[#f5a623] bg-[#2b1e00] border border-[#553c00]">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#f5a623] animate-pulse"></span>
@@ -102,10 +102,10 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="py-3.5 px-5 text-right">
+                            <td class="py-3.5 px-5 text-center whitespace-nowrap">
                                 <a href="{{ route('user.reports.show', ['report' => $rep['id'], 'as_user' => 1]) }}" 
                                    class="text-white hover:text-[#0070f3] font-medium transition inline-flex items-center gap-1 text-xs">
-                                    Detail →
+                                    Detail
                                 </a>
                             </td>
                         </tr>

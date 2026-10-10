@@ -83,7 +83,7 @@
             letter-spacing: 0.5px;
             padding: 8px 10px;
             border: 1px solid #0284c7;
-            text-align: left;
+            text-align: center;
         }
 
         table.data-table td {
@@ -211,20 +211,20 @@
                 @if ($data['group_by'] === 'facility')
                     <tr>
                         <th class="text-center" style="width: 35px;">No</th>
-                        <th>Nama Fasilitas</th>
-                        <th style="width: 100px;">Tipe</th>
-                        <th>Lokasi / Gedung</th>
-                        <th class="text-right" style="width: 110px;">Durasi Selesai</th>
-                        <th class="text-right" style="width: 120px;">Kapasitas Aktif</th>
+                        <th class="text-center">Nama Fasilitas</th>
+                        <th class="text-center" style="width: 100px;">Tipe</th>
+                        <th class="text-center">Lokasi / Gedung</th>
+                        <th class="text-center" style="width: 110px;">Durasi Selesai</th>
+                        <th class="text-center" style="width: 120px;">Kapasitas Aktif</th>
                         <th class="text-center" style="width: 110px;">Tingkat Okupansi</th>
                     </tr>
                 @else
                     <tr>
                         <th class="text-center" style="width: 35px;">No</th>
-                        <th>Lokasi / Gedung</th>
+                        <th class="text-center">Lokasi / Gedung</th>
                         <th class="text-center" style="width: 110px;">Jumlah Fasilitas</th>
-                        <th class="text-right" style="width: 130px;">Durasi Selesai</th>
-                        <th class="text-right" style="width: 140px;">Kapasitas Aktif</th>
+                        <th class="text-center" style="width: 130px;">Durasi Selesai</th>
+                        <th class="text-center" style="width: 140px;">Kapasitas Aktif</th>
                         <th class="text-center" style="width: 130px;">Tingkat Okupansi</th>
                     </tr>
                 @endif
@@ -232,16 +232,16 @@
                 @if ($data['group_by'] === 'facility')
                     <tr>
                         <th class="text-center" style="width: 35px;">No</th>
-                        <th>Nama Fasilitas</th>
-                        <th style="width: 100px;">Tipe</th>
-                        <th>Lokasi / Gedung</th>
+                        <th class="text-center">Nama Fasilitas</th>
+                        <th class="text-center" style="width: 100px;">Tipe</th>
+                        <th class="text-center">Lokasi / Gedung</th>
                         <th class="text-center" style="width: 140px;">Jumlah Insiden Perbaikan</th>
                         <th class="text-center" style="width: 140px;">Insiden Terakhir</th>
                     </tr>
                 @else
                     <tr>
                         <th class="text-center" style="width: 35px;">No</th>
-                        <th>Lokasi / Gedung</th>
+                        <th class="text-center">Lokasi / Gedung</th>
                         <th class="text-center" style="width: 120px;">Jumlah Fasilitas</th>
                         <th class="text-center" style="width: 160px;">Jumlah Insiden Perbaikan</th>
                         <th class="text-center" style="width: 160px;">Insiden Terakhir</th>

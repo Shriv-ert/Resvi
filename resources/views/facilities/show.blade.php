@@ -85,7 +85,7 @@
                 </div>
                 <div class="bg-[#111111] p-4">
                     <span class="font-mono text-[10px] uppercase tracking-wider text-[#888888] block mb-1">Lokasi Gedung</span>
-                    <strong class="text-xs text-white font-medium truncate block" title="{{ $fLocation }}">{{ $fLocation }}</strong>
+                    <strong class="text-xs text-white font-medium block leading-snug break-words" title="{{ $fLocation }}">{{ $fLocation }}</strong>
                 </div>
                 <div class="bg-[#111111] p-4">
                     <span class="font-mono text-[10px] uppercase tracking-wider text-[#888888] block mb-1">Kapasitas Maks</span>

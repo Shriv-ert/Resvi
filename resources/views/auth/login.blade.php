@@ -65,11 +65,8 @@
         <!-- Clean Vercel Auth Card: Crisp border, micro 6px radius, NO soft shadows -->
         <section class="bg-[#111111] border border-[#333333] rounded-[6px] p-8 space-y-6">
             
-            <!-- Logo Header -->
-            <div class="flex items-center gap-2.5">
-                <div class="w-7 h-7 rounded-[4px] bg-white text-black flex items-center justify-center font-bold text-xs">
-                    ▲
-                </div>
+            <!-- Card Header -->
+            <div class="flex items-center">
                 <div>
                     <h1 class="text-sm font-semibold text-white tracking-tight leading-tight">PPK Room Reservation</h1>
                     <p class="font-mono text-[9px] text-[#888888] uppercase tracking-wider">Campus Account Verification</p>
@@ -168,18 +165,8 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Notice (SRS §1.2 No Self-Registration) -->
-            <div class="p-3 rounded-[6px] bg-[#161616] border border-[#333333] text-[11px] text-[#a1a1a1] leading-relaxed">
-                <strong class="font-medium text-white">Ketentuan Sistem:</strong> Tidak ada registrasi mandiri. Akun civitas didaftarkan langsung oleh Administrator kampus.
-            </div>
         </section>
     </main>
-
-    <!-- Footer -->
-    <footer class="border-t border-[#333333] bg-[#0a0a0a] py-4 text-center text-xs text-[#888888] relative z-10">
-        © 2026 PPK Sarpras Kampus · Autentikasi Pengguna
-    </footer>
 
     <script>
         function setDemo(email) {
