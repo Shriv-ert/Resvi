@@ -103,7 +103,7 @@ class StaffReservationService
      */
     public function approve(Reservation $reservation, string $staffId): Reservation
     {
-        return DB::transaction(function () use ($reservation, $staffId): Reservation {
+        $approvedReservation = DB::transaction(function () use ($reservation, $staffId): ?Reservation {
             $lockedReservation = Reservation::query()
                 ->where('id', $reservation->id)
                 ->lockForUpdate()
@@ -121,9 +121,7 @@ class StaffReservationService
                     'expiration_reason' => 'Waktu mulai reservasi telah terlampaui sebelum disetujui petugas.',
                 ]);
 
-                throw ValidationException::withMessages([
-                    'approve' => 'Waktu mulai permohonan reservasi telah tercapai. Pengajuan menjadi kedaluwarsa.',
-                ]);
+                return null;
             }
 
             $lockedFacility = Facility::query()
@@ -188,6 +186,14 @@ class StaffReservationService
 
             return $lockedReservation->fresh(['facility', 'user', 'approvedBy']);
         });
+
+        if ($approvedReservation === null) {
+            throw ValidationException::withMessages([
+                'approve' => 'Waktu mulai permohonan reservasi telah tercapai. Pengajuan menjadi kedaluwarsa.',
+            ]);
+        }
+
+        return $approvedReservation;
     }
 
     /**
@@ -195,7 +201,7 @@ class StaffReservationService
      */
     public function reject(Reservation $reservation, string $reason, string $staffId): Reservation
     {
-        return DB::transaction(function () use ($reservation, $reason, $staffId): Reservation {
+        $rejectedReservation = DB::transaction(function () use ($reservation, $reason, $staffId): ?Reservation {
             $lockedReservation = Reservation::query()
                 ->where('id', $reservation->id)
                 ->lockForUpdate()
@@ -213,9 +219,7 @@ class StaffReservationService
                     'expiration_reason' => 'Waktu mulai reservasi telah terlampaui sebelum disetujui petugas.',
                 ]);
 
-                throw ValidationException::withMessages([
-                    'reject' => 'Waktu mulai permohonan reservasi telah terlampaui. Pengajuan telah menjadi kedaluwarsa.',
-                ]);
+                return null;
             }
 
             $lockedReservation->update([
@@ -227,6 +231,14 @@ class StaffReservationService
 
             return $lockedReservation->fresh(['facility', 'user', 'rejectedBy']);
         });
+
+        if ($rejectedReservation === null) {
+            throw ValidationException::withMessages([
+                'reject' => 'Waktu mulai permohonan reservasi telah terlampaui. Pengajuan telah menjadi kedaluwarsa.',
+            ]);
+        }
+
+        return $rejectedReservation;
     }
 
     /**
