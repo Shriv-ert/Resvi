@@ -23,7 +23,7 @@ if (-not $PSScriptRoot) {
 }
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  Resvi - Setup"          -ForegroundColor Cyan
+Write-Host "  Resvi - Setup"                          -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 
 # --- 1. Cek Docker ---
@@ -107,13 +107,19 @@ docker compose run --rm --no-deps app php artisan key:generate
 if ($LASTEXITCODE -ne 0) { Write-Err "Key generation gagal."; exit 1 }
 Write-Ok "Application key berhasil di-generate."
 
-# --- 9. Jalankan migrasi ---
-Write-Step "Menjalankan migrasi database..."
-docker compose run --rm app php artisan migrate --force
-if ($LASTEXITCODE -ne 0) { Write-Err "Migrasi gagal."; exit 1 }
-Write-Ok "Migrasi selesai."
+# --- 9. Buat symbolic link storage ---
+Write-Step "Membuat symbolic link storage..."
+docker compose run --rm --no-deps app php artisan storage:link --force
+if ($LASTEXITCODE -ne 0) { Write-Err "Storage link gagal."; exit 1 }
+Write-Ok "Storage link berhasil dibuat."
 
-# --- 10. Jalankan semua container ---
+# --- 10. Jalankan migrasi dan data feeder ---
+Write-Step "Menjalankan migrasi dan data feeder..."
+docker compose run --rm app php artisan migrate --seed --force
+if ($LASTEXITCODE -ne 0) { Write-Err "Migrasi dan seeding gagal."; exit 1 }
+Write-Ok "Migrasi dan data feeder berhasil dimasukkan."
+
+# --- 11. Jalankan semua container ---
 Write-Step "Menjalankan semua container..."
 docker compose up -d
 if ($LASTEXITCODE -ne 0) { Write-Err "Gagal menjalankan container."; exit 1 }
@@ -121,10 +127,20 @@ Write-Ok "Semua container berjalan."
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green
-Write-Host "  Setup selesai!"                         -ForegroundColor Green
+Write-Host "  Setup selesai! Sistem Siap Digunakan  " -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "  Aplikasi   : http://localhost:8000"     -ForegroundColor Cyan
+Write-Host "  Aplikasi    : http://localhost:8000"     -ForegroundColor Cyan
 Write-Host "  phpMyAdmin  : http://localhost:8080"     -ForegroundColor Cyan
 Write-Host "  MySQL       : localhost:3306"            -ForegroundColor Cyan
+Write-Host ""
+Write-Host "----------------------------------------" -ForegroundColor Yellow
+Write-Host "  Akun Demo Siap Pakai (Password: password123)" -ForegroundColor Yellow
+Write-Host "----------------------------------------" -ForegroundColor Yellow
+Write-Host "  • Super Admin  : admin@ppk.test"         -ForegroundColor Cyan
+Write-Host "  • Petugas      : petugas.demo@ppk.test"  -ForegroundColor Cyan
+Write-Host "  • Mahasiswa    : mahasiswa.demo@ppk.test"-ForegroundColor Cyan
+Write-Host "  • Dosen        : dosen.demo@ppk.test"    -ForegroundColor Cyan
+Write-Host "  • Staf Civitas : staf.demo@ppk.test"     -ForegroundColor Cyan
+Write-Host "----------------------------------------" -ForegroundColor Yellow
 Write-Host ""

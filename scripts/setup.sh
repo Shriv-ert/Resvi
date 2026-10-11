@@ -87,14 +87,27 @@ print_success "Database container berjalan."
 # --- 6. Tunggu database siap ---
 print_step "Menunggu database siap..."
 RETRIES=30
-until docker compose exec -T db mysqladmin ping -p"${DB_ROOT_PASSWORD:-root_password}" --silent &> /dev/null; do
-    RETRIES=$((RETRIES - 1))
-    if [ $RETRIES -le 0 ]; then
-        print_error "Database tidak merespons setelah timeout."
-        exit 1
+DB_READY=false
+while [ $RETRIES -gt 0 ]; do
+    STATUS=$(docker inspect --format='{{.State.Health.Status}}' ppk_db 2>/dev/null || true)
+    if [ "$STATUS" = "healthy" ]; then
+        DB_READY=true
+        break
     fi
+
+    if docker compose exec -T db sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysqladmin ping 2>/dev/null' >/dev/null 2>&1; then
+        DB_READY=true
+        break
+    fi
+
+    RETRIES=$((RETRIES - 1))
     sleep 2
 done
+
+if [ "$DB_READY" != "true" ]; then
+    print_error "Database tidak merespons setelah timeout."
+    exit 1
+fi
 print_success "Database siap."
 
 # --- 7. Install dependensi Composer (sebelum app container hidup) ---
@@ -107,20 +120,15 @@ print_step "Generate application key..."
 docker compose run --rm --no-deps app php artisan key:generate
 print_success "Application key berhasil di-generate."
 
-# --- 9. Jalankan migrasi ---
-print_step "Menjalankan migrasi database..."
-docker compose run --rm app php artisan migrate --force
-print_success "Migrasi selesai."
+# --- 9. Buat symbolic link storage ---
+print_step "Membuat symbolic link storage..."
+docker compose run --rm --no-deps app php artisan storage:link --force
+print_success "Storage link berhasil dibuat."
 
-# --- 10. Install dependensi NPM (opsional) ---
-print_step "Memeriksa Node.js di container..."
-if docker compose run --rm --no-deps app which node &> /dev/null; then
-    print_step "Menginstal dependensi NPM..."
-    docker compose run --rm --no-deps app npm install
-    print_success "Dependensi NPM terinstal."
-else
-    print_warning "Node.js tidak tersedia di container, lewati install NPM."
-fi
+# --- 10. Jalankan migrasi dan data feeder ---
+print_step "Menjalankan migrasi dan data feeder..."
+docker compose run --rm app php artisan migrate --seed --force
+print_success "Migrasi dan data feeder berhasil dimasukkan."
 
 # --- 11. Jalankan semua container ---
 print_step "Menjalankan semua container..."
@@ -129,10 +137,20 @@ print_success "Semua container berjalan."
 
 echo ""
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}  Setup selesai!${NC}"
+echo -e "${GREEN}  Setup selesai! Sistem Siap Digunakan  ${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
-echo -e "  Aplikasi   : ${CYAN}http://localhost:8000${NC}"
+echo -e "  Aplikasi    : ${CYAN}http://localhost:8000${NC}"
 echo -e "  phpMyAdmin  : ${CYAN}http://localhost:8080${NC}"
 echo -e "  MySQL       : ${CYAN}localhost:3306${NC}"
+echo ""
+echo -e "${YELLOW}----------------------------------------${NC}"
+echo -e "${YELLOW}  Akun Demo Siap Pakai (Password: password123)${NC}"
+echo -e "${YELLOW}----------------------------------------${NC}"
+echo -e "  • Super Admin  : ${CYAN}admin@ppk.test${NC}"
+echo -e "  • Petugas      : ${CYAN}petugas.demo@ppk.test${NC}"
+echo -e "  • Mahasiswa    : ${CYAN}mahasiswa.demo@ppk.test${NC}"
+echo -e "  • Dosen        : ${CYAN}dosen.demo@ppk.test${NC}"
+echo -e "  • Staf Civitas : ${CYAN}staf.demo@ppk.test${NC}"
+echo -e "${YELLOW}----------------------------------------${NC}"
 echo ""
