@@ -14,7 +14,7 @@ Aplikasi web untuk mengelola penggunaan fasilitas kampus (ruang kelas, aula, lab
 
 ## Prasyarat
 
-- [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/install/)
+- [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/install/) (Belum terinstal? Ikuti panduan di [DOCKER_INSTALLATION.md](DOCKER_INSTALLATION.md))
 - Git
 
 > **Catatan:** PHP dan Composer **tidak** perlu diinstal di mesin host. Semua dependensi sudah tersedia di dalam container Docker.
